@@ -37,12 +37,17 @@ gradle.projectsEvaluated {
     }
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    setProperty("archiveClassifier", "sources")
+}
+
+
 publishing {
     publications {
         maven(MavenPublication) {
-            artifact("build/libs/${archivesBaseName}-${version}.jar") {
-                extension 'jar'
-            }
+            from components.java
+            artifact sourceJar
         }
     }
 }
