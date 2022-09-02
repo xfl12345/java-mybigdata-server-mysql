@@ -48,6 +48,17 @@ publishing {
         maven(MavenPublication) {
             from components.java
             artifact sourceJar
+            pom.withXml {
+                asNode().dependencies.'*'.findAll() {
+                    it.scope.text() == 'runtime' && project.configurations.find { dep ->
+                        dep.name == 'implementation' ||
+                            dep.name == 'compileOnly' ||
+                            dep.name == 'annotationProcessor'
+                    }
+                }.each {
+                    it.scope*.value = 'compile'
+                }
+            }
         }
     }
 }
