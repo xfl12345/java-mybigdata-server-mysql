@@ -23,6 +23,7 @@ buildscript {
 
 plugins {
     id 'maven-publish'
+    id 'java-library'
     id 'java'
 }
 
@@ -48,17 +49,6 @@ publishing {
         maven(MavenPublication) {
             from components.java
             artifact sourceJar
-            pom.withXml {
-                asNode().dependencies.'*'.findAll() {
-                    it.scope.text() == 'runtime' && project.configurations.find { dep ->
-                        dep.name == 'implementation' ||
-                            dep.name == 'compileOnly' ||
-                            dep.name == 'annotationProcessor'
-                    }
-                }.each {
-                    it.scope*.value = 'compile'
-                }
-            }
         }
     }
 }
@@ -94,10 +84,10 @@ dependencies {
     // compileOnly 'org.jetbrains:annotations:23.0.0'
 
     // https://mvnrepository.com/artifact/javax.persistence/javax.persistence-api
-    implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
+    api group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
 
     // https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api
-    implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
+    api group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
 
     def springBootVersion = '2.7.3'
     def mybatisGeneratorVersion = '1.3.7'
@@ -116,7 +106,7 @@ dependencies {
     ]
 
     springBootDependencies.each {
-        moduleName -> implementation group: 'org.springframework.boot', name: 'spring-boot-' + moduleName, version: springBootVersion
+        moduleName -> api group: 'org.springframework.boot', name: 'spring-boot-' + moduleName, version: springBootVersion
     }
 
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion) {
@@ -126,61 +116,61 @@ dependencies {
     annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: springBootVersion
 
     // https://mvnrepository.com/artifact/mysql/mysql-connector-java
-    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.30'
+    api group: 'mysql', name: 'mysql-connector-java', version: '8.0.30'
 
     // 阿里巴巴 Druid Datasource
     // https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter
-    implementation group: 'com.alibaba', name: 'druid-spring-boot-starter', version: '1.2.11'
+    api group: 'com.alibaba', name: 'druid-spring-boot-starter', version: '1.2.11'
 
     // 国产ORM框架 bee
     // https://mvnrepository.com/artifact/org.teasoft/bee-spring-boot-starter
-    implementation group: 'org.teasoft', name: 'bee-spring-boot-starter', version: beeSpringBootStarterVersion
+    api group: 'org.teasoft', name: 'bee-spring-boot-starter', version: beeSpringBootStarterVersion
 
     // 字符串风格转换工具
     // https://mvnrepository.com/artifact/com.shekhargulati/strman
-    implementation group: 'com.shekhargulati', name: 'strman', version: '0.4.0'
+    api group: 'com.shekhargulati', name: 'strman', version: '0.4.0'
 
     // 注解神器 getter setter toString builder
     // https://mvnrepository.com/artifact/org.projectlombok/lombok
-    implementation group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    api group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     testImplementation group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
     // JSON support
 //    // https://mvnrepository.com/artifact/com.alibaba/fastjson
-//    implementation group: 'com.alibaba', name: 'fastjson', version: '2.0.3'
+//    api group: 'com.alibaba', name: 'fastjson', version: '2.0.3'
     // https://mvnrepository.com/artifact/com.alibaba.fastjson2/fastjson2
-    implementation group: 'com.alibaba.fastjson2', name: 'fastjson2', version: '2.0.12'
+    api group: 'com.alibaba.fastjson2', name: 'fastjson2', version: '2.0.12'
 
 
     // https://mvnrepository.com/artifact/org.json/json
-    implementation group: 'org.json', name: 'json', version: '20220320'
+    api group: 'org.json', name: 'json', version: '20220320'
 
     // JSON Schema support
     // https://mvnrepository.com/artifact/com.github.victools/jsonschema-generator
-    implementation group: 'com.github.victools', name: 'jsonschema-generator', version: victools_jsonschema
+    api group: 'com.github.victools', name: 'jsonschema-generator', version: victools_jsonschema
 
     // https://github.com/jimblackler/jsonschemafriend
     // https://jitpack.io/#net.jimblackler/jsonschemafriend
-//    implementation 'net.jimblackler.jsonschemafriend:core:0.11.3'
+//    api 'net.jimblackler.jsonschemafriend:core:0.11.3'
 
     // https://mvnrepository.com/artifact/com.networknt/json-schema-validator
-    implementation group: 'com.networknt', name: 'json-schema-validator', version: '1.0.72'
+    api group: 'com.networknt', name: 'json-schema-validator', version: '1.0.72'
 
     // UUID generator support
     // https://mvnrepository.com/artifact/com.fasterxml.uuid/java-uuid-generator
-    implementation group: 'com.fasterxml.uuid', name: 'java-uuid-generator', version: '4.0.1'
+    api group: 'com.fasterxml.uuid', name: 'java-uuid-generator', version: '4.0.1'
 
     // MyBatis
     // https://mvnrepository.com/artifact/org.mybatis/mybatis
-    implementation group: 'org.mybatis', name: 'mybatis', version: '3.5.10'
+    api group: 'org.mybatis', name: 'mybatis', version: '3.5.10'
 
     // https://mvnrepository.com/artifact/org.mybatis/mybatis-spring
-    implementation group: 'org.mybatis', name: 'mybatis-spring', version: '2.0.7'
+    api group: 'org.mybatis', name: 'mybatis-spring', version: '2.0.7'
 
     // https://mvnrepository.com/artifact/org.mybatis.generator/mybatis-generator-core
-    implementation group: 'org.mybatis.generator', name: 'mybatis-generator-core', version: mybatisGeneratorVersion
+    api group: 'org.mybatis.generator', name: 'mybatis-generator-core', version: mybatisGeneratorVersion
 
 //    // MyBatis-Plus
 //    // https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter
@@ -214,10 +204,10 @@ dependencies {
 
     // tk.mybatis Dependence
     // https://mvnrepository.com/artifact/org.freemarker/freemarker
-    implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
+    api group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
 
     // https://mvnrepository.com/artifact/io.swagger/swagger-annotations
-    implementation group: 'io.swagger', name: 'swagger-annotations', version: '1.6.6'
+    api group: 'io.swagger', name: 'swagger-annotations', version: '1.6.6'
 
     // other mybatis generator plugins
     // https://mvnrepository.com/artifact/com.itfsw/mybatis-generator-plugin
@@ -225,41 +215,41 @@ dependencies {
 
 //    // 大名鼎鼎的 Java字节码操作框架 ASM
 //    // https://mvnrepository.com/artifact/org.ow2.asm/asm
-//    implementation group: 'org.ow2.asm', name: 'asm', version: asmVersion
+//    api group: 'org.ow2.asm', name: 'asm', version: asmVersion
 //
 //    // https://mvnrepository.com/artifact/org.ow2.asm/asm-commons
-//    implementation group: 'org.ow2.asm', name: 'asm-commons', version: asmVersion
+//    api group: 'org.ow2.asm', name: 'asm-commons', version: asmVersion
 //
 //    // https://mvnrepository.com/artifact/org.ow2.asm/asm-util
-//    implementation group: 'org.ow2.asm', name: 'asm-util', version: asmVersion
+//    api group: 'org.ow2.asm', name: 'asm-util', version: asmVersion
 
 //    // 大名鼎鼎的 Java字节码工具 javassist
 //    // https://mvnrepository.com/artifact/org.javassist/javassist
-//    implementation group: 'org.javassist', name: 'javassist', version: '3.28.0-GA'
+//    api group: 'org.javassist', name: 'javassist', version: '3.28.0-GA'
 
 //    // https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy
-//    implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.10'
+//    api group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.10'
 //
 //    // https://mvnrepository.com/artifact/org.jsonschema2pojo/jsonschema2pojo
-//    implementation group: 'org.jsonschema2pojo', name: 'jsonschema2pojo-core', version: '1.1.2'
+//    api group: 'org.jsonschema2pojo', name: 'jsonschema2pojo-core', version: '1.1.2'
 
 
     // Google Open Source Library
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.0'
+    api group: 'com.google.code.gson', name: 'gson', version: '2.9.0'
 
 
     // ECC 加解密
     // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15to18
-    implementation group: 'org.bouncycastle', name: 'bcpkix-jdk15to18', version: '1.71'
+    api group: 'org.bouncycastle', name: 'bcpkix-jdk15to18', version: '1.71'
 
     // HuTool 超级工具集
     // https://mvnrepository.com/artifact/cn.hutool/hutool-core
-    implementation group: 'cn.hutool', name: 'hutool-core', version: hutoolVersion
+    api group: 'cn.hutool', name: 'hutool-core', version: hutoolVersion
 
 
-//    implementation fileTree(dir:'lib',includes:['**/*.*'])
-//    implementation fileTree(dir:'src/main/webapp',includes:['**/*.*'])
+//    api fileTree(dir:'lib',includes:['**/*.*'])
+//    api fileTree(dir:'src/main/webapp',includes:['**/*.*'])
 
 }
 
