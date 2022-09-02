@@ -135,7 +135,6 @@ dependencies {
     // 国产ORM框架 bee
     // https://mvnrepository.com/artifact/org.teasoft/bee-spring-boot-starter
     implementation group: 'org.teasoft', name: 'bee-spring-boot-starter', version: beeSpringBootStarterVersion
-    implementation group: 'org.teasoft', name: 'bee-spring-boot-starter', version: beeSpringBootStarterVersion, ext: 'pom'
 
     // 字符串风格转换工具
     // https://mvnrepository.com/artifact/com.shekhargulati/strman
