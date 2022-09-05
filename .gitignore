@@ -3,10 +3,12 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+localDevMode
 
 
 /src/test/java/cc/xfl12345/a_generate_test/
 /src/main/resources/application.properties
+/src/test/resources/
 
 
 ### STS ###
