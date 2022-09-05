@@ -81,7 +81,7 @@ repositories {
 dependencies {
     // 补全环境，使得 Intelij IDEA 可以调试 build.gradle
     // https://search.maven.org/artifact/org.apache.groovy/groovy-all/4.0.4/pom
-    testRuntimeOnly 'org.apache.groovy:groovy-all:4.0.4'
+    testRuntimeOnly 'org.apache.groovy:groovy:4.0.4'
 
     File localDevModeConfFile = new File("localDevMode");
     boolean isLocalDevMode = false;
@@ -108,13 +108,13 @@ dependencies {
         api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion
         // api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion, ext: 'pom'
     } else {
-        def depsParentVersion = '381bdfe9de'
+        def depsParentVersion = 'e4af43463a'
         api platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
         annotationProcessor platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
         testAnnotationProcessor platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
         testImplementation platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
 
-        def commonModuleVersion = 'd162507dac'
+        def commonModuleVersion = '5a926d6947'
         // https://jitpack.io/#xfl12345/java-mybigdata-server-common
         api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: commonModuleVersion
         // api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: commonModuleVersion, ext: 'pom'
