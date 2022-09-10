@@ -1,6 +1,7 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl;
 
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
+import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTables;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.StringContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.BooleanContent;
@@ -17,6 +18,7 @@ import org.teasoft.bee.osql.SuidRich;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
+import org.teasoft.honey.osql.core.SessionFactory;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,7 +31,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     protected String fieldCanNotBeNullMessageTemplate = "Property [%s] can not be null!";
 
     public CoreTableCache() {
-        super();
+        tableNameCache = new TwoWayMap<>(CoreTables.values().length + 1);
     }
 
     @Override
@@ -40,7 +42,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     @Override
     public void refreshBooleanCache() throws Exception {
         // 开启事务
-        Transaction transaction = BeeFactory.getInstance().getTransaction();
+        Transaction transaction = SessionFactory.getTransaction();
         try {
             transaction.begin();
             SuidRich suid = BeeFactory.getHoneyFactory().getSuidRich();
@@ -77,7 +79,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
             .op(StringContentConstant.CONTENT, Op.in, stringBuilder.toString());
 
         // 开启事务
-        Transaction transaction = BeeFactory.getInstance().getTransaction();
+        Transaction transaction = SessionFactory.getTransaction();
         try {
             transaction.begin();
             SuidRich suid = BeeFactory.getHoneyFactory().getSuidRich();
