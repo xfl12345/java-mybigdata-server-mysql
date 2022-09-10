@@ -1,5 +1,3 @@
-import java.nio.charset.StandardCharsets
-
 buildscript {
     repositories {
         mavenLocal()
@@ -24,6 +22,8 @@ buildscript {
 }
 
 plugins {
+    id 'eclipse'
+    id 'idea'
     id 'maven-publish'
     id 'java-library'
     id 'java'
@@ -33,28 +33,38 @@ group = 'cc.xfl12345.mybigdata'
 version = '0.0.1'
 sourceCompatibility = '17'
 
-gradle.projectsEvaluated {
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << '-Xlint:unchecked'
-        options.encoding = 'UTF-8'
+eclipse {
+    classpath {
+        downloadSources = true
+        downloadJavadoc = true
     }
 }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-    setProperty("archiveClassifier", "sources")
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }
 
+java {
+    compileJava.options.compilerArgs  << '-Xlint:unchecked'
+    compileJava.options.encoding = 'UTF-8'
+    withSourcesJar()
+    // withJavadocJar()
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+}
 
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
-            artifact sourceJar
         }
     }
 }
-
 
 repositories {
     mavenLocal()
@@ -77,6 +87,7 @@ repositories {
     }
 }
 
+import java.nio.charset.StandardCharsets
 
 dependencies {
     // 补全环境，使得 Intelij IDEA 可以调试 build.gradle
@@ -106,6 +117,7 @@ dependencies {
         testAnnotationProcessor platform(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
 
         api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion
+        // api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion, classifier: 'sources'
         // api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion, ext: 'pom'
     } else {
         def depsParentVersion = 'e4af43463a'
@@ -114,7 +126,7 @@ dependencies {
         testAnnotationProcessor platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
         testImplementation platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
 
-        def commonModuleVersion = '5a926d6947'
+        def commonModuleVersion = '0f9a64a971'
         // https://jitpack.io/#xfl12345/java-mybigdata-server-common
         api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: commonModuleVersion
         // api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: commonModuleVersion, ext: 'pom'
@@ -202,6 +214,20 @@ dependencies {
     // other mybatis generator plugins
     // https://mvnrepository.com/artifact/com.itfsw/mybatis-generator-plugin
     testImplementation group: 'com.itfsw', name: 'mybatis-generator-plugin', version: '1.3.10'
+
+
+    // // 各种 ORM
+    // // jsqlbox
+    // // https://mvnrepository.com/artifact/com.github.drinkjava2/jsqlbox
+    // implementation group: 'com.github.drinkjava2', name: 'jsqlbox', version: '5.0.13.jre8'
+
+    // // https://mvnrepository.com/artifact/org.nutz/nutzboot-starter
+    // implementation group: 'org.nutz', name: 'nutzboot-starter', version: '2.5.1.v20220215'
+
+    // // nutz
+    // // https://mvnrepository.com/artifact/org.nutz/nutz
+    // implementation group: 'org.nutz', name: 'nutz', version: '1.r.69.v20220703'
+
 
     // https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy
     testImplementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.10'
