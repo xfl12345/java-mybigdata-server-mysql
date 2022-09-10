@@ -126,10 +126,10 @@ dependencies {
         testAnnotationProcessor platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
         testImplementation platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
 
-        def commonModuleVersion = '0f9a64a971'
+        def parentModuleVersion = '0f9a64a971'
         // https://jitpack.io/#xfl12345/java-mybigdata-server-common
-        api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: commonModuleVersion
-        // api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: commonModuleVersion, ext: 'pom'
+        api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: parentModuleVersion
+        // api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: parentModuleVersion, ext: 'pom'
     }
 
     // https://mvnrepository.com/artifact/javax.persistence/javax.persistence-api
