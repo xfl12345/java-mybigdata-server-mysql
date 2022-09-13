@@ -4,8 +4,8 @@ package cc.xfl12345.mybigdata.server.mysql.helper;
 
 import cc.xfl12345.mybigdata.server.common.appconst.CommonConst;
 import cc.xfl12345.mybigdata.server.mysql.helper.url.MysqlJdbcUrlHelper;
-import cc.xfl12345.mybigdata.server.mysql.utility.MyBatisSqlUtils;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.mysql.cj.PreparedQuery;
 import com.mysql.cj.conf.ConnectionUrl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.io.Resources;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -79,6 +80,23 @@ public class MyDatabaseInitializer implements InitializingBean {
         }
     }
 
+    public static String getSql(PreparedStatement preparedStatement) {
+        String sql;
+        com.mysql.cj.jdbc.ClientPreparedStatement unwarpedPreparedStatement;
+        try {
+            unwarpedPreparedStatement = preparedStatement.unwrap(com.mysql.cj.jdbc.ClientPreparedStatement.class);
+            sql = ((PreparedQuery) unwarpedPreparedStatement.getQuery()).asSql();
+        } catch (Exception e) {
+            try {
+                Method method = preparedStatement.getClass().getMethod("asSql");
+                sql = (String) method.invoke(preparedStatement);
+            } catch (Exception exception) {
+                sql = preparedStatement.toString();
+            }
+        }
+        return sql;
+    }
+
     public void initMySQL() throws SQLException, IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         MysqlJdbcUrlHelper mysqlJdbcUrlHelper = new MysqlJdbcUrlHelper(ConnectionUrl.getConnectionUrlInstance(url, null));
@@ -109,7 +127,7 @@ public class MyDatabaseInitializer implements InitializingBean {
         // 检查 MySQL中 某个数据库是否存在（其它数据库暂未适配，所以这个 dataSource 并非万能）
         PreparedStatement ps = conn2.prepareStatement("select * from information_schema.SCHEMATA where SCHEMA_NAME = ?");
         ps.setString(1, targetDatabaseName);
-        log.info(MyBatisSqlUtils.getSql(ps));
+        log.info(getSql(ps));
         ResultSet rs = ps.executeQuery();
 
 

@@ -1,5 +1,6 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl;
 
+import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
 import cc.xfl12345.mybigdata.server.common.appconst.CURD;
 import cc.xfl12345.mybigdata.server.common.database.error.TableOperationException;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
@@ -15,7 +16,7 @@ import java.util.Date;
 public abstract class AbstractTableMapper implements DisposableBean, InitializingBean {
     @Getter
     @Setter
-    protected String fieldCanNotBeNullMessageTemplate = "Property [%s] can not be null!";
+    protected String fieldCanNotBeNullMessageTemplate = AppConst.FIELD_CAN_NOT_BE_NULL_MESSAGE_TEMPLATE;
     @Getter
     @Setter
     protected String messageAffectedRowShouldBe1 = "Affected row count should be 1.";

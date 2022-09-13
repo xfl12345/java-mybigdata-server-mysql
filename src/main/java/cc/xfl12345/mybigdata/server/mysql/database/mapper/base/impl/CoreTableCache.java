@@ -1,5 +1,6 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl;
 
+import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTables;
@@ -18,6 +19,7 @@ import org.teasoft.bee.osql.SuidRich;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
+import org.teasoft.honey.osql.core.HoneyFactory;
 import org.teasoft.honey.osql.core.SessionFactory;
 
 import java.util.Arrays;
@@ -26,9 +28,6 @@ import java.util.List;
 
 @Slf4j
 public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
-    @Getter
-    @Setter
-    protected String fieldCanNotBeNullMessageTemplate = "Property [%s] can not be null!";
 
     public CoreTableCache() {
         tableNameCache = new TwoWayMap<>(CoreTables.values().length + 1);
