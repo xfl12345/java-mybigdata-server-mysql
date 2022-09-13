@@ -7,8 +7,10 @@ import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.NamingStrategy;
 import net.bytebuddy.description.annotation.AnnotationDescription;
+import net.bytebuddy.description.modifier.ModifierContributor;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.FixedValue;
 import net.bytebuddy.jar.asm.Opcodes;
 
@@ -41,16 +43,20 @@ public class StudyGenerateCode {
     }
 
     @SuppressWarnings("unchecked")
-    public  <T extends AppTableCurdMapper<?>> AbstractAppTableMapper<?> getMapper(Type pojoType, Class<T> mapperType) throws Exception {
+    public  <T> AbstractAppTableMapper<T> getMapper(
+        Class<T> pojoType,
+        Class<? extends AppTableCurdMapper<T>> mapperType) throws Exception {
         // Type pojoType = mapperType.getGenericSuperclass();
-        DynamicType.Unloaded<AbstractAppTableMapper<?>> dynamicType = (DynamicType.Unloaded<AbstractAppTableMapper<?>>) new ByteBuddy()
+        DynamicType.Unloaded<AbstractAppTableMapper<T>> dynamicType = (DynamicType.Unloaded<AbstractAppTableMapper<T>>) new ByteBuddy()
             .with(new NamingStrategy.AbstractBase() {
                 protected String name(TypeDescription superClass) {
-                    return GlobalDataRecordMapper.class.getPackageName() + ".impl." + mapperType.getSimpleName() + "DynamicImpl";
+                    return GlobalDataRecordMapper.class.getPackageName() + ".impl."
+                        + mapperType.getSimpleName() + "DynamicImpl";
                 }
             })
             .subclass(TypeDescription.Generic.Builder.parameterizedType(AbstractAppTableMapper.class, pojoType).build())
             .implement(mapperType)
+            .modifiers(Opcodes.ACC_PUBLIC)
             .defineMethod(
                 "getTablePojoType",
                 TypeDescription.Generic.Builder.parameterizedType(Class.class, pojoType).build(),
@@ -60,12 +66,11 @@ public class StudyGenerateCode {
             .intercept(FixedValue.value(pojoType))
             .annotateMethod(AnnotationDescription.Builder.ofType(Override.class).build())
             .make();
-        Class<AbstractAppTableMapper<T>> mapperClass = (Class<AbstractAppTableMapper<T>>) dynamicType.load(getClass().getClassLoader()).getLoaded();
+        Class<AbstractAppTableMapper<T>> mapperClass = (Class<AbstractAppTableMapper<T>>) dynamicType
+            .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER_PERSISTENT)
+            .getLoaded();
         dynamicType.close();
-
-        AbstractAppTableMapper<T> mapper = mapperClass.getDeclaredConstructor().newInstance();
-
-        return mapper;
+        return mapperClass.getDeclaredConstructor().newInstance();
     }
 
 }
