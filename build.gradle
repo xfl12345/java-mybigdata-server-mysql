@@ -109,24 +109,30 @@ dependencies {
         }
     }
 
+    def applyPlatform2All = (myDependencyParent) -> {
+        api platform(myDependencyParent)
+        // providedRuntime platform(myDependencyParent)
+        annotationProcessor platform(myDependencyParent)
+        runtimeOnly platform(myDependencyParent)
+        runtimeClasspath platform(myDependencyParent)
+        testAnnotationProcessor platform(myDependencyParent)
+        testImplementation platform(myDependencyParent)
+        testRuntimeOnly platform(myDependencyParent)
+        testRuntimeClasspath platform(myDependencyParent)
+    }
+
     if (isLocalDevMode) {
         def depsParentVersion = '0.0.1'
-        api platform(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
-        annotationProcessor platform(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
-        testImplementation platform(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
-        testAnnotationProcessor platform(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
+        applyPlatform2All(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
 
         api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion
         // api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion, classifier: 'sources'
         // api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion, ext: 'pom'
     } else {
         def depsParentVersion = '513d8adec4'
-        api platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
-        annotationProcessor platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
-        testAnnotationProcessor platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
-        testImplementation platform(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
+        applyPlatform2All(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
 
-        def parentModuleVersion = '9dd1aaa903'
+        def parentModuleVersion = 'ae02aa273d'
         // https://jitpack.io/#xfl12345/java-mybigdata-server-common
         api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: parentModuleVersion
         // api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: parentModuleVersion, ext: 'pom'
