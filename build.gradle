@@ -156,6 +156,12 @@ dependencies {
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok'
     testImplementation group: 'org.projectlombok', name: 'lombok'
 
+    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+    api group: 'javax.servlet', name: 'javax.servlet-api'
+
+    // https://mvnrepository.com/artifact/org.springframework/spring-webmvc
+    api group: 'org.springframework', name: 'spring-webmvc'
+
 
     def mybatisGeneratorVersion = '1.3.7'
     def tk_mybatis_version = '4.2.1'

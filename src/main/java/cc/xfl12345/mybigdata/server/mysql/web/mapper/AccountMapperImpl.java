@@ -1,4 +1,4 @@
-package cc.xfl12345.mybigdata.server.mysql.web;
+package cc.xfl12345.mybigdata.server.mysql.web.mapper;
 
 import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
 import cc.xfl12345.mybigdata.server.common.web.mapper.AccountMapper;
