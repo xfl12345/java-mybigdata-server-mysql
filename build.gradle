@@ -121,18 +121,18 @@ dependencies {
         testRuntimeClasspath platform(myDependencyParent)
     }
 
+    String depsParentVersion = '0.0.1'
     if (isLocalDevMode) {
-        def depsParentVersion = '0.0.1'
         applyPlatform2All(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
 
-        api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion
-        // api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion, classifier: 'sources'
-        // api group: 'cc.xfl12345.mybigdata', name: 'server-common', version: depsParentVersion, ext: 'pom'
+        api group: 'cc.xfl12345.mybigdata', name: 'server-common'
+        // api group: 'cc.xfl12345.mybigdata', name: 'server-common', classifier: 'sources'
+        // api group: 'cc.xfl12345.mybigdata', name: 'server-common', ext: 'pom'
     } else {
-        def depsParentVersion = '513d8adec4'
+        depsParentVersion = 'b6a6d54f71'
         applyPlatform2All(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
 
-        def parentModuleVersion = 'ae02aa273d'
+        def parentModuleVersion = '08f7a8feb5'
         // https://jitpack.io/#xfl12345/java-mybigdata-server-common
         api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: parentModuleVersion
         // api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: parentModuleVersion, ext: 'pom'
