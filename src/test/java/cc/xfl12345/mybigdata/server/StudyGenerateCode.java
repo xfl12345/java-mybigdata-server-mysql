@@ -1,13 +1,12 @@
 package cc.xfl12345.mybigdata.server;
 
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.GlobalDataRecordMapper;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AppTableCurdMapper;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AppTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl.AbstractAppTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.NamingStrategy;
 import net.bytebuddy.description.annotation.AnnotationDescription;
-import net.bytebuddy.description.modifier.ModifierContributor;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
@@ -45,7 +44,7 @@ public class StudyGenerateCode {
     @SuppressWarnings("unchecked")
     public  <T> AbstractAppTableMapper<T> getMapper(
         Class<T> pojoType,
-        Class<? extends AppTableCurdMapper<T>> mapperType) throws Exception {
+        Class<? extends AppTableMapper<T>> mapperType) throws Exception {
         // Type pojoType = mapperType.getGenericSuperclass();
         DynamicType.Unloaded<AbstractAppTableMapper<T>> dynamicType = (DynamicType.Unloaded<AbstractAppTableMapper<T>>) new ByteBuddy()
             .with(new NamingStrategy.AbstractBase() {

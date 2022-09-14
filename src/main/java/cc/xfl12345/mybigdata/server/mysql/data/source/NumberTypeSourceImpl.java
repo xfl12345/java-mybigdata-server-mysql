@@ -5,7 +5,7 @@ import cc.xfl12345.mybigdata.server.common.data.source.NumberTypeSource;
 import cc.xfl12345.mybigdata.server.common.data.source.impl.SingleTableDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.NumberContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.NumberContentMapper;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AppTableCurdMapper;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AppTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.NumberContent;
 import lombok.Setter;
 
@@ -16,7 +16,7 @@ public class NumberTypeSourceImpl extends SingleTableDataSource<BigDecimal, Numb
     protected NumberContentMapper mapper;
 
     @Override
-    public AppTableCurdMapper<NumberContent> getMapper() {
+    public AppTableMapper<NumberContent> getMapper() {
         return mapper;
     }
 

@@ -5,7 +5,7 @@ import cc.xfl12345.mybigdata.server.common.data.source.StringTypeSource;
 import cc.xfl12345.mybigdata.server.common.data.source.impl.SingleTableDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.StringContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.StringContentMapper;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AppTableCurdMapper;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AppTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
 import lombok.Setter;
 
@@ -14,7 +14,7 @@ public class StringTypeSourceImpl extends SingleTableDataSource<String, StringCo
     protected StringContentMapper mapper;
 
     @Override
-    public AppTableCurdMapper<StringContent> getMapper() {
+    public AppTableMapper<StringContent> getMapper() {
         return mapper;
     }
 
