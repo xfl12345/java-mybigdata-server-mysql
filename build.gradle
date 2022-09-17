@@ -129,10 +129,10 @@ dependencies {
         // api group: 'cc.xfl12345.mybigdata', name: 'server-common', classifier: 'sources'
         // api group: 'cc.xfl12345.mybigdata', name: 'server-common', ext: 'pom'
     } else {
-        depsParentVersion = 'b6a6d54f71'
+        depsParentVersion = 'ad2e00850d'
         applyPlatform2All(group: 'com.github.xfl12345', name: 'java-mybigdata-server-deps-parent', version: depsParentVersion)
 
-        def parentModuleVersion = '08f7a8feb5'
+        def parentModuleVersion = '0d949b8876'
         // https://jitpack.io/#xfl12345/java-mybigdata-server-common
         api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: parentModuleVersion
         // api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: parentModuleVersion, ext: 'pom'
