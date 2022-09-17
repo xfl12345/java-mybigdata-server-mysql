@@ -1,4 +1,4 @@
-package cc.xfl12345.mybigdata.server.mysql.web.controller;
+package cc.xfl12345.mybigdata.server.mysql.spring.web.controller;
 
 import com.alibaba.druid.stat.DruidStatService;
 import lombok.extern.slf4j.Slf4j;

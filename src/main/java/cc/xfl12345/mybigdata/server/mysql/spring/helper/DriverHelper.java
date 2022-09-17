@@ -1,10 +1,9 @@
-package cc.xfl12345.mybigdata.server.mysql.helper;
+package cc.xfl12345.mybigdata.server.mysql.spring.helper;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
 
 import javax.sql.DataSource;
@@ -57,8 +56,8 @@ public class DriverHelper {
                             }
                             if (d.getClass().getCanonicalName().equals(dataSourceDriverName)) {
                                 driverInstanceName = d.toString();
-                                ((BeanDefinitionRegistry) springAppContext.getAutowireCapableBeanFactory()).removeBeanDefinition(beanName);
-                                log.info(String.format("Bean[%s] has been removed definition from Spring context.", beanName));
+                                // ((BeanDefinitionRegistry) springAppContext.getAutowireCapableBeanFactory()).removeBeanDefinition(beanName);
+                                // log.info(String.format("Bean[%s] has been removed definition from Spring context.", beanName));
                                 if (!isHitAsLeaseOnce) {
                                     isHitAsLeaseOnce = true;
                                     DriverManager.deregisterDriver(d);
@@ -69,7 +68,12 @@ public class DriverHelper {
                             }
                         }
                         isOk2DeregisterDriverNormally = dataSourceBeanNamesCount == 0;
-                        Runtime.getRuntime().gc();
+                        try {
+                            //noinspection BusyWait
+                            Thread.sleep(0);
+                        } catch (InterruptedException ignored) {
+                        }
+                        // Runtime.getRuntime().gc();
                     }
                 } catch (SQLException ex) {
                     log.error(String.format("Error deregistering driver %s", d) + ":" + ex);

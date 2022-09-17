@@ -1,6 +1,5 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl;
 
-import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTables;
@@ -9,8 +8,6 @@ import cc.xfl12345.mybigdata.server.mysql.database.pojo.BooleanContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.teasoft.bee.osql.BeeException;
 import org.teasoft.bee.osql.Condition;
@@ -19,7 +16,6 @@ import org.teasoft.bee.osql.SuidRich;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
-import org.teasoft.honey.osql.core.HoneyFactory;
 import org.teasoft.honey.osql.core.SessionFactory;
 
 import java.util.Arrays;

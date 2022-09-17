@@ -1,4 +1,4 @@
-package cc.xfl12345.mybigdata.server.mysql.helper.url;
+package cc.xfl12345.mybigdata.server.mysql.spring.helper.url;
 
 import com.mysql.cj.conf.ConnectionUrl;
 import com.mysql.cj.conf.HostInfo;

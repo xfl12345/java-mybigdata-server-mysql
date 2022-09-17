@@ -1,7 +1,7 @@
 package cc.xfl12345.mybigdata.server;
 
-import cc.xfl12345.mybigdata.server.mysql.helper.DriverHelper;
-import cc.xfl12345.mybigdata.server.mysql.helper.MyDatabaseInitializer;
+import cc.xfl12345.mybigdata.server.mysql.spring.helper.DriverHelper;
+import cc.xfl12345.mybigdata.server.mysql.spring.helper.MyDatabaseInitializer;
 import com.alibaba.druid.pool.DruidDataSource;
 
 public class TestDatabaseReset {

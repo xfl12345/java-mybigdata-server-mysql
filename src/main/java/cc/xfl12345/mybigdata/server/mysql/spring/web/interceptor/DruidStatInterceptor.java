@@ -1,4 +1,4 @@
-package cc.xfl12345.mybigdata.server.mysql.web.interceptor;
+package cc.xfl12345.mybigdata.server.mysql.spring.web.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;

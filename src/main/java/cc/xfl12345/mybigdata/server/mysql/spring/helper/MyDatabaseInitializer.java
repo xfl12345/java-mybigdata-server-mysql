@@ -1,9 +1,7 @@
-package cc.xfl12345.mybigdata.server.mysql.helper;
-
-
+package cc.xfl12345.mybigdata.server.mysql.spring.helper;
 
 import cc.xfl12345.mybigdata.server.common.appconst.CommonConst;
-import cc.xfl12345.mybigdata.server.mysql.helper.url.MysqlJdbcUrlHelper;
+import cc.xfl12345.mybigdata.server.mysql.spring.helper.url.MysqlJdbcUrlHelper;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.mysql.cj.PreparedQuery;
 import com.mysql.cj.conf.ConnectionUrl;

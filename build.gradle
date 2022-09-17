@@ -159,8 +159,9 @@ dependencies {
     // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
     api group: 'javax.servlet', name: 'javax.servlet-api'
 
+    // 不能使用 api 关键字，因为日后假如想转用 Spring Webflux 会比较麻烦。
     // https://mvnrepository.com/artifact/org.springframework/spring-webmvc
-    api group: 'org.springframework', name: 'spring-webmvc'
+    implementation group: 'org.springframework', name: 'spring-webmvc'
 
 
     def mybatisGeneratorVersion = '1.3.7'
