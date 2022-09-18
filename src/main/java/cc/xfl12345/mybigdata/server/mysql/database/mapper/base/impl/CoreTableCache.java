@@ -62,16 +62,10 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
         log.info("Cache \"global_id\" for JSON constant - boolean value: false <---> " + idOfFalse);
     }
 
-    protected void refreshCoreTableNameCache(String... values) throws Exception {
+    protected void refreshCoreTableNameCache(List<String> values) throws Exception {
         Condition condition = new ConditionImpl();
-        StringBuilder stringBuilder = new StringBuilder(values.length * 32);
-        for (String s : values) {
-            stringBuilder.append(s).append(',');
-        }
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-
         condition.selectField(StringContentConstant.GLOBAL_ID, StringContentConstant.CONTENT)
-            .op(StringContentConstant.CONTENT, Op.in, stringBuilder.toString());
+            .op(StringContentConstant.CONTENT, Op.in, values);
 
         // 开启事务
         Transaction transaction = SessionFactory.getTransaction();
@@ -81,11 +75,11 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
 
             // 查询数据
             List<StringContent> contents = suid.select(new StringContent(), condition);
-            if (contents.size() != values.length) {
+            if (contents.size() != values.size()) {
                 HashSet<String> actuallyGet = new HashSet<>(contents.stream().map(StringContent::getContent).toList());
-                HashSet<String> missing = new HashSet<>(List.of(values));
+                HashSet<String> missing = new HashSet<>(values);
                 missing.removeAll(actuallyGet);
-                throw new IllegalArgumentException("We are looking for " + values.length + " records. " +
+                throw new IllegalArgumentException("We are looking for " + values.size() + " records. " +
                     "We get table name data in follow: " +
                     JSONObject.toJSONString(contents, JSONWriter.Feature.PrettyFormat) + ". " +
                     "It is missing " + missing + "."
@@ -105,10 +99,8 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
 
     @Override
     public void refreshCoreTableNameCache() throws Exception {
-        String[] tableNames = Arrays.stream(CoreTables.values())
-            .map(CoreTables::getName)
-            .toArray(String[]::new);
-        refreshCoreTableNameCache(tableNames);
-        log.info("Cache \"global_id\" for core table name: " + JSONObject.toJSONString(tableNameCache.getKey2ValueMap(), JSONWriter.Feature.PrettyFormat));
+        refreshCoreTableNameCache(Arrays.stream(CoreTables.values()).map(CoreTables::getName).toList());
+        log.info("Cache \"global_id\" for core table name: " +
+            JSONObject.toJSONString(tableNameCache.getKey2ValueMap(), JSONWriter.Feature.PrettyFormat));
     }
 }
