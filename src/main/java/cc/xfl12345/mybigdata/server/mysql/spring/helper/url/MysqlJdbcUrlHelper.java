@@ -12,7 +12,7 @@ public class MysqlJdbcUrlHelper extends MysqlJdbcUrlParameter {
     }
 
     public MysqlJdbcUrlHelper(ConnectionUrl connectionUrl) {
-        this(new MysqlJdbcUrlParameter(connectionUrl));
+        super(connectionUrl);
         this.additionalParameters = connectionUrl.getConnectionArgumentsAsProperties();
     }
 
@@ -37,10 +37,10 @@ public class MysqlJdbcUrlHelper extends MysqlJdbcUrlParameter {
      */
     public String getSqlConnectionBaseUrl() {
         if (is_updated || sqlConnectionUrl == null) {
-            sqlConnectionUrl = (sqlProtocal + ":" +
-                sqlSubProtocal + "://" +
-                sqlServerAddress + ":" +
-                sqlServerPort + "/");
+            sqlConnectionUrl = (protocal + ":" +
+                subProtocal + "://" +
+                host + ":" +
+                port + "/");
             is_updated = false;
         }
         return sqlConnectionUrl;
@@ -125,32 +125,32 @@ public class MysqlJdbcUrlHelper extends MysqlJdbcUrlParameter {
     }
 
     @Override
-    public void setSqlServerDriverName(String sqlServerDriverName) {
-        super.setSqlServerDriverName(sqlServerDriverName);
+    public void setDriverName(String driverName) {
+        super.setDriverName(driverName);
         is_updated = true;
     }
 
     @Override
-    public void setSqlProtocal(String sqlProtocal) {
-        super.setSqlProtocal(sqlProtocal);
+    public void setProtocal(String protocal) {
+        super.setProtocal(protocal);
         is_updated = true;
     }
 
     @Override
-    public void setSqlSubProtocal(String sqlSubProtocal) {
-        super.setSqlSubProtocal(sqlSubProtocal);
+    public void setSubProtocal(String subProtocal) {
+        super.setSubProtocal(subProtocal);
         is_updated = true;
     }
 
     @Override
-    public void setSqlServerAddress(String sqlServerAddress) {
-        super.setSqlServerAddress(sqlServerAddress);
+    public void setHost(String host) {
+        super.setHost(host);
         is_updated = true;
     }
 
     @Override
-    public void setSqlServerPort(Integer sqlServerPort) {
-        super.setSqlServerPort(sqlServerPort);
+    public void setPort(Integer port) {
+        super.setPort(port);
         is_updated = true;
     }
 
