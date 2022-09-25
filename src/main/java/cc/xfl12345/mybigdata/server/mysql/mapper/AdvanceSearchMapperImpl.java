@@ -35,6 +35,8 @@ public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
             List<StringContent> contents = suid.select(new StringContent(), condition);
 
             result = contents.parallelStream().map(StringContent::getContent).toList();
+
+            transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
             return new ArrayList<>();
@@ -59,6 +61,8 @@ public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
             List<NumberContent> contents = suid.select(new NumberContent(), condition);
 
             result = contents.parallelStream().map(item -> new BigDecimal(item.getContent())).toList();
+
+            transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
             return new ArrayList<>();
