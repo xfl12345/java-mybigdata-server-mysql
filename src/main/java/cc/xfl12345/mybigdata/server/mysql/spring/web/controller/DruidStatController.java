@@ -9,6 +9,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -90,6 +91,11 @@ public class DruidStatController implements InitializingBean {
 
         }
 
+    }
+
+    @GetMapping(path = {"", "index"})
+    public void redirectIndexPage(HttpServletResponse response) throws IOException {
+        response.sendRedirect("./index.html");
     }
 
     @RequestMapping("/**")
