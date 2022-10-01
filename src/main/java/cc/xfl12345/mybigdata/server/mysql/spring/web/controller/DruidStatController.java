@@ -85,7 +85,7 @@ public class DruidStatController implements InitializingBean {
                     detail.mimeType = tika.detect(inputStream, filename);
                 }
 
-                log.debug(relativePath + " <--->" + currentFileURL.toString());
+                log.debug(relativePath + " <---> " + currentFileURL.toString());
                 druidFrontendFiles.put(relativePath, detail);
             }
 
