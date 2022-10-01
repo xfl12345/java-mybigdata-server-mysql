@@ -53,10 +53,9 @@ public class DruidStatController implements InitializingBean {
         public String path;
     }
 
-    protected Tika tika = new Tika();
-
     @Override
     public void afterPropertiesSet() throws Exception {
+        Tika tika = new Tika();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         rootFileURL = Objects.requireNonNull(classLoader.getResource(resourceRootPath));
         rootFileUrlString = rootFileURL.toString();
