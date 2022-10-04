@@ -85,7 +85,7 @@ public class DruidStatController implements InitializingBean {
                     detail.mimeType = tika.detect(inputStream, filename);
                 }
 
-                log.debug(relativePath + " <---> " + currentFileURL.toString());
+                log.debug("Mapping request: [" + relativePath + "] <---> [" + currentFileURL.toString() + "]");
                 druidFrontendFiles.put(relativePath, detail);
             }
 
@@ -94,8 +94,13 @@ public class DruidStatController implements InitializingBean {
     }
 
     @GetMapping(path = {"", "index"})
-    public void redirectIndexPage(HttpServletResponse response) throws IOException {
-        response.sendRedirect("./index.html");
+    public void redirectIndexPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String relativeURL = request.getServletPath().substring(servletPathCache1.length());
+        if ("".equals(relativeURL)) {
+            response.sendRedirect("./" + servletName + "/index.html");
+        } else {
+            response.sendRedirect("./index.html");
+        }
     }
 
     @RequestMapping("/**")
