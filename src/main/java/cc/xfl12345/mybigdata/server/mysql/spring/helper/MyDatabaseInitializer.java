@@ -148,8 +148,6 @@ public class MyDatabaseInitializer implements InitializingBean {
     }
 
     protected void initDatabaseSchema(Connection connection, String targetDatabaseName, ClassLoader classLoader) throws SQLException, IOException {
-        PreparedStatement ps;
-
         String dropDatabaseIfExists = "drop database if exists " + targetDatabaseName;
         String createDatabase = "create database " + targetDatabaseName + " DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
         String switchDatabase = "use " + targetDatabaseName;
