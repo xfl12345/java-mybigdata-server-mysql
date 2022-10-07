@@ -1,10 +1,11 @@
 package cc.xfl12345.mybigdata.server.mysql.spring.helper;
 
 import cc.xfl12345.mybigdata.server.common.appconst.CommonConst;
-import cc.xfl12345.mybigdata.server.mysql.spring.helper.url.MysqlJdbcUrlHelper;
+import cc.xfl12345.mybigdata.server.mysql.util.MysqlJdbcUrlBean;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.mysql.cj.PreparedQuery;
 import com.mysql.cj.conf.ConnectionUrl;
+import com.mysql.cj.conf.PropertyKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
@@ -22,7 +23,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
 
 @Slf4j
 public class MyDatabaseInitializer implements InitializingBean {
@@ -92,15 +92,26 @@ public class MyDatabaseInitializer implements InitializingBean {
                 sql = preparedStatement.toString();
             }
         }
+
         return sql;
+    }
+
+    protected void logExecutingSQL(String sql) {
+        log.info("Executing SQL: [" + sql + ']');
     }
 
     public void initMySQL() throws SQLException, IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        MysqlJdbcUrlHelper mysqlJdbcUrlHelper = new MysqlJdbcUrlHelper(ConnectionUrl.getConnectionUrlInstance(url, null));
-        String targetDatabaseName = mysqlJdbcUrlHelper.getDatabaseName();
-        mysqlJdbcUrlHelper.setDatabaseName("information_schema");
-        url = mysqlJdbcUrlHelper.getSqlConnUrlWithConfigProp();
+        ConnectionUrl originURL = ConnectionUrl.getConnectionUrlInstance(url, null);
+        MysqlJdbcUrlBean mysqlJdbcUrlBean = new MysqlJdbcUrlBean(originURL);
+
+        String targetDatabaseName = mysqlJdbcUrlBean.getDatabaseName();
+        mysqlJdbcUrlBean.setDatabaseName(CommonConst.INFORMATION_SCHEMA_TABLE_NAME);
+        mysqlJdbcUrlBean.getConnectionArguments().remove(PropertyKey.USER);
+        mysqlJdbcUrlBean.getConnectionArguments().remove(PropertyKey.PASSWORD);
+
+        url = mysqlJdbcUrlBean.buildURL();
+        log.info("Temporary JDBC URL=" + url);
 
         DruidDataSource mysqlTableSchemaDataSource = new DruidDataSource();
         mysqlTableSchemaDataSource.setUsername(username);
@@ -108,36 +119,22 @@ public class MyDatabaseInitializer implements InitializingBean {
         mysqlTableSchemaDataSource.setDriverClassName(driverClassName);
         mysqlTableSchemaDataSource.setUrl(url);
 
-        // 加载 sql URL附加属性
-        Properties confProp = mysqlJdbcUrlHelper.getAdditionalParameters();
-        // 浅拷贝一个Properties对象，删除其中的敏感数据，用以展示完整的JDBC URL
-        Properties tmpConfProp = (Properties) confProp.clone();
-        tmpConfProp.remove("user");
-        tmpConfProp.remove("password");
-        // 创建一个临时的数据库连接，完成数据库初始化
-        // 构建一个不带附加参数的JDBC URL
-        String tmpJdbcConnectionURL = mysqlJdbcUrlHelper.getSqlConnUrlWithConfigProp(CommonConst.INFORMATION_SCHEMA_TABLE_NAME, tmpConfProp);
-        log.info("Temporary JDBC URL=" + tmpJdbcConnectionURL);
         // 创建一个临时连接，用于试探MySQL数据库
-        Connection conn2 = mysqlTableSchemaDataSource.getConnection();
-        conn2.setAutoCommit(false);
+        Connection connection = mysqlTableSchemaDataSource.getConnection();
+        connection.setAutoCommit(false);
         log.info("Database server connected.Checking database.");
         // 检查 MySQL中 某个数据库是否存在（其它数据库暂未适配，所以这个 dataSource 并非万能）
-        PreparedStatement ps = conn2.prepareStatement("select * from information_schema.SCHEMATA where SCHEMA_NAME = ?");
+        PreparedStatement ps = connection.prepareStatement("select * from information_schema.SCHEMATA where SCHEMA_NAME = ?");
         ps.setString(1, targetDatabaseName);
-        log.info(getSql(ps));
+        logExecutingSQL(getSql(ps));
         ResultSet rs = ps.executeQuery();
-
-
         try {
             if (rs.next()) {
                 log.info("Database is exist!");
-                tryExecuteResourceSqlFile(conn2, classLoader, "database/db_restart_init.sql", ";");
+                tryExecuteResourceSqlFile(connection, classLoader, "database/db_restart_init.sql", ";");
             } else {
                 log.info("Database is not exist!");
-                tryExecuteResourceSqlFile(conn2, classLoader, "database/db_init_create_schema.sql", ";");
-                tryExecuteResourceSqlFile(conn2, classLoader, "database/db_init_create_procedure.sql", "$$");
-                tryExecuteResourceSqlFile(conn2, classLoader, "database/db_init_insert_pre_data.sql", ";");
+                initDatabaseSchema(connection, targetDatabaseName, classLoader);
             }
             log.info("Database initiated!");
         } catch (SQLException | IOException exception) {
@@ -145,18 +142,39 @@ public class MyDatabaseInitializer implements InitializingBean {
             log.error(exception.getMessage());
             throw exception;
         } finally {
-            conn2.close();
+            connection.close();
             mysqlTableSchemaDataSource.close();
         }
     }
 
-    protected void tryExecuteResourceSqlFile(Connection conn, ClassLoader classLoader, String fileResourcePath, String delimiter) throws SQLException, IOException {
+    protected void initDatabaseSchema(Connection connection, String targetDatabaseName, ClassLoader classLoader) throws SQLException, IOException {
+        PreparedStatement ps;
+
+        String dropDatabaseIfExists = "drop database if exists " + targetDatabaseName;
+        String createDatabase = "create database " + targetDatabaseName + " DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
+        String switchDatabase = "use " + targetDatabaseName;
+
+        logExecutingSQL(dropDatabaseIfExists);
+        connection.createStatement().execute(dropDatabaseIfExists);
+
+        logExecutingSQL(createDatabase);
+        connection.createStatement().execute(createDatabase);
+
+        logExecutingSQL(switchDatabase);
+        connection.createStatement().execute(switchDatabase);
+
+        tryExecuteResourceSqlFile(connection, classLoader, "database/db_init_create_schema.sql", ";");
+        tryExecuteResourceSqlFile(connection, classLoader, "database/db_init_create_procedure.sql", "$$");
+        tryExecuteResourceSqlFile(connection, classLoader, "database/db_init_insert_pre_data.sql", ";");
+    }
+
+    protected void tryExecuteResourceSqlFile(Connection connection, ClassLoader classLoader, String fileResourcePath, String delimiter) throws SQLException, IOException {
         URL fileURL = classLoader.getResource(fileResourcePath);
         if (fileURL != null) {
-            log.info("Executing SQL file URL=" + fileURL.toString());
-            executeSqlFile(conn, fileURL, delimiter);
-            log.info("Execution done. SQL file URL=" + fileURL.toString());
-        } else  {
+            log.info("Executing SQL file URL=" + fileURL);
+            executeSqlFile(connection, fileURL, delimiter);
+            log.info("Execution done. SQL file URL=" + fileURL);
+        } else {
             log.info("Execution will not process. Because file is not found. SQL file resource path=" + fileResourcePath);
         }
     }
@@ -164,7 +182,6 @@ public class MyDatabaseInitializer implements InitializingBean {
     public static void executeSqlFile(Connection connection, URL sqlFileURL, String delimiter) throws IOException, SQLException {
         connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
         Resources.setCharset(StandardCharsets.UTF_8); //设置字符集,不然中文乱码插入错误
-
 
         InputStream inputStream = sqlFileURL.openStream();
         Reader read = new InputStreamReader(inputStream);

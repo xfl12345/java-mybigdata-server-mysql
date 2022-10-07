@@ -1,7 +1,5 @@
 DELIMITER $$
 
-use xfl_mybigdata$$
-
 # 准备插入一些初始信息
 # 来个插入数据的正规流程示范
 # 先向 global_data_record 表注册，通过查询 UUID 拿到 global_id

@@ -1,4 +1,4 @@
-package cc.xfl12345.mybigdata.server.mysql.spring.helper.url;
+package cc.xfl12345.mybigdata.server.mysql.util;
 
 import com.mysql.cj.conf.*;
 
@@ -69,11 +69,25 @@ public class MysqlJdbcUrlBean {
         return connectionArguments;
     }
 
-    public String buildURL() {
+    public Properties getConnectionArgumentsAsProperties() {
+        Properties properties = new Properties(connectionArguments.size());
+        properties.putAll(connectionArguments);
+        return properties;
+    }
+
+    public String getQuery() {
         StringBuffer queryBuffer = new StringBuffer();
         connectionArguments.entrySet().parallelStream().forEach(
             item -> {
-                String tmp = item.getKey().getKeyName() + "=" + item.getValue() + '&';
+                PropertyKey propertyKey = item.getKey();
+                String tmp = "";
+                if (propertyKey.getCcAlias() != null) {
+                    tmp += propertyKey.getCcAlias();
+                } else {
+                    tmp += item.getKey().getKeyName();
+                }
+
+                tmp += "=" + item.getValue() + '&';
                 queryBuffer.append(tmp);
             }
         );
@@ -82,6 +96,14 @@ public class MysqlJdbcUrlBean {
             queryBuffer.deleteCharAt(queryBuffer.length() - 1);
         }
 
-        return type.getScheme() + "//" + authority + "/" + databaseName + "?" + queryBuffer;
+        return queryBuffer.toString();
+    }
+
+    public String buildURL() {
+        return buildURL(true);
+    }
+
+    public String buildURL(boolean includeQuery) {
+        return type.getScheme() + "//" + authority + "/" + databaseName + (includeQuery ? "?" + getQuery() : "");
     }
 }

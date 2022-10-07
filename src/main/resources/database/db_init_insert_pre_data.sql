@@ -1,4 +1,3 @@
-use xfl_mybigdata;
 
 # 注册 table_schema_record 表
 SELECT insert_string_content(

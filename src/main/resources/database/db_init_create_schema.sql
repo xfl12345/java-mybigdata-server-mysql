@@ -2,18 +2,9 @@
 * Source Server Type             : MySQL
 * Source Server AppInfo          : 5.7.26
 * Source Host                    : 127.0.0.1:3306
-* Source Schema                  : xfl_mybigdata
 * FileOperation Encoding         : utf-8
 * Date: 2021/6/9 17:00:00
 */
-
-drop database if exists xfl_mybigdata;
-
-create
-    database xfl_mybigdata DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-use
-    xfl_mybigdata;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
