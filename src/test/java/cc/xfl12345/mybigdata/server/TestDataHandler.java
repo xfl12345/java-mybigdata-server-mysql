@@ -1,8 +1,8 @@
 package cc.xfl12345.mybigdata.server;
 
 import cc.xfl12345.mybigdata.server.common.data.handler.StringTypeHandler;
-import cc.xfl12345.mybigdata.server.mysql.spring.helper.DriverHelper;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl.CoreTableCache;
+import cc.xfl12345.mybigdata.server.mysql.spring.helper.JdbcContextFinalizer;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
@@ -35,7 +35,7 @@ public class TestDataHandler {
 
         // stringTypeHandler.destroy();
 
-        DriverHelper.deregister(null);
+        JdbcContextFinalizer.deregister(null);
     }
 
     public static void printJSON(Object obj) {

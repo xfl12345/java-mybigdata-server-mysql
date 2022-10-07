@@ -1,6 +1,6 @@
 package cc.xfl12345.mybigdata.server;
 
-import cc.xfl12345.mybigdata.server.mysql.spring.helper.DriverHelper;
+import cc.xfl12345.mybigdata.server.mysql.spring.helper.JdbcContextFinalizer;
 import cc.xfl12345.mybigdata.server.mysql.spring.helper.MyDatabaseInitializer;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson2.JSONObject;
@@ -37,7 +37,7 @@ public class TestDatabaseInitializer {
         DruidDataSource dataSource = TestLoadDataSource.getDataSource();
         System.out.println(((java.sql.Connection) dataSource.getConnection()).getMetaData().getDatabaseProductName());
 
-        DriverHelper.deregister(null);
+        JdbcContextFinalizer.deregister(null);
     }
 
 }
