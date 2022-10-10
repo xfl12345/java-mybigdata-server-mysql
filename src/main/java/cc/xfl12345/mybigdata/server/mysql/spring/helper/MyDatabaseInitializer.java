@@ -136,6 +136,7 @@ public class MyDatabaseInitializer implements InitializingBean {
                 log.info("Database is not exist!");
                 initDatabaseSchema(connection, targetDatabaseName, classLoader);
             }
+            connection.commit();
             log.info("Database initiated!");
         } catch (SQLException | IOException exception) {
             log.error("Database initiation failed.");
