@@ -6,6 +6,9 @@ import java.io.Serializable;
  * 表名：auth_account
 */
 @lombok.Data
+@lombok.experimental.SuperBuilder
+@lombok.NoArgsConstructor
+@lombok.experimental.FieldNameConstants
 @io.swagger.annotations.ApiModel("")
 @javax.persistence.Table(name = "auth_account")
 @javax.persistence.Entity

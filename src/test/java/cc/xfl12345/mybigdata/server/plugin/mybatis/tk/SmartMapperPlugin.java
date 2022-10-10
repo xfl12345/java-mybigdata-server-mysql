@@ -26,7 +26,6 @@ package cc.xfl12345.mybigdata.server.plugin.mybatis.tk;
 import io.swagger.annotations.ApiModelProperty;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
-import org.mybatis.generator.api.Plugin;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.CommentGeneratorConfiguration;
 import org.mybatis.generator.config.Context;
@@ -69,6 +68,8 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
     private boolean needsSuperBuilder = false;
     private boolean needsNoArgsConstructor = false;
     private boolean needsAllArgsConstructor = false;
+
+    private boolean needFieldNameConstants = false;
 
     //是否需要生成EqualsAndHashCode注解
     private boolean needsEqualsAndHashCode = false;
@@ -253,6 +254,9 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
         }
         if (this.needsAllArgsConstructor) {
             justAddAnnotation2Class(topLevelClass, lombok.AllArgsConstructor.class, null);
+        }
+        if (this.needFieldNameConstants) {
+            justAddAnnotation2Class(topLevelClass, lombok.experimental.FieldNameConstants.class, null);
         }
         // lombok扩展结束
         // region swagger扩展
@@ -504,6 +508,7 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
             this.needsBuilder = !this.needsSuperBuilder && lombok.contains("Builder");
             this.needsNoArgsConstructor = lombok.contains("NoArgsConstructor");
             this.needsAllArgsConstructor = lombok.contains("AllArgsConstructor");
+            this.needFieldNameConstants = lombok.contains("FieldNameConstants");
         }
         //swagger扩展
         String swagger = getProperty("swagger", "false");

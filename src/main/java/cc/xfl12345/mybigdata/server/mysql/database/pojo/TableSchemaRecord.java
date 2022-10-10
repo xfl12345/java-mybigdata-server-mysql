@@ -6,6 +6,9 @@ import java.io.Serializable;
  * 表名：table_schema_record
 */
 @lombok.Data
+@lombok.experimental.SuperBuilder
+@lombok.NoArgsConstructor
+@lombok.experimental.FieldNameConstants
 @io.swagger.annotations.ApiModel("")
 @javax.persistence.Table(name = "table_schema_record")
 @javax.persistence.Entity

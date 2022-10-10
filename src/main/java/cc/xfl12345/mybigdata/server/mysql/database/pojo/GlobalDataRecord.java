@@ -7,6 +7,9 @@ import java.util.Date;
  * 表名：global_data_record
 */
 @lombok.Data
+@lombok.experimental.SuperBuilder
+@lombok.NoArgsConstructor
+@lombok.experimental.FieldNameConstants
 @io.swagger.annotations.ApiModel("")
 @javax.persistence.Table(name = "global_data_record")
 @javax.persistence.Entity

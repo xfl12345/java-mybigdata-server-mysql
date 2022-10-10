@@ -404,7 +404,7 @@ CREATE TABLE object_content
 # 大杀器，修改所有表的引擎为 InnoDB 。适用于对MySQL支持不太好的 ORM框架
 # SELECT CONCAT( 'ALTER TABLE ', TABLE_NAME, ' ENGINE=InnoDB;' )
 # FROM information_schema.tables
-# WHERE table_schema = 'xfl_mybigdata';
+# WHERE table_schema = 'mybigdata';
 
 /**
   账号表

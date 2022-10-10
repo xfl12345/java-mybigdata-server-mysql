@@ -14,6 +14,7 @@ import org.teasoft.bee.osql.BeeException;
 import org.teasoft.bee.osql.Condition;
 import org.teasoft.bee.osql.Op;
 import org.teasoft.bee.osql.SuidRich;
+import org.teasoft.bee.osql.chain.Select;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
 import org.teasoft.honey.osql.core.HoneyFactory;
@@ -63,6 +64,7 @@ public class StudyBeeOrm {
 
         SuidRich suid = honeyFactory.getSuidRich();
 
+        // 插入两行空的 GlobalDataRecord
         ArrayList<GlobalDataRecord> records = new ArrayList<>();
         GlobalDataRecord globalDataRecord = new GlobalDataRecord();
         globalDataRecord.setUuid(uuidGenerator.generate().toString());
@@ -73,7 +75,6 @@ public class StudyBeeOrm {
         System.out.println(suid.insert(records));
 
         Condition condition = new ConditionImpl();
-//        Condition condition = BeeFactoryHelper.getCondition();
         condition.op("table_name", Op.eq, null);
         List<GlobalDataRecord> recordList = suid.select(new GlobalDataRecord(), condition);
 
