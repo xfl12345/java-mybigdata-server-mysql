@@ -7,8 +7,7 @@ localDevMode
 
 
 /src/test/java/cc/xfl12345/a_generate_test/
-/src/main/resources/application.properties
-/src/test/resources/
+/config/
 
 
 ### STS ###
