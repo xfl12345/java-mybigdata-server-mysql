@@ -100,6 +100,10 @@ public class MyDatabaseInitializer implements InitializingBean {
         log.info("Executing SQL: [" + sql + ']');
     }
 
+    protected String getFormattedLogURL(String url) {
+        return '[' + url + ']';
+    }
+
     public void initMySQL() throws SQLException, IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         ConnectionUrl originURL = ConnectionUrl.getConnectionUrlInstance(url, null);
@@ -111,7 +115,7 @@ public class MyDatabaseInitializer implements InitializingBean {
         mysqlJdbcUrlBean.getConnectionArguments().remove(PropertyKey.PASSWORD);
 
         url = mysqlJdbcUrlBean.buildURL();
-        log.info("Temporary JDBC URL=" + url);
+        log.info("Temporary JDBC URL=" + getFormattedLogURL(url));
 
         DruidDataSource mysqlTableSchemaDataSource = new DruidDataSource();
         mysqlTableSchemaDataSource.setUsername(username);
@@ -170,11 +174,11 @@ public class MyDatabaseInitializer implements InitializingBean {
     protected void tryExecuteResourceSqlFile(Connection connection, ClassLoader classLoader, String fileResourcePath, String delimiter) throws SQLException, IOException {
         URL fileURL = classLoader.getResource(fileResourcePath);
         if (fileURL != null) {
-            log.info("Executing SQL file URL=" + fileURL);
+            log.info("Executing SQL file URL=" + getFormattedLogURL(fileURL.toString()));
             executeSqlFile(connection, fileURL, delimiter);
-            log.info("Execution done. SQL file URL=" + fileURL);
+            log.info("Execution done. SQL file URL=" + getFormattedLogURL(fileURL.toString()));
         } else {
-            log.info("Execution will not process. Because file is not found. SQL file resource path=" + fileResourcePath);
+            log.info("Execution will not process. Because file is not found. SQL file resource path=[" + fileResourcePath + ']');
         }
     }
 
