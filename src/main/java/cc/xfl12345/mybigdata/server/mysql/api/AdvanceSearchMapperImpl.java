@@ -1,7 +1,8 @@
-package cc.xfl12345.mybigdata.server.mysql.mapper;
+package cc.xfl12345.mybigdata.server.mysql.api;
 
+import cc.xfl12345.mybigdata.server.common.api.AdvanceSearchMapper;
 import cc.xfl12345.mybigdata.server.common.data.condition.SingleTableCondition;
-import cc.xfl12345.mybigdata.server.common.web.mapper.AdvanceSearchMapper;
+import cc.xfl12345.mybigdata.server.common.pojo.IdAndValue;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.NumberContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.StringContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.NumberContent;
@@ -15,16 +16,16 @@ import org.teasoft.honey.osql.core.ConditionImpl;
 import org.teasoft.honey.osql.core.SessionFactory;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
     @Override
-    public List<String> selectStringByPrefix(String prefix) {
-        List<String> result = null;
+    public List<IdAndValue<String>> selectStringByPrefix(String prefix) {
+        List<IdAndValue<String>> result = null;
 
         Condition condition = new ConditionImpl();
-        condition.selectField(StringContentConstant.CONTENT)
+        condition
+            .selectField(StringContentConstant.GLOBAL_ID, StringContentConstant.CONTENT)
             .op(StringContentConstant.CONTENT, Op.likeRight, prefix);
 
         Transaction transaction = SessionFactory.getTransaction();
@@ -34,23 +35,29 @@ public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
             SuidRich suid = BeeFactory.getHoneyFactory().getSuidRich();
             List<StringContent> contents = suid.select(new StringContent(), condition);
 
-            result = contents.parallelStream().map(StringContent::getContent).toList();
+            result = contents.parallelStream().map(item -> {
+                IdAndValue<String> idAndValue = new IdAndValue<>();
+                idAndValue.id = item.getGlobalId();
+                idAndValue.value = item.getContent();
+                return idAndValue;
+            }).toList();
 
             transaction.commit();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             transaction.rollback();
-            return new ArrayList<>();
+            throw e;
         }
 
         return result;
     }
 
     @Override
-    public List<BigDecimal> selectNumberByPrefix(String prefix) {
-        List<BigDecimal> result = null;
+    public List<IdAndValue<BigDecimal>> selectNumberByPrefix(String prefix) {
+        List<IdAndValue<BigDecimal>> result = null;
 
         Condition condition = new ConditionImpl();
-        condition.selectField(NumberContentConstant.CONTENT)
+        condition
+            .selectField(NumberContentConstant.GLOBAL_ID, NumberContentConstant.CONTENT)
             .op(NumberContentConstant.CONTENT, Op.likeRight, prefix);
 
         Transaction transaction = SessionFactory.getTransaction();
@@ -60,19 +67,24 @@ public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
             SuidRich suid = BeeFactory.getHoneyFactory().getSuidRich();
             List<NumberContent> contents = suid.select(new NumberContent(), condition);
 
-            result = contents.parallelStream().map(item -> new BigDecimal(item.getContent())).toList();
+            result = contents.parallelStream().map(item -> {
+                IdAndValue<BigDecimal> idAndValue = new IdAndValue<>();
+                idAndValue.id = item.getGlobalId();
+                idAndValue.value = new BigDecimal(item.getContent());
+                return idAndValue;
+            }).toList();
 
             transaction.commit();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             transaction.rollback();
-            return new ArrayList<>();
+            throw e;
         }
 
         return result;
     }
 
     @Override
-    public List<BigDecimal> selectNumberByPrefix(Integer prefix) {
+    public List<IdAndValue<BigDecimal>> selectNumberByPrefix(Integer prefix) {
         return selectNumberByPrefix(prefix.toString());
     }
 

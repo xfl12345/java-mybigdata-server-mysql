@@ -37,27 +37,27 @@ public abstract class AbstractBeeTableMapper<TablePojoType>
     }
 
     @Override
-    public long insert(TablePojoType value) throws Exception {
+    public long insert(TablePojoType value) {
         return getSuidRich().insert(value);
     }
 
     @Override
-    public long insertBatch(List<TablePojoType> values) throws Exception {
+    public long insertBatch(List<TablePojoType> values) {
         return getSuidRich().insert(values);
     }
 
     @Override
-    public Object insertAndReturnId(TablePojoType value) throws Exception {
+    public Object insertAndReturnId(TablePojoType value) {
         return getSuidRich().insertAndReturnId(value);
     }
 
     @Override
-    public List<TablePojoType> select(Condition condition) throws Exception {
+    public List<TablePojoType> select(Condition condition) {
         return getSuidRich().select(mapperConfig.getNewPojoInstance(), condition);
     }
 
     @Override
-    public TablePojoType selectOne(TablePojoType value, String[] fields) throws Exception {
+    public TablePojoType selectOne(TablePojoType value, String[] fields) {
         List<TablePojoType> items = getSuidRich().select(value, getConditionWithSelectedFields(fields));
         if (items.size() != 1) {
             throw getAffectedRowShouldBe1Exception(items.size(), CURD.RETRIEVE, mapperConfig.getTableName());
@@ -67,7 +67,7 @@ public abstract class AbstractBeeTableMapper<TablePojoType>
     }
 
     @Override
-    public TablePojoType selectById(Object globalId, String[] fields) throws Exception {
+    public TablePojoType selectById(Object globalId, String[] fields) {
         Condition condition = getConditionWithSelectedFields(fields);
         addId2Condition(condition, globalId);
         List<TablePojoType> items = getSuidRich().select(mapperConfig.getNewPojoInstance(), condition);
@@ -79,18 +79,18 @@ public abstract class AbstractBeeTableMapper<TablePojoType>
     }
 
     @Override
-    public Object selectId(TablePojoType value) throws Exception {
+    public Object selectId(TablePojoType value) {
         TablePojoType item = selectOne(value, selectIdFieldOnly);
         return mapperConfig.getId(item);
     }
 
     @Override
-    public long update(TablePojoType value, Condition condition) throws Exception {
+    public long update(TablePojoType value, Condition condition) {
         return getSuidRich().update(value, condition);
     }
 
     @Override
-    public void updateById(TablePojoType value, Object globalId) throws Exception {
+    public void updateById(TablePojoType value, Object globalId) {
         long affectedRowCount = 0;
         affectedRowCount = getSuidRich().update(value, getConditionWithId(globalId));
         if (affectedRowCount != 1) {
@@ -99,12 +99,12 @@ public abstract class AbstractBeeTableMapper<TablePojoType>
     }
 
     @Override
-    public long delete(Condition condition) throws Exception {
+    public long delete(Condition condition) {
         return getSuidRich().delete(condition);
     }
 
     @Override
-    public void deleteById(Object globalId) throws Exception {
+    public void deleteById(Object globalId) {
         long affectedRowCount = 0;
         affectedRowCount = getSuidRich().delete(mapperConfig.getNewPojoInstance(), getConditionWithId(globalId));
         if (affectedRowCount != 1) {

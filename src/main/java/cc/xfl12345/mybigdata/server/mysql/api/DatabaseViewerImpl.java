@@ -1,9 +1,12 @@
-package cc.xfl12345.mybigdata.server.mysql.mapper;
+package cc.xfl12345.mybigdata.server.mysql.api;
 
+import cc.xfl12345.mybigdata.server.common.api.DatabaseViewer;
+import cc.xfl12345.mybigdata.server.common.pojo.DbDataSourceInfo;
 import cc.xfl12345.mybigdata.server.common.utility.MyReflectUtils;
-import cc.xfl12345.mybigdata.server.common.web.mapper.DatabaseViewer;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTables;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
+import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.stat.DruidStatManagerFacade;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
@@ -13,12 +16,17 @@ import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.SessionFactory;
 
 import javax.persistence.Table;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class DatabaseViewerImpl implements DatabaseViewer {
+    private static final DruidStatManagerFacade statManagerFacade = DruidStatManagerFacade.getInstance();
     private final List<String> allTableName = Arrays.stream(CoreTables.values()).parallel().map(CoreTables::getName).toList();
 
     private final HashMap<String, List<String>> tableFieldNames;
@@ -77,7 +85,7 @@ public class DatabaseViewerImpl implements DatabaseViewer {
             result = suid.count(pojo);
 
             transaction.commit();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             transaction.rollback();
             throw e;
         }
@@ -99,7 +107,7 @@ public class DatabaseViewerImpl implements DatabaseViewer {
             result = suid.select(pojo, (int) offset, (int) limit);
 
             transaction.commit();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             transaction.rollback();
             throw e;
         }
@@ -107,4 +115,35 @@ public class DatabaseViewerImpl implements DatabaseViewer {
         return result;
     }
 
+    @Override
+    public List<DbDataSourceInfo> getAllDataSourceInfos() {
+        return statManagerFacade.getDataSourceStatDataList()
+            .parallelStream()
+            .filter(item -> item instanceof DataSource)
+            .map(item -> {
+                    DbDataSourceInfo info = new DbDataSourceInfo();
+                    DataSource dataSource = (DataSource) item;
+                    if (dataSource instanceof DruidDataSource druidDataSource) {
+                        info.setName(druidDataSource.getName());
+                        info.setDbType(druidDataSource.getDbType());
+                        info.setDriverName(druidDataSource.getDriverClassName());
+                        info.setUrl(druidDataSource.getUrl());
+                    } else {
+                        info.setName(dataSource.getClass().getName());
+
+                        try (Connection connection = dataSource.getConnection()) {
+                            DatabaseMetaData databaseMetaData = connection.getMetaData();
+
+                            info.setDbType(databaseMetaData.getDatabaseProductName());
+                            info.setDriverName(databaseMetaData.getDriverName());
+                            info.setUrl(databaseMetaData.getURL());
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    return info;
+                }
+            ).toList();
+    }
 }

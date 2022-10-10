@@ -65,22 +65,31 @@ public class SqlErrorAnalystImpl implements SqlErrorAnalyst, InitializingBean {
 
     @Override
     public SimpleCoreTableCurdResult getSimpleCoreTableCurdResult(@NonNull Exception exception) {
-        Throwable cause = exception.getCause();
+        Throwable cause;
+        do {
+            cause = exception.getCause();
+        } while (cause != null && !(cause instanceof SQLException));
+
         if (cause instanceof SQLException sqlException) {
-            int errorCode = sqlException.getErrorCode();
-            BeeFactory beeFactory = BeeFactory.getInstance();
-            DataSource dataSource = beeFactory.getDataSource();
-            if (dataSource instanceof DruidDataSource druidDataSource) {
-                return getSimpleCoreTableCurdResult(druidDataSource.getDbType(), errorCode);
-            } else {
-                try {
-                    return getSimpleCoreTableCurdResult(dataSource, errorCode);
-                } catch (SQLException e) {
-                    log.error(e.getMessage());
-                    return SimpleCoreTableCurdResult.UNKNOWN_FAILED;
-                }
-            }
+            return getSimpleCoreTableCurdResult(sqlException);
         }
         return SimpleCoreTableCurdResult.UNKNOWN_FAILED;
+    }
+
+    @Override
+    public SimpleCoreTableCurdResult getSimpleCoreTableCurdResult(@NonNull SQLException exception) {
+        int errorCode = exception.getErrorCode();
+        BeeFactory beeFactory = BeeFactory.getInstance();
+        DataSource dataSource = beeFactory.getDataSource();
+        if (dataSource instanceof DruidDataSource druidDataSource) {
+            return getSimpleCoreTableCurdResult(druidDataSource.getDbType(), errorCode);
+        } else {
+            try {
+                return getSimpleCoreTableCurdResult(dataSource, errorCode);
+            } catch (SQLException e) {
+                log.error(e.getMessage());
+                return SimpleCoreTableCurdResult.UNKNOWN_FAILED;
+            }
+        }
     }
 }

@@ -63,7 +63,7 @@ publishing {
 }
 
 group = 'cc.xfl12345.mybigdata'
-version = '0.0.3'
+version = '0.3.0'
 sourceCompatibility = '17'
 
 repositories {
@@ -94,14 +94,14 @@ dependencies {
     // https://search.maven.org/artifact/org.apache.groovy/groovy-all/4.0.4/pom
     testRuntimeOnly 'org.apache.groovy:groovy:4.0.5'
 
-    File localDevModeConfFile = new File("localDevMode");
+    File localDevModeConfFile = getProject().file('localDevMode');
     boolean isLocalDevMode = false;
     if (localDevModeConfFile.exists()) {
         FileReader fileReader = new FileReader(localDevModeConfFile, StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
         try {
             String localDevMode = bufferedReader.readLine();
-            isLocalDevMode = "true".equals(localDevMode);
+            isLocalDevMode = 'true'.equals(localDevMode);
         } catch (Exception ignored) {
         } finally {
             bufferedReader.close();
@@ -113,16 +113,16 @@ dependencies {
         api platform(myDependencyParent)
         // providedRuntime platform(myDependencyParent)
         annotationProcessor platform(myDependencyParent)
-        runtimeOnly platform(myDependencyParent)
-        runtimeClasspath platform(myDependencyParent)
+        // runtimeOnly platform(myDependencyParent)
+        // runtimeClasspath platform(myDependencyParent)
         testAnnotationProcessor platform(myDependencyParent)
         testImplementation platform(myDependencyParent)
         testRuntimeOnly platform(myDependencyParent)
-        testRuntimeClasspath platform(myDependencyParent)
+        // testRuntimeClasspath platform(myDependencyParent)
     }
 
     String depsParentVersion = '0.0.3'
-    String parentModuleVersion = depsParentVersion
+    String parentModuleVersion = getProject().getVersion()
     if (isLocalDevMode) {
         applyPlatform2All(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
 

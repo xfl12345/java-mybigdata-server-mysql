@@ -1,8 +1,8 @@
-package cc.xfl12345.mybigdata.server.mysql.mapper;
+package cc.xfl12345.mybigdata.server.mysql.api;
 
+import cc.xfl12345.mybigdata.server.common.api.AccountMapper;
 import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
-import cc.xfl12345.mybigdata.server.common.web.mapper.AccountMapper;
-import cc.xfl12345.mybigdata.server.common.web.pojo.Account;
+import cc.xfl12345.mybigdata.server.common.pojo.CommonAccount;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.AuthAccountMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.AuthAccount;
@@ -35,8 +35,8 @@ public class AccountMapperImpl implements AccountMapper, InitializingBean {
         }
     }
 
-    public Account cast(AuthAccount account) {
-        Account item = new Account();
+    public CommonAccount cast(AuthAccount account) {
+        CommonAccount item = new CommonAccount();
         item.setAccountId(account.getAccountId());
         item.setPasswordHash(account.getPasswordHash());
         item.setPasswordSalt(account.getPasswordSalt());
@@ -45,7 +45,7 @@ public class AccountMapperImpl implements AccountMapper, InitializingBean {
         return item;
     }
 
-    public AuthAccount cast(Account account) {
+    public AuthAccount cast(CommonAccount account) {
         AuthAccount item = new AuthAccount();
         idTypeConverter.injectId2Object(account.getAccountId(), item::setAccountId);
         item.setPasswordHash(account.getPasswordHash());
@@ -56,42 +56,42 @@ public class AccountMapperImpl implements AccountMapper, InitializingBean {
     }
 
     @Override
-    public long insert(Account account) throws Exception {
+    public long insert(CommonAccount account) {
         return authAccountMapper.insert(cast(account));
     }
 
     @Override
-    public long insertBatch(List<Account> list) throws Exception {
+    public long insertBatch(List<CommonAccount> list) {
         return authAccountMapper.insertBatch(list.parallelStream().map(this::cast).toList());
     }
 
     @Override
-    public Object insertAndReturnId(Account account) throws Exception {
+    public Object insertAndReturnId(CommonAccount account) {
         return authAccountMapper.insertAndReturnId(cast(account));
     }
 
     @Override
-    public Account selectOne(Account account, String[] strings) throws Exception {
+    public CommonAccount selectOne(CommonAccount account, String[] strings) {
         return cast(authAccountMapper.selectOne(cast(account), null));
     }
 
     @Override
-    public Account selectById(Object globalId, String[] strings) throws Exception {
+    public CommonAccount selectById(Object globalId, String[] strings) {
         return cast(authAccountMapper.selectById(globalId, null));
     }
 
     @Override
-    public Object selectId(Account account) throws Exception {
+    public Object selectId(CommonAccount account) {
         return authAccountMapper.selectId(cast(account));
     }
 
     @Override
-    public void updateById(Account account, Object globalId) throws Exception {
+    public void updateById(CommonAccount account, Object globalId) {
         authAccountMapper.updateById(cast(account), globalId);
     }
 
     @Override
-    public void deleteById(Object globalId) throws Exception {
+    public void deleteById(Object globalId) {
         authAccountMapper.deleteById(globalId);
     }
 }

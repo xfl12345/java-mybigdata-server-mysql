@@ -2,24 +2,15 @@ package cc.xfl12345.mybigdata.server.mysql.data.source;
 
 
 import cc.xfl12345.mybigdata.server.common.data.source.NumberTypeSource;
-import cc.xfl12345.mybigdata.server.common.data.source.impl.SingleTableDataSource;
+import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractSingleTableDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.NumberContentConstant;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.NumberContentMapper;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AppTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.NumberContent;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 
-public class NumberTypeSourceImpl extends SingleTableDataSource<BigDecimal, NumberContent> implements NumberTypeSource {
-    @Setter
-    protected NumberContentMapper mapper;
-
-    @Override
-    public AppTableMapper<NumberContent> getMapper() {
-        return mapper;
-    }
-
+public class NumberTypeSourceImpl
+    extends AbstractSingleTableDataSource<BigDecimal, NumberContent>
+    implements NumberTypeSource {
     protected String[] selectContentFieldOnly = new String[]{NumberContentConstant.CONTENT};
 
     @Override
