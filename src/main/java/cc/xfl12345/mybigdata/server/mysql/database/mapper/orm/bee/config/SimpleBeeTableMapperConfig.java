@@ -16,12 +16,12 @@ public class SimpleBeeTableMapperConfig<TablePojoType> implements BeeTableMapper
     protected String idFieldName;
 
     @Setter
-    protected Function<TablePojoType, Long> idGetter = (value) -> null;
+    protected Function<TablePojoType, Object> idGetter = (value) -> null;
 
     @Setter
     protected Supplier<TablePojoType> pojoInstanceSupplier = () -> null;
 
-    public Long getId(TablePojoType value) {
+    public Object getId(TablePojoType value) {
         return idGetter.apply(value);
     }
 

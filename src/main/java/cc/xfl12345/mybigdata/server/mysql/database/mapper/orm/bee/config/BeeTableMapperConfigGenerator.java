@@ -17,7 +17,7 @@ public class BeeTableMapperConfigGenerator {
     public static <TablePojoType> BeeTableMapperConfig<TablePojoType> getConfig(Class<TablePojoType> cls) throws NoSuchMethodException {
         String tableName;
         String idFieldName = KeyWords.KEY_WORD_GLOBAL_ID;
-        Function<TablePojoType, Long> idGetter = (value) -> null;
+        Function<TablePojoType, Object> idGetter = (value) -> null;
         Supplier<TablePojoType> pojoInstanceSupplier;
 
         // tableName
@@ -29,14 +29,17 @@ public class BeeTableMapperConfigGenerator {
         for (Field field : fields) {
             if (field.getAnnotation(Id.class) != null) {
                 idFieldName = field.getName();
+                // 获取该字段的 Getter 方法
                 Method method = cls.getDeclaredMethod("get" +
+                    // 大写字段名称的第一个字母
                     Character.toUpperCase(idFieldName.charAt(0)) +
+                    // 拼接字段名称的剩余字符
                     (idFieldName.length() == 1 ? "" : idFieldName.substring(1))
                 );
 
                 idGetter = (value) -> {
                     try {
-                        return (Long) method.invoke(value);
+                        return method.invoke(value);
                     } catch (Exception e) {
                         throw  new RuntimeException(e);
                     }
