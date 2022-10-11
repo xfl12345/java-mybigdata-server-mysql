@@ -2,9 +2,12 @@ package cc.xfl12345.mybigdata.server.mysql.spring.helper;
 
 import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -16,7 +19,12 @@ import java.util.HashMap;
  * 这是一个用来执行正常退出任务的类
  */
 @Slf4j
-public class JdbcContextFinalizer implements ApplicationListener<ContextClosedEvent> {
+public class JdbcContextFinalizer implements ApplicationListener<ApplicationFailedEvent> {
+    @Override
+    public void onApplicationEvent(ApplicationFailedEvent event) {
+        deregisterFromSpringFramework(event);
+    }
+
     public static void deregisterDriver(Driver d) throws SQLException {
         String driverInstanceName = d.toString();
         DriverManager.deregisterDriver(d);
@@ -84,11 +92,21 @@ public class JdbcContextFinalizer implements ApplicationListener<ContextClosedEv
 
     }
 
-    @Override
-    public void onApplicationEvent(ContextClosedEvent event) {
+    @EventListener
+    public void onSpringContextClosed(ContextClosedEvent event) {
+        deregisterFromSpringFramework(event);
+    }
+
+    protected void deregisterFromSpringFramework(ApplicationEvent applicationEvent) {
         AbandonedConnectionCleanupThread.checkedShutdown();
-        ApplicationContext applicationContext = event.getApplicationContext();
-        if (applicationContext.getParent() == null) {
+        ApplicationContext applicationContext = null;
+        if (applicationEvent instanceof ContextClosedEvent event) {
+            applicationContext = event.getApplicationContext();
+        } else if (applicationEvent instanceof ApplicationFailedEvent event) {
+            applicationContext = event.getApplicationContext();
+        }
+
+        if (applicationContext != null && applicationContext.getParent() == null) {
             deregister(applicationContext);
         }
     }
