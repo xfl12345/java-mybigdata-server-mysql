@@ -35,8 +35,8 @@
         <plugin type="tk.mybatis.mapper.generator.TemplateFilePlugin">
             <property name="targetProject" value="src/test/java"/>
             <property name="targetPackage" value="cc.xfl12345.a_generate_test.mapper.impl"/>
-            <property name="templatePath" value="mybatis/app_table_mapper_implement.ftl"/>
-            <property name="mapperSuffix" value="MapperImpl"/>
+            <property name="templatePath" value="mybatis/app_table_mapper_implement_proxy.ftl"/>
+            <property name="mapperSuffix" value="MapperProxy"/>
             <property name="fileName" value="${tableClass.shortClassName}${mapperSuffix}.java"/>
             <!--默认值是下面这个，可以不配置-->
             <property name="templateFormatter" value="tk.mybatis.mapper.generator.formatter.FreemarkerTemplateFormatter"/>

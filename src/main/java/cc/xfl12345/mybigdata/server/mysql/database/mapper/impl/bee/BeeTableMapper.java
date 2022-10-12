@@ -1,8 +1,8 @@
-package cc.xfl12345.mybigdata.server.mysql.database.mapper.orm.bee;
+package cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee;
 
 import cc.xfl12345.mybigdata.server.common.database.mapper.ConditionSweet;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import org.teasoft.bee.osql.Condition;
 
-public interface BeeTableMapper<ValueType> extends TableMapper<ValueType, Condition>, ConditionSweet<Condition> {
+public interface BeeTableMapper<Value> extends TableMapper<Value, Condition>, ConditionSweet<Condition> {
 }

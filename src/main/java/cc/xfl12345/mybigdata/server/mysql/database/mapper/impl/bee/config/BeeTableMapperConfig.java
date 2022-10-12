@@ -1,4 +1,4 @@
-package cc.xfl12345.mybigdata.server.mysql.database.mapper.orm.bee.config;
+package cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config;
 
 public interface BeeTableMapperConfig<TablePojoType> {
     String getTableName();

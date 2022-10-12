@@ -1,9 +1,9 @@
-package cc.xfl12345.mybigdata.server.mysql.database.mapper.orm.bee;
+package cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee;
 
 import cc.xfl12345.mybigdata.server.common.appconst.CURD;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl.AbstractTypedTableMapper;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.orm.bee.config.BeeTableMapperConfig;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.orm.bee.config.BeeTableMapperConfigGenerator;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AbstractTypedTableMapper;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config.BeeTableMapperConfig;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config.BeeTableMapperConfigGenerator;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import lombok.Getter;
 import org.teasoft.bee.osql.Condition;
@@ -15,12 +15,23 @@ import org.teasoft.honey.osql.core.ConditionImpl;
 import java.util.Date;
 import java.util.List;
 
-public abstract class AbstractBeeTableMapper<TablePojoType>
-    extends AbstractTypedTableMapper<TablePojoType> implements BeeTableMapper<TablePojoType> {
-    @Getter
-    protected BeeTableMapperConfig<TablePojoType> mapperConfig;
+public class BeeTableMapperImpl<Pojo>
+    extends AbstractTypedTableMapper<Pojo> implements BeeTableMapper<Pojo> {
+    protected Class<Pojo> pojoClass;
 
-    public void setMapperConfig(BeeTableMapperConfig<TablePojoType> mapperConfig) {
+    @Override
+    public Class<Pojo> getGenericType() {
+        return pojoClass;
+    }
+
+    public BeeTableMapperImpl(Class<Pojo> pojoClass) {
+        this.pojoClass = pojoClass;
+    }
+
+    @Getter
+    protected BeeTableMapperConfig<Pojo> mapperConfig;
+
+    public void setMapperConfig(BeeTableMapperConfig<Pojo> mapperConfig) {
         this.mapperConfig = mapperConfig;
     }
 
@@ -30,35 +41,35 @@ public abstract class AbstractBeeTableMapper<TablePojoType>
     public void afterPropertiesSet() throws Exception {
         super.afterPropertiesSet();
         if (mapperConfig == null) {
-            mapperConfig = BeeTableMapperConfigGenerator.getConfig(getTablePojoType());
+            mapperConfig = BeeTableMapperConfigGenerator.getConfig(pojoClass);
         }
 
         selectIdFieldOnly = new String[]{ mapperConfig.getIdFieldName() };
     }
 
     @Override
-    public long insert(TablePojoType value) {
+    public long insert(Pojo value) {
         return getSuidRich().insert(value);
     }
 
     @Override
-    public long insertBatch(List<TablePojoType> values) {
+    public long insertBatch(List<Pojo> values) {
         return getSuidRich().insert(values);
     }
 
     @Override
-    public Object insertAndReturnId(TablePojoType value) {
+    public Object insertAndReturnId(Pojo value) {
         return getSuidRich().insertAndReturnId(value);
     }
 
     @Override
-    public List<TablePojoType> select(Condition condition) {
+    public List<Pojo> select(Condition condition) {
         return getSuidRich().select(mapperConfig.getNewPojoInstance(), condition);
     }
 
     @Override
-    public TablePojoType selectOne(TablePojoType value, String[] fields) {
-        List<TablePojoType> items = getSuidRich().select(value, getConditionWithSelectedFields(fields));
+    public Pojo selectOne(Pojo value, String[] fields) {
+        List<Pojo> items = getSuidRich().select(value, getConditionWithSelectedFields(fields));
         if (items.size() != 1) {
             throw getAffectedRowShouldBe1Exception(items.size(), CURD.RETRIEVE, mapperConfig.getTableName());
         }
@@ -67,10 +78,10 @@ public abstract class AbstractBeeTableMapper<TablePojoType>
     }
 
     @Override
-    public TablePojoType selectById(Object globalId, String[] fields) {
+    public Pojo selectById(Object globalId, String[] fields) {
         Condition condition = getConditionWithSelectedFields(fields);
         addId2Condition(condition, globalId);
-        List<TablePojoType> items = getSuidRich().select(mapperConfig.getNewPojoInstance(), condition);
+        List<Pojo> items = getSuidRich().select(mapperConfig.getNewPojoInstance(), condition);
         if (items.size() != 1) {
             throw getAffectedRowShouldBe1Exception(items.size(), CURD.RETRIEVE, mapperConfig.getTableName());
         }
@@ -79,18 +90,18 @@ public abstract class AbstractBeeTableMapper<TablePojoType>
     }
 
     @Override
-    public Object selectId(TablePojoType value) {
-        TablePojoType item = selectOne(value, selectIdFieldOnly);
+    public Object selectId(Pojo value) {
+        Pojo item = selectOne(value, selectIdFieldOnly);
         return mapperConfig.getId(item);
     }
 
     @Override
-    public long update(TablePojoType value, Condition condition) {
+    public long update(Pojo value, Condition condition) {
         return getSuidRich().update(value, condition);
     }
 
     @Override
-    public void updateById(TablePojoType value, Object globalId) {
+    public void updateById(Pojo value, Object globalId) {
         long affectedRowCount = 0;
         affectedRowCount = getSuidRich().update(value, getConditionWithId(globalId));
         if (affectedRowCount != 1) {

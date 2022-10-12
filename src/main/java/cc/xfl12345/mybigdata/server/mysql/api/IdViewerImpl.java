@@ -9,7 +9,7 @@ import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTables;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.GlobalDataRecordConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.GlobalDataRecordMapper;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl.CoreTableCache;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl;
+package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
 import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
 import cc.xfl12345.mybigdata.server.common.appconst.CURD;
@@ -11,9 +11,10 @@ import lombok.Setter;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 
-public abstract class AbstractTableMapper implements DisposableBean, InitializingBean {
+public abstract class AbstractTableMapper implements DisposableBean {
     @Getter
     @Setter
     protected String fieldCanNotBeNullMessageTemplate = AppConst.FIELD_CAN_NOT_BE_NULL_MESSAGE_TEMPLATE;
@@ -46,7 +47,7 @@ public abstract class AbstractTableMapper implements DisposableBean, Initializin
         this.idTypeConverter = idTypeConverter;
     }
 
-    @Override
+    @PostConstruct
     public void afterPropertiesSet() throws Exception {
         if (uuidGenerator == null) {
             throw new IllegalArgumentException(fieldCanNotBeNullMessageTemplate.formatted("uuidGenerator"));

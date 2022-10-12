@@ -94,4 +94,9 @@ public class AccountMapperImpl implements AccountMapper, InitializingBean {
     public void deleteById(Object globalId) {
         authAccountMapper.deleteById(globalId);
     }
+
+    @Override
+    public Class<CommonAccount> getGenericType() {
+        return CommonAccount.class;
+    }
 }

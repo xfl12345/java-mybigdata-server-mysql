@@ -20,10 +20,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class DatabaseViewerImpl implements DatabaseViewer {
     private static final DruidStatManagerFacade statManagerFacade = DruidStatManagerFacade.getInstance();
@@ -38,9 +35,11 @@ public class DatabaseViewerImpl implements DatabaseViewer {
         tableFieldNames = new HashMap<>(coreTableCount + 2);
         tableName2PojoInstance = new HashMap<>(coreTableCount + 2);
 
-        List<Class<?>> pojoClasses = MyReflectUtils.getClasses(
+        Collection<Class<?>> pojoClasses = MyReflectUtils.getClasses(
             GlobalDataRecord.class.getPackage().getName(),
-            false
+            false,
+            false,
+            true
         );
 
         for (Class<?> cls : pojoClasses) {

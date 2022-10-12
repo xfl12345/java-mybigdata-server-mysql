@@ -1,4 +1,4 @@
-package cc.xfl12345.mybigdata.server.mysql.database.mapper.base.impl;
+package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
