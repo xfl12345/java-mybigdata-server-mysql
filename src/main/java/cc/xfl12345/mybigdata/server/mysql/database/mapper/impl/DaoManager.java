@@ -1,6 +1,6 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.impl;
 
-import cc.xfl12345.mybigdata.server.common.database.mapper.TableNoConditionMapper;
+import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
 import cc.xfl12345.mybigdata.server.common.utility.MyReflectUtils;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AbstractTypedTableMapper;
@@ -28,7 +28,7 @@ public class DaoManager {
     @Setter
     protected NoArgGenerator uuidGenerator;
 
-    protected ConcurrentHashMap<Class<?>, TableNoConditionMapper<?>> mappers;
+    protected ConcurrentHashMap<Class<?>, TableBasicMapper<?>> mappers;
 
     @PostConstruct
     public void init() throws Exception {
@@ -53,7 +53,7 @@ public class DaoManager {
     }
 
     @SuppressWarnings("unchecked")
-    public <Pojo> TableNoConditionMapper<Pojo> getMapper(Class<Pojo> cls) {
-        return (TableNoConditionMapper<Pojo>) mappers.get(cls);
+    public <Pojo> TableBasicMapper<Pojo> getMapper(Class<Pojo> cls) {
+        return (TableBasicMapper<Pojo>) mappers.get(cls);
     }
 }

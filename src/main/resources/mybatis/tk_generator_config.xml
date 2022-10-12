@@ -21,28 +21,6 @@
             <property name="swagger" value="true"/>
         </plugin>
 
-        <!-- 生成统一的Mapper接口 -->
-        <plugin type="tk.mybatis.mapper.generator.TemplateFilePlugin">
-            <property name="targetProject" value="src/test/java"/>
-            <property name="targetPackage" value="cc.xfl12345.a_generate_test.mapper"/>
-            <property name="templatePath" value="mybatis/app_table_mapper_interface.ftl"/>
-            <property name="mapperSuffix" value="Mapper"/>
-            <property name="fileName" value="${tableClass.shortClassName}${mapperSuffix}.java"/>
-            <!--默认值是下面这个，可以不配置-->
-            <property name="templateFormatter" value="tk.mybatis.mapper.generator.formatter.FreemarkerTemplateFormatter"/>
-        </plugin>
-        <!-- 生成Mapper接口空壳实现 -->
-        <plugin type="tk.mybatis.mapper.generator.TemplateFilePlugin">
-            <property name="targetProject" value="src/test/java"/>
-            <property name="targetPackage" value="cc.xfl12345.a_generate_test.mapper.impl"/>
-            <property name="templatePath" value="mybatis/app_table_mapper_implement_proxy.ftl"/>
-            <property name="mapperSuffix" value="MapperProxy"/>
-            <property name="fileName" value="${tableClass.shortClassName}${mapperSuffix}.java"/>
-            <!--默认值是下面这个，可以不配置-->
-            <property name="templateFormatter" value="tk.mybatis.mapper.generator.formatter.FreemarkerTemplateFormatter"/>
-        </plugin>
-
-
         <!-- 生成类添加 Serializable 接口 -->
         <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
 

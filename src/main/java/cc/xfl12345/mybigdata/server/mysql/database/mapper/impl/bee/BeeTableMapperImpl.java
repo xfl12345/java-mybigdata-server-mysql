@@ -20,7 +20,7 @@ public class BeeTableMapperImpl<Pojo>
     protected Class<Pojo> pojoClass;
 
     @Override
-    public Class<Pojo> getGenericType() {
+    public Class<Pojo> getPojoType() {
         return pojoClass;
     }
 

@@ -5,7 +5,7 @@ import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
 import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
 import cc.xfl12345.mybigdata.server.common.data.requirement.DataRequirementPack;
 import cc.xfl12345.mybigdata.server.common.database.error.TableDataException;
-import cc.xfl12345.mybigdata.server.common.database.mapper.TableNoConditionMapper;
+import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTables;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.GlobalDataRecordConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
@@ -34,7 +34,7 @@ public class IdViewerImpl implements IdViewer, InitializingBean {
 
     @Getter
     @Setter
-    protected TableNoConditionMapper<GlobalDataRecord> globalDataRecordMapper;
+    protected TableBasicMapper<GlobalDataRecord> globalDataRecordMapper;
 
     protected HashMap<String, CoreTables> tableNameMap;
 
