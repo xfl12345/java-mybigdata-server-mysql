@@ -14,11 +14,11 @@ import java.util.function.Supplier;
 
 public class BeeTableMapperConfigGenerator {
 
-    public static <TablePojoType> BeeTableMapperConfig<TablePojoType> getConfig(Class<TablePojoType> cls) throws NoSuchMethodException {
+    public static <Pojo> BeeTableMapperConfig<Pojo> getConfig(Class<Pojo> cls) throws NoSuchMethodException {
         String tableName;
         String idFieldName = KeyWords.KEY_WORD_GLOBAL_ID;
-        Function<TablePojoType, Object> idGetter = (value) -> null;
-        Supplier<TablePojoType> pojoInstanceSupplier;
+        Function<Pojo, Object> idGetter = (value) -> null;
+        Supplier<Pojo> pojoInstanceSupplier;
 
         // tableName
         Table tableAnnotation = cls.getAnnotation(Table.class);
@@ -50,7 +50,7 @@ public class BeeTableMapperConfigGenerator {
         }
 
         // pojoInstanceSupplier
-        Constructor<TablePojoType> constructor = cls.getDeclaredConstructor();
+        Constructor<Pojo> constructor = cls.getDeclaredConstructor();
         pojoInstanceSupplier = () -> {
             try {
                 return constructor.newInstance();
@@ -59,7 +59,7 @@ public class BeeTableMapperConfigGenerator {
             }
         };
 
-        SimpleBeeTableMapperConfig<TablePojoType> config = new SimpleBeeTableMapperConfig<>();
+        SimpleBeeTableMapperConfig<Pojo> config = new SimpleBeeTableMapperConfig<>();
         config.setTableName(tableName);
         config.setIdFieldName(idFieldName);
         config.setIdGetter(idGetter);

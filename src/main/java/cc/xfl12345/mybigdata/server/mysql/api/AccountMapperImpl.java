@@ -2,9 +2,9 @@ package cc.xfl12345.mybigdata.server.mysql.api;
 
 import cc.xfl12345.mybigdata.server.common.api.AccountMapper;
 import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
+import cc.xfl12345.mybigdata.server.common.database.mapper.TableNoConditionMapper;
 import cc.xfl12345.mybigdata.server.common.pojo.CommonAccount;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.AuthAccountMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.AuthAccount;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +15,7 @@ import java.util.List;
 public class AccountMapperImpl implements AccountMapper, InitializingBean {
     @Getter
     @Setter
-    protected AuthAccountMapper authAccountMapper;
+    protected TableNoConditionMapper<AuthAccount> authAccountMapper;
 
     @Getter
     @Setter

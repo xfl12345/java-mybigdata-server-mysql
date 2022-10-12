@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class SimpleBeeTableMapperConfig<TablePojoType> implements BeeTableMapperConfig<TablePojoType> {
+public class SimpleBeeTableMapperConfig<Pojo> implements BeeTableMapperConfig<Pojo> {
     @Getter
     @Setter
     protected String tableName;
@@ -16,16 +16,16 @@ public class SimpleBeeTableMapperConfig<TablePojoType> implements BeeTableMapper
     protected String idFieldName;
 
     @Setter
-    protected Function<TablePojoType, Object> idGetter = (value) -> null;
+    protected Function<Pojo, Object> idGetter = (value) -> null;
 
     @Setter
-    protected Supplier<TablePojoType> pojoInstanceSupplier = () -> null;
+    protected Supplier<Pojo> pojoInstanceSupplier = () -> null;
 
-    public Object getId(TablePojoType value) {
+    public Object getId(Pojo value) {
         return idGetter.apply(value);
     }
 
-    public TablePojoType getNewPojoInstance() {
+    public Pojo getNewPojoInstance() {
         return pojoInstanceSupplier.get();
     }
 }
