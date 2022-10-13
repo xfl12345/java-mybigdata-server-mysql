@@ -41,6 +41,10 @@ public class DaoPack {
     // MapperPack 字段名称 -> MapperPack 该字段的值 -> MapperPack
     protected Map<String, ConcurrentHashMap<Object, MapperPack<?>>> mapperPackMap;
 
+    protected Map<Object, MapperPack<?>> cache4ClassMap;
+
+    protected Map<Object, MapperPack<?>> cache4TableNameMap;
+
     @PostConstruct
     public void init() throws Exception {
         pojoClasses = MyReflectUtils.getClasses(
@@ -95,6 +99,9 @@ public class DaoPack {
                 }
             }
         }
+
+        cache4ClassMap = mapperPackMap.get(MapperPack.Fields.pojoClass);
+        cache4TableNameMap = mapperPackMap.get(MapperPack.Fields.tableName);
     }
 
     protected <T> MapperPack<T> generateMapperPack(TableBasicMapper<T> mapper) {
@@ -129,7 +136,12 @@ public class DaoPack {
 
     @SuppressWarnings("unchecked")
     public <T> MapperPack<T> getMapperPackByPojoClass(Class<T> pojoClass) {
-        return (MapperPack<T>) mapperPackMap.get(MapperPack.Fields.pojoClass).get(pojoClass);
+        return (MapperPack<T>) cache4ClassMap.get(pojoClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> MapperPack<T> getMapperPackByTableName(String tableName) {
+        return (MapperPack<T>) cache4TableNameMap.get(tableName);
     }
 
     @SuppressWarnings("unchecked")
