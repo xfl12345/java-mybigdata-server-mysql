@@ -2,7 +2,7 @@ package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
-import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTables;
+import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.StringContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.BooleanContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
@@ -26,7 +26,7 @@ import java.util.List;
 public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
 
     public CoreTableCache() {
-        tableNameCache = new TwoWayMap<>(CoreTables.values().length + 1);
+        tableNameCache = new TwoWayMap<>(EnumCoreTable.values().length + 1);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
 
     @Override
     public void refreshCoreTableNameCache() throws Exception {
-        refreshCoreTableNameCache(Arrays.stream(CoreTables.values()).map(CoreTables::getName).toList());
+        refreshCoreTableNameCache(Arrays.stream(EnumCoreTable.values()).map(EnumCoreTable::getName).toList());
         log.info("Cache \"global_id\" for core table name: " +
             JSONObject.toJSONString(tableNameCache.getKey2ValueMap(), JSONWriter.Feature.PrettyFormat));
     }

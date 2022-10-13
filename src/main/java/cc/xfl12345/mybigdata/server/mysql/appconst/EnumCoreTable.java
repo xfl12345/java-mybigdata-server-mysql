@@ -3,7 +3,7 @@ package cc.xfl12345.mybigdata.server.mysql.appconst;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum CoreTables {
+public enum EnumCoreTable {
     GLOBAL_DATA_RECORD(CoreTableNames.GLOBAL_DATA_RECORD),
     TABLE_SCHEMA_RECORD(CoreTableNames.TABLE_SCHEMA_RECORD),
 
@@ -19,7 +19,7 @@ public enum CoreTables {
 
     AUTH_ACCOUNT(CoreTableNames.AUTH_ACCOUNT);
 
-    CoreTables(String name) {
+    EnumCoreTable(String name) {
         this.name = name;
     }
 
@@ -29,16 +29,16 @@ public enum CoreTables {
         return name;
     }
 
-    private static final Map<String, CoreTables> nameMap;
+    private static final Map<String, EnumCoreTable> nameMap;
 
     static {
-        nameMap = new HashMap<>(CoreTables.values().length);
-        for (CoreTables item : CoreTables.values()) {
+        nameMap = new HashMap<>(EnumCoreTable.values().length);
+        for (EnumCoreTable item : EnumCoreTable.values()) {
             nameMap.put(item.getName(), item);
         }
     }
 
-    public static CoreTables getByName(String name) {
+    public static EnumCoreTable getByName(String name) {
         return nameMap.get(name);
     }
 

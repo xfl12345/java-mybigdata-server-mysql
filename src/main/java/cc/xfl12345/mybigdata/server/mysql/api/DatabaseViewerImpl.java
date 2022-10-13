@@ -3,7 +3,7 @@ package cc.xfl12345.mybigdata.server.mysql.api;
 import cc.xfl12345.mybigdata.server.common.api.DatabaseViewer;
 import cc.xfl12345.mybigdata.server.common.pojo.DbDataSourceInfo;
 import cc.xfl12345.mybigdata.server.common.utility.MyReflectUtils;
-import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTables;
+import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.stat.DruidStatManagerFacade;
@@ -24,14 +24,14 @@ import java.util.*;
 
 public class DatabaseViewerImpl implements DatabaseViewer {
     private static final DruidStatManagerFacade statManagerFacade = DruidStatManagerFacade.getInstance();
-    private final List<String> allTableName = Arrays.stream(CoreTables.values()).parallel().map(CoreTables::getName).toList();
+    private final List<String> allTableName = Arrays.stream(EnumCoreTable.values()).parallel().map(EnumCoreTable::getName).toList();
 
     private final HashMap<String, List<String>> tableFieldNames;
 
     private final HashMap<String, Object> tableName2PojoInstance;
 
     public DatabaseViewerImpl() throws Exception {
-        int coreTableCount = CoreTables.values().length;
+        int coreTableCount = EnumCoreTable.values().length;
         tableFieldNames = new HashMap<>(coreTableCount + 2);
         tableName2PojoInstance = new HashMap<>(coreTableCount + 2);
 

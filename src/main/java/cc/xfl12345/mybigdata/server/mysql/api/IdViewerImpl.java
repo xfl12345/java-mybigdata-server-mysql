@@ -6,7 +6,7 @@ import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
 import cc.xfl12345.mybigdata.server.common.data.requirement.DataRequirementPack;
 import cc.xfl12345.mybigdata.server.common.database.error.TableDataException;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
-import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTables;
+import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.constant.GlobalDataRecordConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
@@ -36,11 +36,11 @@ public class IdViewerImpl implements IdViewer, InitializingBean {
     @Setter
     protected TableBasicMapper<GlobalDataRecord> globalDataRecordMapper;
 
-    protected HashMap<String, CoreTables> tableNameMap;
+    protected HashMap<String, EnumCoreTable> tableNameMap;
 
     protected void initTableNameMap() {
-        tableNameMap = new HashMap<>(CoreTables.values().length);
-        for (CoreTables coreTable : CoreTables.values()) {
+        tableNameMap = new HashMap<>(EnumCoreTable.values().length);
+        for (EnumCoreTable coreTable : EnumCoreTable.values()) {
             tableNameMap.put(coreTable.getName(), coreTable);
         }
     }
