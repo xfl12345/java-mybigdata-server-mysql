@@ -12,6 +12,7 @@ import org.teasoft.bee.osql.SuidRich;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 
@@ -37,9 +38,8 @@ public class BeeTableMapperImpl<Pojo>
 
     protected String[] selectIdFieldOnly;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        super.afterPropertiesSet();
+    @PostConstruct
+    public void init() throws Exception {
         if (mapperConfig == null) {
             mapperConfig = BeeTableMapperConfigGenerator.getConfig(pojoClass);
         }
@@ -128,7 +128,7 @@ public class BeeTableMapperImpl<Pojo>
         GlobalDataRecord globalDataRecord = getNewGlobalDataRecord(createTime, tableNameId);
         SuidRich suid = BeeFactory.getHoneyFactory().getSuidRich();
         Object id = suid.insertAndReturnId(globalDataRecord);
-        idTypeConverter.injectId2Object(tableNameId, globalDataRecord::setId);
+        tableMapperProperties.getIdTypeConverter().injectId2Object(id, globalDataRecord::setId);
         return globalDataRecord;
     }
 
