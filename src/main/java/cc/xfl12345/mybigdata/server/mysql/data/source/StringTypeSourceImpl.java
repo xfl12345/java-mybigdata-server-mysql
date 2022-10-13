@@ -3,13 +3,12 @@ package cc.xfl12345.mybigdata.server.mysql.data.source;
 
 import cc.xfl12345.mybigdata.server.common.data.source.StringTypeSource;
 import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractSingleTableDataSource;
-import cc.xfl12345.mybigdata.server.mysql.database.constant.StringContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
 
 public class StringTypeSourceImpl
     extends AbstractSingleTableDataSource<String, StringContent>
     implements StringTypeSource {
-    protected String[] selectContentFieldOnly = new String[]{StringContentConstant.CONTENT};
+    protected String[] selectContentFieldOnly = new String[]{StringContent.Fields.content};
 
     @Override
     protected String[] getSelectContentFieldOnly() {

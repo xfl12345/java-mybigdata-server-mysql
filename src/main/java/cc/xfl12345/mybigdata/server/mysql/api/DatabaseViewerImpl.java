@@ -1,10 +1,9 @@
 package cc.xfl12345.mybigdata.server.mysql.api;
 
 import cc.xfl12345.mybigdata.server.common.api.DatabaseViewer;
-import cc.xfl12345.mybigdata.server.common.pojo.DbDataSourceInfo;
-import cc.xfl12345.mybigdata.server.common.utility.MyReflectUtils;
+import cc.xfl12345.mybigdata.server.common.pojo.DatabaseDataSourceInfo;
 import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
-import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.DaoPack;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.stat.DruidStatManagerFacade;
 import com.alibaba.fastjson2.JSON;
@@ -15,35 +14,42 @@ import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.SessionFactory;
 
-import javax.persistence.Table;
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class DatabaseViewerImpl implements DatabaseViewer {
-    private static final DruidStatManagerFacade statManagerFacade = DruidStatManagerFacade.getInstance();
-    private final List<String> allTableName = Arrays.stream(EnumCoreTable.values()).parallel().map(EnumCoreTable::getName).toList();
+    protected static DruidStatManagerFacade statManagerFacade = DruidStatManagerFacade.getInstance();
+    protected List<String> allTableName = Arrays.stream(EnumCoreTable.values()).parallel().map(EnumCoreTable::getName).toList();
 
-    private final HashMap<String, List<String>> tableFieldNames;
+    protected HashMap<String, List<String>> tableFieldNames;
 
-    private final HashMap<String, Object> tableName2PojoInstance;
+    protected HashMap<String, Object> tableName2PojoInstance;
 
-    public DatabaseViewerImpl() throws Exception {
+    protected DaoPack daoPack;
+
+    public DaoPack getDaoManager() {
+        return daoPack;
+    }
+
+    public void setDaoManager(DaoPack daoPack) {
+        this.daoPack = daoPack;
+    }
+
+    @PostConstruct
+    public void init() throws Exception {
         int coreTableCount = EnumCoreTable.values().length;
         tableFieldNames = new HashMap<>(coreTableCount + 2);
         tableName2PojoInstance = new HashMap<>(coreTableCount + 2);
 
-        Collection<Class<?>> pojoClasses = MyReflectUtils.getClasses(
-            GlobalDataRecord.class.getPackage().getName(),
-            false,
-            false,
-            true
-        );
-
-        for (Class<?> cls : pojoClasses) {
-            String tableName = cls.getAnnotation(Table.class).name();
+        for (Class<?> cls : daoPack.getPojoClasses()) {
+            String tableName = daoPack.getMapperPackByPojoClass(cls).getTableName();
             Object pojoInstance = cls.getDeclaredConstructor().newInstance();
 
             JSONObject jsonObject = (JSONObject) JSON.toJSON(
@@ -97,6 +103,10 @@ public class DatabaseViewerImpl implements DatabaseViewer {
         List<Object> result = new ArrayList<>();
         Object pojo = tableName2PojoInstance.get(tableName);
 
+        if (pojo == null) {
+            return result;
+        }
+
         Transaction transaction = SessionFactory.getTransaction();
         try {
             transaction.begin();
@@ -115,12 +125,12 @@ public class DatabaseViewerImpl implements DatabaseViewer {
     }
 
     @Override
-    public List<DbDataSourceInfo> getAllDataSourceInfos() {
+    public List<DatabaseDataSourceInfo> getAllDataSourceInfos() {
         return statManagerFacade.getDataSourceStatDataList()
             .parallelStream()
             .filter(item -> item instanceof DataSource)
             .map(item -> {
-                    DbDataSourceInfo info = new DbDataSourceInfo();
+                    DatabaseDataSourceInfo info = new DatabaseDataSourceInfo();
                     DataSource dataSource = (DataSource) item;
                     if (dataSource instanceof DruidDataSource druidDataSource) {
                         info.setName(druidDataSource.getName());

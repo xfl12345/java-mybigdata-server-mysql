@@ -2,8 +2,7 @@ package cc.xfl12345.mybigdata.server.mysql.data.source;
 
 import cc.xfl12345.mybigdata.server.common.data.source.IdDataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractSingleTableDataSource;
-import cc.xfl12345.mybigdata.server.common.pojo.CommonGlobalDataRecord;
-import cc.xfl12345.mybigdata.server.mysql.database.constant.GlobalDataRecordConstant;
+import cc.xfl12345.mybigdata.server.common.database.pojo.CommonGlobalDataRecord;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import lombok.Getter;
@@ -26,13 +25,13 @@ public class IdDataSourceImpl
     }
 
     protected String[] selectContentFieldOnly = new String[]{
-        GlobalDataRecordConstant.ID,
-        GlobalDataRecordConstant.UUID,
-        GlobalDataRecordConstant.CREATE_TIME,
-        GlobalDataRecordConstant.UPDATE_TIME,
-        GlobalDataRecordConstant.MODIFIED_COUNT,
-        GlobalDataRecordConstant.TABLE_NAME,
-        GlobalDataRecordConstant.DESCRIPTION,
+        GlobalDataRecord.Fields.id,
+        GlobalDataRecord.Fields.uuid,
+        GlobalDataRecord.Fields.createTime,
+        GlobalDataRecord.Fields.updateTime,
+        GlobalDataRecord.Fields.modifiedCount,
+        GlobalDataRecord.Fields.tableName,
+        GlobalDataRecord.Fields.description
     };
 
     @Override

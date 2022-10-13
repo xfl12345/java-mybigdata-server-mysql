@@ -3,7 +3,6 @@ package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
 import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
-import cc.xfl12345.mybigdata.server.mysql.database.constant.StringContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.BooleanContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
 import com.alibaba.fastjson2.JSONObject;
@@ -64,8 +63,8 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
 
     protected void refreshCoreTableNameCache(List<String> values) throws Exception {
         Condition condition = new ConditionImpl();
-        condition.selectField(StringContentConstant.GLOBAL_ID, StringContentConstant.CONTENT)
-            .op(StringContentConstant.CONTENT, Op.in, values);
+        condition.selectField(StringContent.Fields.globalId, StringContent.Fields.content)
+            .op(StringContent.Fields.content, Op.in, values);
 
         // 开启事务
         Transaction transaction = SessionFactory.getTransaction();

@@ -3,8 +3,6 @@ package cc.xfl12345.mybigdata.server.mysql.api;
 import cc.xfl12345.mybigdata.server.common.api.AdvanceSearchMapper;
 import cc.xfl12345.mybigdata.server.common.data.condition.SingleTableCondition;
 import cc.xfl12345.mybigdata.server.common.pojo.IdAndValue;
-import cc.xfl12345.mybigdata.server.mysql.database.constant.NumberContentConstant;
-import cc.xfl12345.mybigdata.server.mysql.database.constant.StringContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.NumberContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
 import org.teasoft.bee.osql.Condition;
@@ -25,8 +23,8 @@ public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
 
         Condition condition = new ConditionImpl();
         condition
-            .selectField(StringContentConstant.GLOBAL_ID, StringContentConstant.CONTENT)
-            .op(StringContentConstant.CONTENT, Op.likeRight, prefix);
+            .selectField(StringContent.Fields.globalId, StringContent.Fields.content)
+            .op(StringContent.Fields.content, Op.likeRight, prefix);
 
         Transaction transaction = SessionFactory.getTransaction();
         try {
@@ -57,8 +55,8 @@ public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
 
         Condition condition = new ConditionImpl();
         condition
-            .selectField(NumberContentConstant.GLOBAL_ID, NumberContentConstant.CONTENT)
-            .op(NumberContentConstant.CONTENT, Op.likeRight, prefix);
+            .selectField(NumberContent.Fields.globalId, NumberContent.Fields.content)
+            .op(NumberContent.Fields.content, Op.likeRight, prefix);
 
         Transaction transaction = SessionFactory.getTransaction();
         try {

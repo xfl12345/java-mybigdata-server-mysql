@@ -3,7 +3,6 @@ package cc.xfl12345.mybigdata.server.mysql.data.source;
 
 import cc.xfl12345.mybigdata.server.common.data.source.NumberTypeSource;
 import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractSingleTableDataSource;
-import cc.xfl12345.mybigdata.server.mysql.database.constant.NumberContentConstant;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.NumberContent;
 
 import java.math.BigDecimal;
@@ -11,7 +10,7 @@ import java.math.BigDecimal;
 public class NumberTypeSourceImpl
     extends AbstractSingleTableDataSource<BigDecimal, NumberContent>
     implements NumberTypeSource {
-    protected String[] selectContentFieldOnly = new String[]{NumberContentConstant.CONTENT};
+    protected String[] selectContentFieldOnly = new String[]{NumberContent.Fields.content};
 
     @Override
     protected String[] getSelectContentFieldOnly() {
