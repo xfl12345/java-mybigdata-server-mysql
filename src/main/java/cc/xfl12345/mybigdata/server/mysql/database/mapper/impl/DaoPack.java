@@ -8,14 +8,16 @@ import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.TableMapperProperties;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.BeeTableMapperImpl;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
+import cc.xfl12345.mybigdata.server.mysql.pojo.ClassDeclaredInfo;
 import cc.xfl12345.mybigdata.server.mysql.pojo.MapperPack;
-import com.alibaba.fastjson2.PropertyNamingStrategy;
-import com.alibaba.fastjson2.util.BeanUtils;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.Table;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,25 +56,24 @@ public class DaoPack {
             true
         );
 
-        Map<String, Method> mapperPackGetterMap = new HashMap<>(8);
-        mapperPackMap = new HashMap<>(8);
-        // 获取 MapperPack 的 Getter
-        BeanUtils.getters(MapperPack.class, method -> {
-            // 获取 MapperPack 字段名称
-            String fieldName = BeanUtils.getterName(
-                method,
-                PropertyNamingStrategy.CamelCase.name()
-            );
+        Map<String, PropertyDescriptor> mapperPackPropertiesMap;
 
-            synchronized (mapperPackGetterMap) {
-                mapperPackGetterMap.put(fieldName, method);
-                mapperPackMap.put(
-                    fieldName,
-                    // 初始化容量为 pojo 个数
-                    new ConcurrentHashMap<>(pojoClasses.size())
-                );
+        // 临时内存，及时释放
+        {
+            BeanInfo beanInfo = Introspector.getBeanInfo(MapperPack.class, MapperPack.class.getSuperclass());
+            mapperPackPropertiesMap = new HashMap<>(beanInfo.getPropertyDescriptors().length);
+            for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+                mapperPackPropertiesMap.put(descriptor.getDisplayName(), descriptor);
             }
-        });
+        }
+
+        // 初始化容量为 MapperPack 属性个数
+        mapperPackMap = new HashMap<>(mapperPackPropertiesMap.keySet().size());
+        mapperPackPropertiesMap.keySet().forEach(propertyName -> mapperPackMap.put(
+            propertyName,
+            // 初始化容量为 pojo 个数
+            new ConcurrentHashMap<>(pojoClasses.size())
+        ));
 
         mappers = new ConcurrentHashMap<>(pojoClasses.size());
         mapperPacks = new CopyOnWriteArrayList<>();
@@ -85,9 +86,9 @@ public class DaoPack {
 
             MapperPack<?> mapperPack = generateMapperPack(mapper);
             mapperPacks.add(mapperPack);
-            for (String fieldName : mapperPackGetterMap.keySet()) {
+            for (String fieldName : mapperPackPropertiesMap.keySet()) {
                 // 获取 MapperPack 字段 对应的 Getter
-                Method getter = mapperPackGetterMap.get(fieldName);
+                Method getter = mapperPackPropertiesMap.get(fieldName).getReadMethod();
                 // 按 字段 获取 值， 作为 二级映射表 的 键
                 Object key = getter.invoke(mapperPack);
                 // 我觉得非空检查有必要，而且既然是空的，就不应该有对应实体。
@@ -104,9 +105,13 @@ public class DaoPack {
         cache4TableNameMap = mapperPackMap.get(MapperPack.Fields.tableName);
     }
 
-    protected <T> MapperPack<T> generateMapperPack(TableBasicMapper<T> mapper) {
+    protected <T> MapperPack<T> generateMapperPack(TableBasicMapper<T> mapper) throws Exception {
         Class<T> pojoClass = mapper.getPojoType();
-        String databaseTableName = pojoClass.getAnnotation(Table.class).name();
+        ClassDeclaredInfo classDeclaredInfo = new ClassDeclaredInfo();
+        classDeclaredInfo.setClazz(pojoClass);
+        classDeclaredInfo.init();
+
+        String databaseTableName = classDeclaredInfo.getJpaAnnotationByType(Table.class).get(0).name();
         EnumCoreTable enumCoreTable = EnumCoreTable.getByName(databaseTableName);
         AppDataType dataType = null;
 
@@ -126,6 +131,7 @@ public class DaoPack {
             .dataType(dataType)
             .mapper(mapper)
             .coreTable(enumCoreTable)
+            .classDeclaredInfo(classDeclaredInfo)
             .tableName(databaseTableName)
             .build();
     }

@@ -20,7 +20,7 @@ public class TestDatabaseReset {
         connection.createStatement().execute("drop database if exists mybigdata");
         connection.close();
 
-        databaseInitializer.afterPropertiesSet();
+        databaseInitializer.init();
         JdbcContextFinalizer.deregister(null);
     }
 

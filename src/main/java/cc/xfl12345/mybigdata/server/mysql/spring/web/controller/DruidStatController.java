@@ -3,7 +3,6 @@ package cc.xfl12345.mybigdata.server.mysql.spring.web.controller;
 import com.alibaba.druid.stat.DruidStatService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @Slf4j
 @RequestMapping(DruidStatController.servletName)
-public class DruidStatController implements InitializingBean {
+public class DruidStatController {
 
     protected DruidStatService statService = DruidStatService.getInstance();
     public static final String servletName = "druid";
@@ -54,8 +54,8 @@ public class DruidStatController implements InitializingBean {
         public String path;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
         Tika tika = new Tika();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         rootFileURL = Objects.requireNonNull(classLoader.getResource(resourceRootPath));

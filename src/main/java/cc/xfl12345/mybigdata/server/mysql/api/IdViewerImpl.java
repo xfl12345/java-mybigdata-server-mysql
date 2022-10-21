@@ -61,8 +61,7 @@ public class IdViewerImpl implements IdViewer {
         try {
             transaction.begin();
             GlobalDataRecord globalDataRecord = globalDataRecordMapper.selectById(
-                id,
-                new String[]{GlobalDataRecord.Fields.id, GlobalDataRecord.Fields.tableName}
+                id, GlobalDataRecord.Fields.id, GlobalDataRecord.Fields.tableName
             );
             tableNameId = globalDataRecord.getTableName();
             transaction.commit();

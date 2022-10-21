@@ -9,9 +9,9 @@ import com.mysql.cj.conf.PropertyKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,7 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Slf4j
-public class MyDatabaseInitializer implements InitializingBean {
+public class MyDatabaseInitializer {
 
     protected String username;
     protected String password;
@@ -70,8 +70,8 @@ public class MyDatabaseInitializer implements InitializingBean {
         this.driverClassName = driverClassName;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
         String mysqlJdbcProtocolHeader = "jdbc:mysql://";
         if (url != null && url.startsWith(mysqlJdbcProtocolHeader)) {
             initMySQL();

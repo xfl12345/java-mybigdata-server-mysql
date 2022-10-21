@@ -6,9 +6,6 @@ import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.DaoPack;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.stat.DruidStatManagerFacade;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONWriter;
 import org.teasoft.bee.osql.SuidRich;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.BeeFactory;
@@ -52,14 +49,10 @@ public class DatabaseViewerImpl implements DatabaseViewer {
             String tableName = daoPack.getMapperPackByPojoClass(cls).getTableName();
             Object pojoInstance = cls.getDeclaredConstructor().newInstance();
 
-            JSONObject jsonObject = (JSONObject) JSON.toJSON(
-                pojoInstance,
-                JSONWriter.Feature.WriteNulls
-            );
-
             tableFieldNames.put(
                 tableName,
-                jsonObject.keySet().stream().toList()
+                daoPack.getMapperPackByPojoClass(cls).getClassDeclaredInfo()
+                    .getPropertiesMap().keySet().stream().toList()
             );
 
             tableName2PojoInstance.put(tableName, pojoInstance);

@@ -31,5 +31,9 @@ public class MapperPack<T> {
 
     @Getter
     @Setter
+    protected ClassDeclaredInfo classDeclaredInfo;
+
+    @Getter
+    @Setter
     protected String tableName;
 }

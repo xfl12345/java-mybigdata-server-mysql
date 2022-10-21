@@ -8,11 +8,11 @@ import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.AuthAccount;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.InitializingBean;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
-public class AccountMapperImpl implements AccountMapper, InitializingBean {
+public class AccountMapperImpl implements AccountMapper {
     @Getter
     @Setter
     protected TableBasicMapper<AuthAccount> authAccountMapper;
@@ -25,8 +25,8 @@ public class AccountMapperImpl implements AccountMapper, InitializingBean {
     @Setter
     protected String fieldCanNotBeNullMessageTemplate = AppConst.FIELD_CAN_NOT_BE_NULL_MESSAGE_TEMPLATE;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
         if (authAccountMapper == null) {
             throw new IllegalArgumentException(fieldCanNotBeNullMessageTemplate.formatted("authAccountMapper"));
         }
@@ -61,8 +61,8 @@ public class AccountMapperImpl implements AccountMapper, InitializingBean {
     }
 
     @Override
-    public long insertBatch(List<CommonAccount> list) {
-        return authAccountMapper.insertBatch(list.parallelStream().map(this::cast).toList());
+    public long insertBatch(List<CommonAccount> accounts) {
+        return authAccountMapper.insertBatch(accounts.parallelStream().map(this::cast).toList());
     }
 
     @Override
@@ -71,13 +71,13 @@ public class AccountMapperImpl implements AccountMapper, InitializingBean {
     }
 
     @Override
-    public CommonAccount selectOne(CommonAccount account, String[] strings) {
-        return cast(authAccountMapper.selectOne(cast(account), null));
+    public CommonAccount selectOne(CommonAccount account, String... fields) {
+        return cast(authAccountMapper.selectOne(cast(account), fields));
     }
 
     @Override
-    public CommonAccount selectById(Object globalId, String[] strings) {
-        return cast(authAccountMapper.selectById(globalId, null));
+    public CommonAccount selectById(Object globalId, String[] fields) {
+        return cast(authAccountMapper.selectById(globalId, fields));
     }
 
     @Override

@@ -7,18 +7,17 @@ import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.InitializingBean;
 
 public class IdDataSourceImpl
     extends AbstractSingleTableDataSource<CommonGlobalDataRecord, GlobalDataRecord>
-    implements IdDataSource, InitializingBean {
+    implements IdDataSource {
     @Getter
     @Setter
     protected AppIdTypeConverter idTypeConverter;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        super.afterPropertiesSet();
+    public void init() throws Exception {
+        super.init();
         if (idTypeConverter == null) {
             throw new IllegalArgumentException(fieldCanNotBeNullMessageTemplate.formatted("idTypeConverter"));
         }

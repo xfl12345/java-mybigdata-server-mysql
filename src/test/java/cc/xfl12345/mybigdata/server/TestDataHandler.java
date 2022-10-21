@@ -4,8 +4,7 @@ import cc.xfl12345.mybigdata.server.common.data.handler.StringTypeHandler;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.spring.helper.JdbcContextFinalizer;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONWriter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.teasoft.honey.osql.core.BeeFactory;
 
 public class TestDataHandler {
@@ -21,7 +20,7 @@ public class TestDataHandler {
         StringTypeHandler stringTypeHandler = new StringTypeHandler();
         // stringTypeHandler.setUuidGenerator(Generators.timeBasedGenerator());
         // stringTypeHandler.setCoreTableCache(coreTableCache);
-        // stringTypeHandler.afterPropertiesSet();
+        // stringTypeHandler.init();
 
         // printJSON(stringTypeHandler.selectStringByPrefix("t"));
 
@@ -38,7 +37,7 @@ public class TestDataHandler {
         JdbcContextFinalizer.deregister(null);
     }
 
-    public static void printJSON(Object obj) {
-        System.out.println(JSON.toJSONString(obj, JSONWriter.Feature.PrettyFormat));
+    public static void printJSON(ObjectMapper objectMapper, Object obj) {
+        System.out.println(objectMapper.valueToTree(obj).toPrettyString());
     }
 }

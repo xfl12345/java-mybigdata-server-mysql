@@ -5,8 +5,9 @@ import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
 import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.BooleanContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONWriter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.teasoft.bee.osql.BeeException;
 import org.teasoft.bee.osql.Condition;
@@ -29,9 +30,16 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        super.afterPropertiesSet();
+    public void init() throws Exception {
+        if (jacksonObjectMapper == null) {
+            jacksonObjectMapper = new ObjectMapper();
+        }
+        super.init();
     }
+
+    @Getter
+    @Setter
+    protected ObjectMapper jacksonObjectMapper;
 
     @Override
     public void refreshBooleanCache() throws Exception {
@@ -79,9 +87,8 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
                 HashSet<String> missing = new HashSet<>(values);
                 missing.removeAll(actuallyGet);
                 throw new IllegalArgumentException("We are looking for " + values.size() + " records. " +
-                    "We get table name data in follow: " +
-                    JSONObject.toJSONString(contents, JSONWriter.Feature.PrettyFormat) + ". " +
-                    "It is missing " + missing + "."
+                    "We get table name data in follow: " + jacksonObjectMapper.valueToTree(contents).toPrettyString() +
+                    ". It is missing " + jacksonObjectMapper.valueToTree(missing).toPrettyString() + "."
                 );
             }
 
@@ -100,6 +107,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     public void refreshCoreTableNameCache() throws Exception {
         refreshCoreTableNameCache(Arrays.stream(EnumCoreTable.values()).map(EnumCoreTable::getName).toList());
         log.info("Cache \"global_id\" for core table name: " +
-            JSONObject.toJSONString(tableNameCache.getKey2ValueMap(), JSONWriter.Feature.PrettyFormat));
+            jacksonObjectMapper.valueToTree(tableNameCache.getKey2ValueMap()).toPrettyString()
+        );
     }
 }

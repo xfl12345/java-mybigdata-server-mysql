@@ -7,9 +7,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.teasoft.honey.osql.core.BeeFactory;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,13 +18,13 @@ import java.util.Locale;
 import java.util.Map;
 
 @Slf4j
-public class SqlErrorAnalystImpl implements SqlErrorAnalyst, InitializingBean {
+public class SqlErrorAnalystImpl implements SqlErrorAnalyst {
     @Getter
     @Setter
     protected Map<String, Map<Integer, SimpleCoreTableCurdResult>> coreTableResultMap = null;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
         if (coreTableResultMap == null) {
             coreTableResultMap = new HashMap<>();
             HashMap<Integer, SimpleCoreTableCurdResult> mysql = new HashMap<>();

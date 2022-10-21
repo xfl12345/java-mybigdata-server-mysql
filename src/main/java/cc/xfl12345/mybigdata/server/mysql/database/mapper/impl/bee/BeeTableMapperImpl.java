@@ -68,7 +68,7 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public Pojo selectOne(Pojo value, String[] fields) {
+    public Pojo selectOne(Pojo value, String... fields) {
         List<Pojo> items = getSuidRich().select(value, getConditionWithSelectedFields(fields));
         if (items.size() != 1) {
             throw getAffectedRowShouldBe1Exception(items.size(), CURD.RETRIEVE, mapperConfig.getTableName());
@@ -78,7 +78,7 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public Pojo selectById(Object globalId, String[] fields) {
+    public Pojo selectById(Object globalId, String... fields) {
         Condition condition = getConditionWithSelectedFields(fields);
         addId2Condition(condition, globalId);
         List<Pojo> items = getSuidRich().select(mapperConfig.getNewPojoInstance(), condition);
