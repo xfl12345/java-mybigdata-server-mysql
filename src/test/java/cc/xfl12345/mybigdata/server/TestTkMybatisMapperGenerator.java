@@ -15,7 +15,7 @@ public class TestTkMybatisMapperGenerator {
     public static void main(String[] args) throws Exception {
         // String s = System.getProperty("line.separator");
         System.setProperty("line.separator", "\n");
-        generate(Resources.getResourceAsStream("mybatis/tk_generator_config.xml"), true);
+        generate(Resources.getResourceAsStream("cc/xfl12345/mybigdata/server/mysql/mybatis/tk_generator_config.xml"), true);
     }
 
     public static void generate(InputStream stream, boolean overwrite) throws Exception {

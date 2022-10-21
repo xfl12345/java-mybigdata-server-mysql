@@ -135,7 +135,7 @@ public class MyDatabaseInitializer {
         try {
             if (rs.next()) {
                 log.info("Database is exist!");
-                tryExecuteResourceSqlFile(connection, classLoader, "sql/db_restart_init.sql", ";");
+                tryExecuteResourceSqlFile(connection, classLoader, "cc/xfl12345/mybigdata/server/mysql/sql/db_restart_init.sql", ";");
             } else {
                 log.info("Database is not exist!");
                 initDatabaseSchema(connection, targetDatabaseName, classLoader);
@@ -166,9 +166,9 @@ public class MyDatabaseInitializer {
         logExecutingSQL(switchDatabase);
         connection.createStatement().execute(switchDatabase);
 
-        tryExecuteResourceSqlFile(connection, classLoader, "sql/db_init_create_schema.sql", ";");
-        tryExecuteResourceSqlFile(connection, classLoader, "sql/db_init_create_procedure.sql", "$$");
-        tryExecuteResourceSqlFile(connection, classLoader, "sql/db_init_insert_pre_data.sql", ";");
+        tryExecuteResourceSqlFile(connection, classLoader, "cc/xfl12345/mybigdata/server/mysql/sql/db_init_create_schema.sql", ";");
+        tryExecuteResourceSqlFile(connection, classLoader, "cc/xfl12345/mybigdata/server/mysql/sql/db_init_create_procedure.sql", "$$");
+        tryExecuteResourceSqlFile(connection, classLoader, "cc/xfl12345/mybigdata/server/mysql/sql/db_init_insert_pre_data.sql", ";");
     }
 
     protected void tryExecuteResourceSqlFile(Connection connection, ClassLoader classLoader, String fileResourcePath, String delimiter) throws SQLException, IOException {
