@@ -64,7 +64,7 @@ publishing {
 
 group = 'cc.xfl12345.mybigdata'
 version = '0.4.5'
-sourceCompatibility = '17'
+sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenLocal()
@@ -121,7 +121,7 @@ dependencies {
         // testRuntimeClasspath platform(myDependencyParent)
     }
 
-    String depsParentVersion = '0.0.4'
+    String depsParentVersion = '0.0.5'
     String parentModuleVersion = getProject().getVersion()
     if (isLocalDevMode) {
         applyPlatform2All(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
