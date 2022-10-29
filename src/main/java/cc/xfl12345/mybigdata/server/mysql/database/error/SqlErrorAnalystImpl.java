@@ -1,6 +1,6 @@
 package cc.xfl12345.mybigdata.server.mysql.database.error;
 
-import cc.xfl12345.mybigdata.server.common.appconst.SimpleCoreTableCurdResult;
+import cc.xfl12345.mybigdata.server.common.appconst.TableCurdResult;
 import cc.xfl12345.mybigdata.server.common.database.error.SqlErrorAnalyst;
 import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Getter;
@@ -21,74 +21,74 @@ import java.util.Map;
 public class SqlErrorAnalystImpl implements SqlErrorAnalyst {
     @Getter
     @Setter
-    protected Map<String, Map<Integer, SimpleCoreTableCurdResult>> coreTableResultMap = null;
+    protected Map<String, Map<Integer, TableCurdResult>> coreTableResultMap = null;
 
     @PostConstruct
     public void init() throws Exception {
         if (coreTableResultMap == null) {
             coreTableResultMap = new HashMap<>();
-            HashMap<Integer, SimpleCoreTableCurdResult> mysql = new HashMap<>();
+            HashMap<Integer, TableCurdResult> mysql = new HashMap<>();
             // ER_TOO_LONG_IDENT -- Identifier name '%s' is too long
-            mysql.put(1059, SimpleCoreTableCurdResult.FAILED_OVER_FLOW);
+            mysql.put(1059, TableCurdResult.FAILED_OVER_FLOW);
             // ER_DUP_ENTRY -- Duplicate entry '%s' for key %d
-            mysql.put(1062, SimpleCoreTableCurdResult.DUPLICATE);
+            mysql.put(1062, TableCurdResult.DUPLICATE);
             // ER_DATA_TOO_LONG -- Data too long for column '%s' at row %ld
-            mysql.put(1406, SimpleCoreTableCurdResult.FAILED_OVER_FLOW);
+            mysql.put(1406, TableCurdResult.FAILED_OVER_FLOW);
             // ER_ROW_IS_REFERENCED_2 -- Cannot delete or update a parent row: a foreign key constraint fails (%s)
-            mysql.put(1451, SimpleCoreTableCurdResult.FAILED_OPERATION_REJECTED);
+            mysql.put(1451, TableCurdResult.FAILED_OPERATION_REJECTED);
             coreTableResultMap.put("mysql", mysql);
         }
     }
 
     @Override
-    public SimpleCoreTableCurdResult getSimpleCoreTableCurdResult(String dbType, int vendorCode) {
-        Map<Integer, SimpleCoreTableCurdResult> codeMapper = coreTableResultMap.get(dbType);
+    public TableCurdResult getTableCurdResult(String dbType, int vendorCode) {
+        Map<Integer, TableCurdResult> codeMapper = coreTableResultMap.get(dbType);
         if (codeMapper == null) {
-            return SimpleCoreTableCurdResult.UNKNOWN_FAILED;
+            return TableCurdResult.UNKNOWN_FAILED;
         }
 
-        return codeMapper.getOrDefault(vendorCode, SimpleCoreTableCurdResult.UNKNOWN_FAILED);
+        return codeMapper.getOrDefault(vendorCode, TableCurdResult.UNKNOWN_FAILED);
     }
 
     @Override
-    public SimpleCoreTableCurdResult getSimpleCoreTableCurdResult(@NonNull DataSource dataSource, int vendorCode) throws SQLException {
+    public TableCurdResult getTableCurdResult(@NonNull DataSource dataSource, int vendorCode) throws SQLException {
         Connection connection = dataSource.getConnection();
-        SimpleCoreTableCurdResult result = getSimpleCoreTableCurdResult(connection, vendorCode);
+        TableCurdResult result = getTableCurdResult(connection, vendorCode);
         connection.close();
         return result;
     }
 
     @Override
-    public SimpleCoreTableCurdResult getSimpleCoreTableCurdResult(@NonNull Connection connection, int vendorCode) throws SQLException {
-        return getSimpleCoreTableCurdResult(connection.getMetaData().getDatabaseProductName().toLowerCase(Locale.ROOT), vendorCode);
+    public TableCurdResult getTableCurdResult(@NonNull Connection connection, int vendorCode) throws SQLException {
+        return getTableCurdResult(connection.getMetaData().getDatabaseProductName().toLowerCase(Locale.ROOT), vendorCode);
     }
 
     @Override
-    public SimpleCoreTableCurdResult getSimpleCoreTableCurdResult(@NonNull Exception exception) {
+    public TableCurdResult getTableCurdResult(@NonNull Exception exception) {
         Throwable cause;
         do {
             cause = exception.getCause();
         } while (cause != null && !(cause instanceof SQLException));
 
         if (cause instanceof SQLException sqlException) {
-            return getSimpleCoreTableCurdResult(sqlException);
+            return getTableCurdResult(sqlException);
         }
-        return SimpleCoreTableCurdResult.UNKNOWN_FAILED;
+        return TableCurdResult.UNKNOWN_FAILED;
     }
 
     @Override
-    public SimpleCoreTableCurdResult getSimpleCoreTableCurdResult(@NonNull SQLException exception) {
+    public TableCurdResult getTableCurdResult(@NonNull SQLException exception) {
         int errorCode = exception.getErrorCode();
         BeeFactory beeFactory = BeeFactory.getInstance();
         DataSource dataSource = beeFactory.getDataSource();
         if (dataSource instanceof DruidDataSource druidDataSource) {
-            return getSimpleCoreTableCurdResult(druidDataSource.getDbType(), errorCode);
+            return getTableCurdResult(druidDataSource.getDbType(), errorCode);
         } else {
             try {
-                return getSimpleCoreTableCurdResult(dataSource, errorCode);
+                return getTableCurdResult(dataSource, errorCode);
             } catch (SQLException e) {
                 log.error(e.getMessage());
-                return SimpleCoreTableCurdResult.UNKNOWN_FAILED;
+                return TableCurdResult.UNKNOWN_FAILED;
             }
         }
     }
