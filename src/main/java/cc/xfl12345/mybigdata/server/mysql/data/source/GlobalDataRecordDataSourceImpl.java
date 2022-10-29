@@ -1,6 +1,6 @@
 package cc.xfl12345.mybigdata.server.mysql.data.source;
 
-import cc.xfl12345.mybigdata.server.common.data.source.IdDataSource;
+import cc.xfl12345.mybigdata.server.common.data.source.GlobalDataRecordDataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractSingleTableDataSource;
 import cc.xfl12345.mybigdata.server.common.database.pojo.CommonGlobalDataRecord;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
@@ -8,9 +8,9 @@ import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import lombok.Getter;
 import lombok.Setter;
 
-public class IdDataSourceImpl
+public class GlobalDataRecordDataSourceImpl
     extends AbstractSingleTableDataSource<CommonGlobalDataRecord, GlobalDataRecord>
-    implements IdDataSource {
+    implements GlobalDataRecordDataSource {
     @Getter
     @Setter
     protected AppIdTypeConverter idTypeConverter;
