@@ -3,9 +3,11 @@ package cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee;
 import cc.xfl12345.mybigdata.server.common.appconst.CURD;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AbstractTypedTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config.BeeTableMapperConfig;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config.BeeTableMapperConfigGenerator;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config.SimpleBeeTableMapperConfig;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
+import cc.xfl12345.mybigdata.server.mysql.pojo.ClassDeclaredInfo;
 import lombok.Getter;
+import lombok.Setter;
 import org.teasoft.bee.osql.Condition;
 import org.teasoft.bee.osql.Op;
 import org.teasoft.bee.osql.SuidRich;
@@ -13,6 +15,10 @@ import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.Id;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 
@@ -25,23 +31,46 @@ public class BeeTableMapperImpl<Pojo>
         return pojoClass;
     }
 
-    public BeeTableMapperImpl(Class<Pojo> pojoClass) {
+    public BeeTableMapperImpl(Class<Pojo> pojoClass) throws Exception {
         this.pojoClass = pojoClass;
+        mapperPack = generateMapperPack();
     }
 
     @Getter
+    @Setter
     protected BeeTableMapperConfig<Pojo> mapperConfig;
-
-    public void setMapperConfig(BeeTableMapperConfig<Pojo> mapperConfig) {
-        this.mapperConfig = mapperConfig;
-    }
 
     protected String[] selectIdFieldOnly;
 
     @PostConstruct
     public void init() throws Exception {
         if (mapperConfig == null) {
-            mapperConfig = BeeTableMapperConfigGenerator.getConfig(pojoClass);
+            ClassDeclaredInfo classDeclaredInfo = mapperPack.getClassDeclaredInfo();
+            String idFieldName = classDeclaredInfo.getAnnotation2FieldMap().get(
+                classDeclaredInfo.getJpaAnnotationByType(Id.class).get(0)
+            ).getName();
+            Method idGetterMethod = classDeclaredInfo.getPropertiesMap().get(idFieldName).getReadMethod();
+            Constructor<Pojo> constructor = pojoClass.getDeclaredConstructor();
+
+            SimpleBeeTableMapperConfig<Pojo> config = new SimpleBeeTableMapperConfig<>();
+            config.setTableName(mapperPack.getTableName());
+            config.setIdFieldName(idFieldName);
+            config.setIdGetter((value) -> {
+                try {
+                    return idGetterMethod.invoke(value);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            config.setPojoInstanceSupplier(() -> {
+                try {
+                    return constructor.newInstance();
+                } catch (Exception e) {
+                    throw  new RuntimeException(e);
+                }
+            });
+
+            mapperConfig = config;
         }
 
         selectIdFieldOnly = new String[]{ mapperConfig.getIdFieldName() };
@@ -145,7 +174,7 @@ public class BeeTableMapperImpl<Pojo>
 
     @Override
     public void addFields2Condition(Condition condition, String... fields) {
-        if (fields != null) {
+        if (fields != null && fields.length > 0) {
             condition.selectField(fields);
         }
     }

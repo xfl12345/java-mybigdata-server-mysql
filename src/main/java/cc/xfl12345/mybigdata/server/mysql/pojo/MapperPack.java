@@ -33,6 +33,9 @@ public class MapperPack<T> {
     @Setter
     protected ClassDeclaredInfo classDeclaredInfo;
 
+    /**
+     * 数据库里的表名
+     */
     @Getter
     @Setter
     protected String tableName;

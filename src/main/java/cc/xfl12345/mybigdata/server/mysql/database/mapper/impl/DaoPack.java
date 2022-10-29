@@ -84,7 +84,7 @@ public class DaoPack {
 
             mappers.put(pojoClass, mapper);
 
-            MapperPack<?> mapperPack = generateMapperPack(mapper);
+            MapperPack<?> mapperPack = mapper.getMapperPack();
             mapperPacks.add(mapperPack);
             for (String fieldName : mapperPackPropertiesMap.keySet()) {
                 // 获取 MapperPack 字段 对应的 Getter
@@ -103,37 +103,6 @@ public class DaoPack {
 
         cache4ClassMap = mapperPackMap.get(MapperPack.Fields.pojoClass);
         cache4TableNameMap = mapperPackMap.get(MapperPack.Fields.tableName);
-    }
-
-    protected <T> MapperPack<T> generateMapperPack(TableBasicMapper<T> mapper) throws Exception {
-        Class<T> pojoClass = mapper.getPojoType();
-        ClassDeclaredInfo classDeclaredInfo = new ClassDeclaredInfo();
-        classDeclaredInfo.setClazz(pojoClass);
-        classDeclaredInfo.init();
-
-        String databaseTableName = classDeclaredInfo.getJpaAnnotationByType(Table.class).get(0).name();
-        EnumCoreTable enumCoreTable = EnumCoreTable.getByName(databaseTableName);
-        AppDataType dataType = null;
-
-        if (enumCoreTable != null) {
-            switch (enumCoreTable) {
-                case TABLE_SCHEMA_RECORD -> dataType = AppDataType.JsonSchema;
-                case STRING_CONTENT -> dataType = AppDataType.String;
-                case BOOLEAN_CONTENT -> dataType = AppDataType.Boolean;
-                case NUMBER_CONTENT -> dataType = AppDataType.Number;
-                case GROUP_RECORD -> dataType = AppDataType.Array;
-                case OBJECT_RECORD -> dataType = AppDataType.Object;
-            }
-        }
-
-        return MapperPack.<T>builder()
-            .pojoClass(pojoClass)
-            .dataType(dataType)
-            .mapper(mapper)
-            .coreTable(enumCoreTable)
-            .classDeclaredInfo(classDeclaredInfo)
-            .tableName(databaseTableName)
-            .build();
     }
 
     public MapperPack<?> getMapperPack(String fieldName, Object fieldValue) {
