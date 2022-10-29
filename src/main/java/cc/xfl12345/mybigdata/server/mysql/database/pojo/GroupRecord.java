@@ -33,6 +33,14 @@ public class GroupRecord implements Cloneable, Serializable {
     @org.teasoft.bee.osql.annotation.Column("group_name")
     private Long groupName;
 
+    /**
+     * 元素是否都是唯一的（默认否）
+     */
+    @javax.persistence.Column(name = "unique_items", nullable = false)
+    @io.swagger.annotations.ApiModelProperty("元素是否都是唯一的（默认否）")
+    @org.teasoft.bee.osql.annotation.Column("unique_items")
+    private Long uniqueItems;
+
     private static final long serialVersionUID = 1L;
 
     @Override

@@ -325,10 +325,12 @@ CREATE TABLE group_record
 (
     `global_id`  bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
     `group_name` bigint NOT NULL default 2 comment '组名',
+    `unique_items` bigint NOT NULL default 10 comment '元素是否都是唯一的（默认否）',
     foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
     unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
     foreign key (group_name) references string_content (global_id) on delete restrict on update cascade,
-    index boost_query_all (group_name) comment '加速查询全部数据'
+    foreign key (unique_items) references boolean_content (global_id) on delete restrict on update cascade,
+    index boost_query_all (group_name, unique_items) comment '加速查询全部数据'
 ) ENGINE = InnoDB
   ROW_FORMAT = DYNAMIC;
 
@@ -374,7 +376,8 @@ ORDER BY g.id;
 CREATE TABLE object_record
 (
     `global_id`     bigint NOT NULL comment '对象id',
-    `object_schema` bigint comment '用于检验该对象的JSON Schema',
+    `object_schema` bigint NOT NULL comment '用于检验该对象的JSON Schema',
+    `schema_path`   bigint NOT NULL comment 'JSON Schema 的 相对路径（用于检验子对象）',
     `object_name`   bigint NOT NULL comment '对象名称',
     foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
     foreign key (object_schema) references table_schema_record (global_id) on delete restrict on update cascade,

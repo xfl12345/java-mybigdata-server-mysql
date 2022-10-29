@@ -28,10 +28,18 @@ public class ObjectRecord implements Cloneable, Serializable {
     /**
      * 用于检验该对象的JSON Schema
      */
-    @javax.persistence.Column(name = "object_schema", nullable = true)
+    @javax.persistence.Column(name = "object_schema", nullable = false)
     @io.swagger.annotations.ApiModelProperty("用于检验该对象的JSON Schema")
     @org.teasoft.bee.osql.annotation.Column("object_schema")
     private Long objectSchema;
+
+    /**
+     * JSON Schema 的 相对路径（用于检验子对象）
+     */
+    @javax.persistence.Column(name = "schema_path", nullable = false)
+    @io.swagger.annotations.ApiModelProperty("JSON Schema 的 相对路径（用于检验子对象）")
+    @org.teasoft.bee.osql.annotation.Column("schema_path")
+    private Long schemaPath;
 
     /**
      * 对象名称
