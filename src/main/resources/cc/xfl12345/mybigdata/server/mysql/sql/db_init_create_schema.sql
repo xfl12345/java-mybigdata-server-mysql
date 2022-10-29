@@ -327,6 +327,7 @@ CREATE TABLE group_record
     `group_name` bigint NOT NULL default 2 comment '组名',
     foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
     unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
+    foreign key (group_name) references string_content (global_id) on delete restrict on update cascade,
     index boost_query_all (group_name) comment '加速查询全部数据'
 ) ENGINE = InnoDB
   ROW_FORMAT = DYNAMIC;
@@ -378,6 +379,7 @@ CREATE TABLE object_record
     foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
     foreign key (object_schema) references table_schema_record (global_id) on delete restrict on update cascade,
     foreign key (object_name) references string_content (global_id) on delete restrict on update cascade,
+    unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
     unique unique_schema (global_id, object_schema),
     unique unique_name (global_id, object_name),
     unique key boost_query_all (global_id, object_schema, object_name) comment '加速查询全部数据'
