@@ -8,18 +8,6 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
-CREATE TABLE `test_table`
-(
-    `ID`  int NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `num` int NOT NULL
-) AUTO_INCREMENT = 1
-  ENGINE = InnoDB;
-
-INSERT INTO `test_table` (`ID`, `num`)
-VALUES (1, 666),
-       (233, 678);
-
-
 # 优先创建 字符串记录表 ，毕竟 全局ID记录表 对 字符串表 存在必要依赖
 /**
   一个庞大的 字符串记录表，暂时还没做来源系统
@@ -194,10 +182,10 @@ ORDER BY `g`.id;
  */
 CREATE TABLE number_content
 (
-    `global_id`     bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
+    `global_id`        bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
     `numberIsInteger`  boolean NOT NULL comment '是否为整数（无论长度）',
-    `numberIs64bit` boolean NOT NULL comment '是否为64bit整数',
-    `content`       varchar(760) NOT NULL comment '字符串形式的十进制数字（最多760个字符）',
+    `numberIs64bit`    boolean NOT NULL comment '是否为64bit整数',
+    `content`          varchar(760) NOT NULL comment '字符串形式的十进制数字（最多760个字符）',
     foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
     unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
     unique key boost_query_all (numberIsInteger, numberIs64bit, content) comment '加速查询全部数据'
@@ -323,13 +311,12 @@ ORDER BY g.id;
  */
 CREATE TABLE group_record
 (
-    `global_id`  bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
-    `group_name` bigint NOT NULL default 2 comment '组名',
-    `unique_items` bigint NOT NULL default 10 comment '元素是否都是唯一的（默认否）',
+    `global_id`    bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
+    `group_name`   bigint NOT NULL default 2 comment '组名',
+    `unique_items` boolean NOT NULL default false comment '元素是否都是唯一的（默认否）',
     foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
     unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
     foreign key (group_name) references string_content (global_id) on delete restrict on update cascade,
-    foreign key (unique_items) references boolean_content (global_id) on delete restrict on update cascade,
     index boost_query_all (group_name, unique_items) comment '加速查询全部数据'
 ) ENGINE = InnoDB
   ROW_FORMAT = DYNAMIC;
@@ -340,7 +327,7 @@ CREATE TABLE group_record
 CREATE TABLE group_content
 (
     `global_id`  bigint NOT NULL comment '组id',
-    `item_index` bigint default null comment '组内对象的下标',
+    `item_index` bigint NOT NULL comment '组内对象的下标',
     `item`       bigint NOT NULL comment '组内对象',
     # 关联 group_record 表。毕竟 “组” 这种概念，本就是一对多的关系。
     foreign key (global_id) references group_record (global_id) on delete restrict on update cascade,

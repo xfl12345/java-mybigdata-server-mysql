@@ -28,7 +28,7 @@ public class GroupContent implements Cloneable, Serializable {
     /**
      * 组内对象的下标
      */
-    @javax.persistence.Column(name = "item_index", nullable = true)
+    @javax.persistence.Column(name = "item_index", nullable = false)
     @io.swagger.annotations.ApiModelProperty("组内对象的下标")
     @org.teasoft.bee.osql.annotation.Column("item_index")
     private Long itemIndex;

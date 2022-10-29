@@ -39,7 +39,7 @@ public class GroupRecord implements Cloneable, Serializable {
     @javax.persistence.Column(name = "unique_items", nullable = false)
     @io.swagger.annotations.ApiModelProperty("元素是否都是唯一的（默认否）")
     @org.teasoft.bee.osql.annotation.Column("unique_items")
-    private Long uniqueItems;
+    private Boolean uniqueItems;
 
     private static final long serialVersionUID = 1L;
 

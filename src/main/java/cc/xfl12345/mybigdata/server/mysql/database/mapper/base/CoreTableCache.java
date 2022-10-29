@@ -2,6 +2,7 @@ package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
+import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTableNames;
 import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.BooleanContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
@@ -109,5 +110,10 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
         log.info("Cache \"global_id\" for core table name: " +
             jacksonObjectMapper.valueToTree(tableNameCache.getKey2ValueMap()).toPrettyString()
         );
+    }
+
+    @Override
+    protected String tableNameOfBoolean() {
+        return CoreTableNames.BOOLEAN_CONTENT;
     }
 }
