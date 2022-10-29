@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * 表名：number_content
-*/
+ */
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * 表名：binary_relationship_record
-*/
+ */
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor

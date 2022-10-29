@@ -5,7 +5,7 @@ import java.util.Date;
 
 /**
  * 表名：global_data_record
-*/
+ */
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
