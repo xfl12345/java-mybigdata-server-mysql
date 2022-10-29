@@ -1,20 +1,16 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.impl;
 
 import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
-import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
 import cc.xfl12345.mybigdata.server.common.utility.MyReflectUtils;
-import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.TableMapperProperties;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.BeeTableMapperImpl;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
-import cc.xfl12345.mybigdata.server.mysql.pojo.ClassDeclaredInfo;
 import cc.xfl12345.mybigdata.server.mysql.pojo.MapperPack;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.Table;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
