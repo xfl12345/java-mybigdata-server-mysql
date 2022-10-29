@@ -112,36 +112,6 @@ public class ClassDeclaredInfo {
         });
     }
 
-    // protected <T> void annotationHandler(Map<Class<?>, List<Annotation>> annotationMap, Annotation annotation, String type) {
-    //     // 获取类型
-    //     Class<?> annotationClass = annotation.annotationType();
-    //     // 初始化 & 获取 & 加入 List
-    //     annotationMap.putIfAbsent(annotationClass, new CopyOnWriteArrayList<>());
-    //     List<Annotation> annotationList = annotationMap.get(annotationClass);
-    //     annotationList.add(annotation);
-    //     // 识别类型
-    //     String annotationName = annotationClass.getCanonicalName();
-    //     if (annotationName.startsWith("javax.persistence.")) {
-    //         class2JpaAnnotationMap.putIfAbsent(annotationClass, new CopyOnWriteArrayList<>());
-    //         List<Annotation> jpaAnnotationList = class2JpaAnnotationMap.get(annotationClass);
-    //         jpaAnnotationList.add(annotation);
-    //
-    //         switch (type) {
-    //             case "Field":
-    //                 if (annotation instanceof Column) {
-    //                     jpaColumns.add(annotation);
-    //                 }
-    //                 break;
-    //             case "Class":
-    //                 if (annotation instanceof Table) {
-    //                     jpaColumns.add(annotation);
-    //                 }
-    //                 break;
-    //             default: break;
-    //         }
-    //     }
-    // }
-
     @SuppressWarnings("unchecked")
     public <T> List<T> getJpaAnnotationByType(Class<T> jpaAnnotationType) {
         return (List<T>) class2JpaAnnotationMap.get(jpaAnnotationType);
