@@ -74,9 +74,6 @@ CREATE TABLE global_data_record
     `description`    bigint DEFAULT NULL comment '该行数据的附加简述',
     # 全局ID 记录表，删除乃大忌。拒绝一切外表级联删除行记录，只允许按 global_id 或 uuid 删除行记录
     # 遵循 一切普通文本 由 字符串记录表
-    # TODO 这里有问题……………………
-    #     foreign key (table_name) references string_content (global_id) on delete restrict on update cascade,
-    #     foreign key (description) references string_content (global_id) on delete restrict on update cascade,
     unique key index_uuid (uuid) comment '确保UUID的唯一性',
     index boost_query_all (uuid, create_time, update_time, modified_count, table_name, description)
 ) ENGINE = InnoDB
@@ -419,24 +416,3 @@ CREATE TABLE auth_account
 UPDATE string_content
 SET content_length = CHAR_LENGTH(content)
 WHERE content_length = default(content_length);
-
-
-/**
-  暂时还没写完，因为发现了很多问题欠缺考虑
- */
-
-/**
-  天气数据MySQL表设计目标（检验编程结果是否OK的表）
- */
-CREATE TABLE weather_coding_goal
-(
-    `global_id`      bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
-    `weather_like`   bigint NOT NULL comment '天气状况',
-    `celsius_degree` int    NOT NULL comment '摄氏度',
-    foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
-    unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
-    # 拒绝一切外表级联删除行记录，只允许按 主键id 删除行记录
-    foreign key (weather_like) references string_content (global_id) on delete restrict on update cascade,
-    index boost_query_all (weather_like, celsius_degree) comment '加速查询全部数据'
-) ENGINE = InnoDB
-  ROW_FORMAT = DYNAMIC;
