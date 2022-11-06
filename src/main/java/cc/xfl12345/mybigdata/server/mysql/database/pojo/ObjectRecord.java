@@ -1,10 +1,12 @@
 package cc.xfl12345.mybigdata.server.mysql.database.pojo;
 
+import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
+
 import java.io.Serializable;
 
 /**
  * 表名：object_record
- */
+*/
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
@@ -13,7 +15,7 @@ import java.io.Serializable;
 @javax.persistence.Table(name = "object_record")
 @javax.persistence.Entity
 @org.teasoft.bee.osql.annotation.Table("object_record")
-public class ObjectRecord implements Cloneable, Serializable {
+public class ObjectRecord implements OpenCloneable, Serializable {
     /**
      * 对象id
      */

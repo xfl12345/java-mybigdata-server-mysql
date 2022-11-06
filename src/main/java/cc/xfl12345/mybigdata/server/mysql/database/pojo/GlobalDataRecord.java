@@ -1,11 +1,13 @@
 package cc.xfl12345.mybigdata.server.mysql.database.pojo;
 
+import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
+
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * 表名：global_data_record
- */
+*/
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
@@ -14,7 +16,7 @@ import java.util.Date;
 @javax.persistence.Table(name = "global_data_record")
 @javax.persistence.Entity
 @org.teasoft.bee.osql.annotation.Table("global_data_record")
-public class GlobalDataRecord implements Cloneable, Serializable {
+public class GlobalDataRecord implements OpenCloneable, Serializable {
     /**
      * 当前表所在数据库实例里的全局ID
      */

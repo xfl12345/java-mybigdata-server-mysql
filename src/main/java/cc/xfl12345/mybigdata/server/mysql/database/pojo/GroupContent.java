@@ -1,10 +1,12 @@
 package cc.xfl12345.mybigdata.server.mysql.database.pojo;
 
+import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
+
 import java.io.Serializable;
 
 /**
  * 表名：group_content
- */
+*/
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
@@ -13,7 +15,7 @@ import java.io.Serializable;
 @javax.persistence.Table(name = "group_content")
 @javax.persistence.Entity
 @org.teasoft.bee.osql.annotation.Table("group_content")
-public class GroupContent implements Cloneable, Serializable {
+public class GroupContent implements OpenCloneable, Serializable {
     /**
      * 组id
      */
@@ -31,7 +33,7 @@ public class GroupContent implements Cloneable, Serializable {
     @javax.persistence.Column(name = "item_index", nullable = false)
     @io.swagger.annotations.ApiModelProperty("组内对象的下标")
     @org.teasoft.bee.osql.annotation.Column("item_index")
-    private Long itemIndex;
+    private Integer itemIndex;
 
     /**
      * 组内对象

@@ -1,10 +1,12 @@
 package cc.xfl12345.mybigdata.server.mysql.database.pojo;
 
+import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
+
 import java.io.Serializable;
 
 /**
  * 表名：auth_account
- */
+*/
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
@@ -13,7 +15,7 @@ import java.io.Serializable;
 @javax.persistence.Table(name = "auth_account")
 @javax.persistence.Entity
 @org.teasoft.bee.osql.annotation.Table("auth_account")
-public class AuthAccount implements Cloneable, Serializable {
+public class AuthAccount implements OpenCloneable, Serializable {
     /**
      * 账号ID
      */

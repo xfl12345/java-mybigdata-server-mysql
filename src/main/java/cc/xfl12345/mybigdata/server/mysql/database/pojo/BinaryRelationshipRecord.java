@@ -1,10 +1,12 @@
 package cc.xfl12345.mybigdata.server.mysql.database.pojo;
 
+import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
+
 import java.io.Serializable;
 
 /**
  * 表名：binary_relationship_record
- */
+*/
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
@@ -13,7 +15,7 @@ import java.io.Serializable;
 @javax.persistence.Table(name = "binary_relationship_record")
 @javax.persistence.Entity
 @org.teasoft.bee.osql.annotation.Table("binary_relationship_record")
-public class BinaryRelationshipRecord implements Cloneable, Serializable {
+public class BinaryRelationshipRecord implements OpenCloneable, Serializable {
     /**
      * 当前表所在数据库实例里的全局ID
      */
