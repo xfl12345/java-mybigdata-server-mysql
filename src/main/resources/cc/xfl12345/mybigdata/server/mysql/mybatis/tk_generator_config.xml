@@ -28,10 +28,10 @@
         <plugin type="cc.xfl12345.mybigdata.server.plugin.mybatis.org.MybigdataJpaAnnotationPlugin"/>
 
         <!--bee ORM 注解-->
-        <plugin type="cc.xfl12345.mybigdata.server.plugin.mybatis.org.BeeOrmAnnotationPlugin"/>
+        <!--<plugin type="cc.xfl12345.mybigdata.server.plugin.mybatis.org.BeeOrmAnnotationPlugin"/>-->
 
-        <!-- 数据ModelCloneable插件 -->
-        <plugin type="com.itfsw.mybatis.generator.plugins.ModelCloneablePlugin"/>
+        <!-- 实现 Cloneable 接口插件 -->
+        <plugin type="cc.xfl12345.mybigdata.server.plugin.mybatis.org.ModelCloneablePlugin"/>
 
         <!--数据库连接信息-->
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
@@ -78,9 +78,6 @@
         </table>
         <table tableName="auth_account">
             <generatedKey column="account_id" sqlStatement="JDBC" identity="true"/>
-        </table>
-        <table tableName="binary_relationship_record">
-            <generatedKey column="global_id" sqlStatement="JDBC" identity="true"/>
         </table>
     </context>
 </generatorConfiguration>

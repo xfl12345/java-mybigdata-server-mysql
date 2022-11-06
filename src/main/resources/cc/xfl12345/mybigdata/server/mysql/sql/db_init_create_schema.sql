@@ -6,9 +6,10 @@
 * Date: 2021/6/9 17:00:00
 */
 
+# 优先创建 字符串记录表 ，毕竟 全局ID记录表 对 字符串表 存在必要依赖
+# 所以必须临时关闭外键检查
 SET FOREIGN_KEY_CHECKS = 0;
 
-# 优先创建 字符串记录表 ，毕竟 全局ID记录表 对 字符串表 存在必要依赖
 /**
   一个庞大的 字符串记录表，暂时还没做来源系统
  */
@@ -22,6 +23,7 @@ CREATE TABLE string_content
     index boost_query_id (data_format, content_length) comment '加速查询主键，避免全表扫描',
     unique key boost_query_content (content(768)) comment '加速检索字符串内容'
 ) ENGINE = InnoDB
+  COMMENT '字符串记录表'
   ROW_FORMAT = DYNAMIC;
 
 INSERT INTO string_content (global_id, data_format, content)
@@ -77,6 +79,7 @@ CREATE TABLE global_data_record
     unique key index_uuid (uuid) comment '确保UUID的唯一性',
     index boost_query_all (uuid, create_time, update_time, modified_count, table_name, description)
 ) ENGINE = InnoDB
+  COMMENT '全局ID记录表'
   ROW_FORMAT = DYNAMIC;
 
 
@@ -120,6 +123,7 @@ CREATE TABLE boolean_content
     unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
     unique key boost_query_content (content) comment '唯一限制。意味着该表只可能有两个值。'
 ) ENGINE = InnoDB
+  COMMENT '专门记录 "JSON Boolean" 的表'
   ROW_FORMAT = DYNAMIC;
 
 INSERT INTO global_data_record (id, uuid, table_name, description)
@@ -149,33 +153,30 @@ ALTER TABLE global_data_record AUTO_INCREMENT = 100;
 
  */
 
-# 创建个视图，方便跨表查看数据
-CREATE OR REPLACE VIEW view_global_data_record AS
-SELECT g.id,
-       g.uuid,
-       g.create_time,
-       g.update_time,
-       g.modified_count,
-       (SELECT content FROM string_content AS s1 WHERE s1.global_id = g.table_name)  AS `table_name`,
-       (SELECT content FROM string_content AS s2 WHERE s2.global_id = g.description) AS `description`
-FROM global_data_record AS g
-ORDER BY `g`.id;
-
-CREATE OR REPLACE VIEW view_string_content AS
-SELECT g.id,
-       g.uuid,
-       g.create_time,
-       g.update_time,
-       g.modified_count,
-       (SELECT content FROM string_content AS s WHERE s.global_id = g.description) AS `description`,
-       data_src_table.content                                                      AS `content`
-FROM string_content AS data_src_table,
-     global_data_record AS g
-WHERE data_src_table.global_id = g.id
-ORDER BY `g`.id;
+/**
+  MyBigData 特色功能之一，就是使用JSON Schema完成对MySQL模型化操作
+  这个表主要存放JSON模型
+ */
+CREATE TABLE table_schema_record
+(
+  `global_id`      bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
+  `schema_name`    bigint NOT NULL comment '插表模型名称',
+  `content_length` smallint        NOT NULL default -1 comment 'json_schema 字段的长度',
+  # 这里不遵循 “一切普通文本 由 字符串记录表” 的原则
+  # 是因为json格式的字符串可以使用json格式存储，MySQL原生支持JSON格式
+  # 暂不考虑使用JSON格式存储JSON字符串，暂且先保留修改空间
+  `json_schema`    varchar(16000)  NOT NULL comment '插表模型',
+  foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
+  foreign key (schema_name) references string_content (global_id) on delete restrict on update cascade,
+  unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
+  unique key index_schema_name (schema_name) comment '确保插表模型名称的唯一性',
+  index boost_query_id (global_id, schema_name, content_length) comment '加速查询主键，避免全表扫描'
+) ENGINE = InnoDB
+  COMMENT 'MyBigData 表模型'
+  ROW_FORMAT = DYNAMIC;
 
 /**
-  专门记录 “数字” 的表
+  专门记录 "JSON Number" 的表
  */
 CREATE TABLE number_content
 (
@@ -187,124 +188,11 @@ CREATE TABLE number_content
     unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
     unique key boost_query_all (numberIsInteger, numberIs64bit, content) comment '加速查询全部数据'
 ) ENGINE = InnoDB
+  COMMENT '专门记录 "JSON Number" 的表'
   ROW_FORMAT = DYNAMIC;
 
 /**
-  MyBigData 特色功能之一，就是使用JSON Schema完成对MySQL模型化操作
-  这个表主要存放JSON模型
- */
-CREATE TABLE table_schema_record
-(
-    `global_id`      bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
-    `schema_name`    bigint NOT NULL comment '插表模型名称',
-    `content_length` smallint        NOT NULL default -1 comment 'json_schema 字段的长度',
-    # 这里不遵循 “一切普通文本 由 字符串记录表” 的原则
-    # 是因为json格式的字符串可以使用json格式存储，MySQL原生支持JSON格式
-    # 暂不考虑使用JSON格式存储JSON字符串，暂且先保留修改空间
-    `json_schema`    varchar(16000)  NOT NULL comment '插表模型',
-    foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
-    foreign key (schema_name) references global_data_record (id) on delete restrict on update cascade,
-    unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
-    unique key index_schema_name (schema_name) comment '确保插表模型名称的唯一性',
-    index boost_query_id (global_id, schema_name, content_length) comment '加速查询主键，避免全表扫描'
-) ENGINE = InnoDB
-  ROW_FORMAT = DYNAMIC;
-
-CREATE OR REPLACE VIEW view_table_schema_record AS
-SELECT g.id,
-       g.uuid,
-       g.create_time,
-       g.update_time,
-       g.modified_count,
-       (SELECT content FROM string_content AS s WHERE s.global_id = g.description) AS `description`,
-       data_src_table.schema_name                                                  AS schema_name,
-       data_src_table.content_length                                               AS content_length,
-       data_src_table.json_schema                                                  AS json_schema
-FROM table_schema_record AS data_src_table,
-     global_data_record AS g
-WHERE data_src_table.global_id = g.id
-ORDER BY g.id;
-
-/**
-  专门记录树状结构的表
- */
-CREATE TABLE tree_struct_record
-(
-    `global_id`      bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
-    `root_id`        bigint NOT NULL comment '根节点对象',
-    `item_count`     int    NOT NULL comment '整个树的节点个数',
-    `tree_deep`      int    NOT NULL comment '整个树的深度（有几层）',
-    `content_length` smallint        NOT NULL default -1 comment 'JSON文本长度',
-    # 暂不考虑使用JSON格式存储JSON字符串，且先保留修改空间
-    `struct_data`    varchar(16000)  NOT NULL comment '以JSON字符串形式记载树形结构',
-    foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
-    unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
-    foreign key (root_id) references global_data_record (id) on delete restrict on update cascade,
-    index boost_query_id (root_id, item_count, tree_deep, content_length) comment '加速查询主键，避免全表扫描'
-) ENGINE = InnoDB
-  ROW_FORMAT = DYNAMIC;
-
-CREATE OR REPLACE VIEW view_tree_struct_record AS
-SELECT g.id,
-       g.uuid,
-       g.create_time,
-       g.update_time,
-       g.modified_count,
-       (SELECT content FROM string_content AS s WHERE s.global_id = g.description) AS `description`,
-       data_src_table.root_id                                                      AS `root_id`,
-       data_src_table.item_count                                                   AS `item_count`,
-       data_src_table.tree_deep                                                    AS `tree_deep`,
-       data_src_table.content_length                                               AS `content_length`,
-       data_src_table.struct_data                                                  AS `struct_data`
-FROM tree_struct_record AS data_src_table,
-     global_data_record AS g
-WHERE data_src_table.global_id = g.id
-ORDER BY g.id;
-
-/**
-  专门记录二元关系的表
- */
-CREATE TABLE binary_relationship_record
-(
-    `global_id` bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
-    `item_a`    bigint NOT NULL comment '对象A',
-    `item_b`    bigint NOT NULL comment '对象B',
-    foreign key (global_id) references global_data_record (id) on delete restrict on update cascade,
-    unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
-    foreign key (item_a) references global_data_record (id) on delete restrict on update cascade,
-    foreign key (item_b) references global_data_record (id) on delete restrict on update cascade,
-    unique key unique_limit_ab (item_a, item_b) comment '不允许出现重复关系，以免浪费空间',
-    index boost_query_all (item_b, item_a) comment '加速查询全部数据'
-) ENGINE = InnoDB
-  ROW_FORMAT = DYNAMIC;
-
-CREATE OR REPLACE VIEW view_binary_relationship_record AS
-SELECT g.id,
-       g.uuid,
-       g.create_time,
-       g.update_time,
-       g.modified_count,
-       (SELECT content FROM string_content AS s WHERE s.global_id = g.description) AS `description`,
-       data_src_table.item_a                                                       AS `item_a`,
-       (SELECT content
-        FROM string_content AS s
-        WHERE s.global_id = (SELECT description
-                             FROM global_data_record AS s
-                             WHERE s.id = data_src_table.item_a))                  AS `item_a_description`,
-       data_src_table.item_b                                                       AS `item_b`,
-       (SELECT content
-        FROM string_content AS s
-        WHERE s.global_id = (SELECT description
-                             FROM global_data_record AS s
-                             WHERE s.id = data_src_table.item_b))                  AS `item_b_description`
-FROM binary_relationship_record AS data_src_table,
-     global_data_record AS g
-WHERE data_src_table.global_id = g.id
-ORDER BY g.id;
-
-/**
-  专门记录 “组” 的表
-  不过这 group_record 表只记 组号
+  专门记录 "JSON Array" 的表。不过这 group_record 表只记 组号
  */
 CREATE TABLE group_record
 (
@@ -316,10 +204,11 @@ CREATE TABLE group_record
     foreign key (group_name) references string_content (global_id) on delete restrict on update cascade,
     index boost_query_all (group_name, unique_items) comment '加速查询全部数据'
 ) ENGINE = InnoDB
+  COMMENT '专门记录 "JSON Array" 的表。不过这 group_record 表只记 组号'
   ROW_FORMAT = DYNAMIC;
 
 /**
-  专门记录 “组” 的表，所有关于“列表（一维数组）”、“集合”和“分组”等概念的数据的 关系 都记录于该表
+  专门记录 "JSON Array" 的表
  */
 CREATE TABLE group_content
 (
@@ -331,31 +220,11 @@ CREATE TABLE group_content
     foreign key (item) references global_data_record (id) on delete restrict on update cascade,
     unique key boost_query_all (global_id, item_index, item) comment '加速查询全部数据'
 ) ENGINE = InnoDB
+  COMMENT '专门记录 "JSON Array" 的表'
   ROW_FORMAT = DYNAMIC;
 
-CREATE OR REPLACE VIEW view_group_content AS
-SELECT g.id,
-       g.uuid,
-       g.create_time,
-       g.update_time,
-       g.modified_count,
-       (SELECT content FROM string_content AS s WHERE s.global_id = g.description) AS `description`,
-       (SELECT content
-        FROM string_content AS s
-        WHERE s.global_id = (SELECT id
-                             FROM group_record AS s
-                             WHERE s.global_id = data_src_table.global_id))         AS `group_name`,
-       data_src_table.item_index                                                   AS `item_index`,
-       data_src_table.item                                                         AS `item`
-FROM group_content AS data_src_table,
-     global_data_record AS g
-WHERE data_src_table.global_id = g.id
-ORDER BY g.id;
-
-
 /**
-  专门记录 “字典” 的表
-  不过这 object_record 表只记 对象号
+  专门记录 "JSON Object" 的表。不过这 object_record 表只记 对象号
  */
 CREATE TABLE object_record
 (
@@ -371,10 +240,11 @@ CREATE TABLE object_record
     unique unique_name (global_id, object_name),
     unique key boost_query_all (global_id, object_schema, object_name) comment '加速查询全部数据'
 ) ENGINE = InnoDB
+  COMMENT '专门记录 “字典” 的表。不过这 object_record 表只记 对象号'
   ROW_FORMAT = DYNAMIC;
 
 /**
-  专门记录 “对象” 的表，所有关于“字典”概念的数据的 关系 都记录于该表
+  专门记录 "JSON Object" 的表。
  */
 CREATE TABLE object_content
 (
@@ -387,6 +257,7 @@ CREATE TABLE object_content
     unique key unique_object_key (global_id, the_key),
     unique key boost_query_all (global_id, the_key, the_value) comment '加速查询全部数据'
 ) ENGINE = InnoDB
+  COMMENT '专门记录 "JSON Object" 的表。'
   ROW_FORMAT = DYNAMIC;
 
 
@@ -408,8 +279,7 @@ CREATE TABLE auth_account
     index boost_query_all (account_id, password_hash, password_salt, extra_info_id),
     foreign key (extra_info_id) references global_data_record (id) on delete restrict on update restrict
 ) ENGINE = InnoDB
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci
+  COMMENT '账号表'
   ROW_FORMAT = Dynamic;
 
 # 补完字符串长度

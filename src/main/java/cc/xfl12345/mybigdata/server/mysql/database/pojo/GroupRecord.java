@@ -14,7 +14,6 @@ import java.io.Serializable;
 @io.swagger.annotations.ApiModel("")
 @javax.persistence.Table(name = "group_record")
 @javax.persistence.Entity
-@org.teasoft.bee.osql.annotation.Table("group_record")
 public class GroupRecord implements OpenCloneable, Serializable {
     /**
      * 当前表所在数据库实例里的全局ID
@@ -23,8 +22,6 @@ public class GroupRecord implements OpenCloneable, Serializable {
     @javax.persistence.GeneratedValue(generator = "JDBC")
     @io.swagger.annotations.ApiModelProperty("当前表所在数据库实例里的全局ID")
     @javax.persistence.Id
-    @org.teasoft.bee.osql.annotation.Column("global_id")
-    @org.teasoft.bee.osql.annotation.PrimaryKey
     private Long globalId;
 
     /**
@@ -32,7 +29,6 @@ public class GroupRecord implements OpenCloneable, Serializable {
      */
     @javax.persistence.Column(name = "group_name", nullable = false)
     @io.swagger.annotations.ApiModelProperty("组名")
-    @org.teasoft.bee.osql.annotation.Column("group_name")
     private Long groupName;
 
     /**
@@ -40,7 +36,6 @@ public class GroupRecord implements OpenCloneable, Serializable {
      */
     @javax.persistence.Column(name = "unique_items", nullable = false)
     @io.swagger.annotations.ApiModelProperty("元素是否都是唯一的（默认否）")
-    @org.teasoft.bee.osql.annotation.Column("unique_items")
     private Boolean uniqueItems;
 
     private static final long serialVersionUID = 1L;
