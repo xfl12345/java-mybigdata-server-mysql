@@ -6,12 +6,13 @@ import java.io.Serializable;
 
 /**
  * 表名：table_schema_record
+ * 表注释：MyBigData 表模型
 */
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants
-@io.swagger.annotations.ApiModel("")
+@io.swagger.annotations.ApiModel("MyBigData 表模型")
 @javax.persistence.Table(name = "table_schema_record")
 @javax.persistence.Entity
 public class TableSchemaRecord implements OpenCloneable, Serializable {

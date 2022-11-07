@@ -6,12 +6,13 @@ import java.io.Serializable;
 
 /**
  * 表名：auth_account
+ * 表注释：账号表
 */
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants
-@io.swagger.annotations.ApiModel("")
+@io.swagger.annotations.ApiModel("账号表")
 @javax.persistence.Table(name = "auth_account")
 @javax.persistence.Entity
 public class AuthAccount implements OpenCloneable, Serializable {

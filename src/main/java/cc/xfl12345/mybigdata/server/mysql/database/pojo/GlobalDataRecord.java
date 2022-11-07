@@ -7,12 +7,13 @@ import java.util.Date;
 
 /**
  * 表名：global_data_record
+ * 表注释：全局ID记录表
 */
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants
-@io.swagger.annotations.ApiModel("")
+@io.swagger.annotations.ApiModel("全局ID记录表")
 @javax.persistence.Table(name = "global_data_record")
 @javax.persistence.Entity
 public class GlobalDataRecord implements OpenCloneable, Serializable {

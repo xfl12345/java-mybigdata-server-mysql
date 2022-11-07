@@ -6,12 +6,13 @@ import java.io.Serializable;
 
 /**
  * 表名：string_content
+ * 表注释：字符串记录表
 */
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants
-@io.swagger.annotations.ApiModel("")
+@io.swagger.annotations.ApiModel("字符串记录表")
 @javax.persistence.Table(name = "string_content")
 @javax.persistence.Entity
 public class StringContent implements OpenCloneable, Serializable {

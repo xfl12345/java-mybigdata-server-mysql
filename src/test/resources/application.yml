@@ -2,7 +2,7 @@ spring:
     datasource:
         username: mybigdata
         password: mybigdata
-        url: "jdbc:mysql://localhost:3306/mybigdata?characterEncoding=utf8&characterSetResults=utf8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowMultiQueries=true"
+        url: "jdbc:mysql://localhost:3306/mybigdata?characterEncoding=utf8&characterSetResults=utf8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&nullCatalogMeansCurrent=true&useInformationSchema=true&remarks=true"
         driver-class-name: com.mysql.cj.jdbc.Driver
         type: com.alibaba.druid.pool.DruidDataSource
     sql:

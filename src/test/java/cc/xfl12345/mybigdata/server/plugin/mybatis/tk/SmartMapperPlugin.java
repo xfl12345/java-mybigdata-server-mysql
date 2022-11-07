@@ -190,9 +190,7 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
             }
             String swaggerAnnotation = "@ApiModelProperty(value = \"%s\" da )";
             justAddAnnotation2Field(topLevelClass, field, ApiModelProperty.class,
-                "\"" +
-                    remarks.replaceAll("\r", "").replaceAll("\n", "")
-                    + "\""
+                "\"" + escapeDoubleQuotationMarks(nowrap(remarks)) + "\""
             );
         }
         // endregion
@@ -266,7 +264,11 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
             if (remarks == null) {
                 remarks = "";
             }
-            justAddAnnotation2Class(topLevelClass, io.swagger.annotations.ApiModel.class, "\"" + remarks.replaceAll("\r", "").replaceAll("\n", "") + "\"");
+            justAddAnnotation2Class(
+                topLevelClass,
+                io.swagger.annotations.ApiModel.class,
+                "\"" + escapeDoubleQuotationMarks(nowrap(remarks)) + "\""
+            );
         }
         // endregion swagger扩展
         String tableName = introspectedTable.getFullyQualifiedTableNameAtRuntime();
@@ -529,5 +531,13 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
 
     protected Boolean getPropertyAsBoolean(String key) {
         return Boolean.parseBoolean(getProperty(key));
+    }
+
+    protected String nowrap(String src) {
+        return src.replaceAll("\r", "").replaceAll("\n", "");
+    }
+
+    protected String escapeDoubleQuotationMarks(String src) {
+        return src.replace("\"", "\\\"");
     }
 }

@@ -35,7 +35,7 @@
 
         <!--数据库连接信息-->
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/mybigdata?useUnicode=true&amp;characterEncoding=utf8&amp;characterSetResults=utf8&amp;serverTimezone=Asia/Shanghai&amp;nullCatalogMeansCurrent=true&amp;allowMultiQueries=true"
+                        connectionURL="jdbc:mysql://localhost:3306/mybigdata?characterEncoding=utf8&amp;characterSetResults=utf8&amp;serverTimezone=Asia/Shanghai&amp;allowMultiQueries=true&amp;nullCatalogMeansCurrent=true&amp;useInformationSchema=true&amp;remarks=true"
                         userId="mybigdata"
                         password="mybigdata">
         </jdbcConnection>

@@ -6,12 +6,13 @@ import java.io.Serializable;
 
 /**
  * 表名：boolean_content
+ * 表注释：专门记录 "JSON Boolean" 的表
 */
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants
-@io.swagger.annotations.ApiModel("")
+@io.swagger.annotations.ApiModel("专门记录 \"JSON Boolean\" 的表")
 @javax.persistence.Table(name = "boolean_content")
 @javax.persistence.Entity
 public class BooleanContent implements OpenCloneable, Serializable {
