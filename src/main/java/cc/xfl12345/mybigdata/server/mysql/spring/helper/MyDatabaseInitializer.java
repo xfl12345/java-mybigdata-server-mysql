@@ -1,11 +1,13 @@
 package cc.xfl12345.mybigdata.server.mysql.spring.helper;
 
 import cc.xfl12345.mybigdata.server.common.appconst.CommonConst;
+import cc.xfl12345.mybigdata.server.mysql.sql.PackageLandmark;
 import cc.xfl12345.mybigdata.server.mysql.util.MysqlJdbcUrlBean;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.mysql.cj.PreparedQuery;
 import com.mysql.cj.conf.ConnectionUrl;
 import com.mysql.cj.conf.PropertyKey;
+import com.mysql.cj.jdbc.ClientPreparedStatement;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
@@ -26,7 +28,6 @@ import java.sql.SQLException;
 
 @Slf4j
 public class MyDatabaseInitializer {
-
     protected String username;
     protected String password;
     protected String url;
@@ -54,7 +55,6 @@ public class MyDatabaseInitializer {
         return url;
     }
 
-    //@ConditionalOnProperty(prefix = "spring.datasource",name = "url",havingValue = "true")
     @Value("${spring.datasource.url}")
     public void setUrl(String url) {
         this.url = url;
@@ -64,7 +64,6 @@ public class MyDatabaseInitializer {
         return driverClassName;
     }
 
-    //@ConditionalOnProperty(prefix = "spring.datasource",name = "driver-class-name",havingValue = "true")
     @Value("${spring.datasource.driver-class-name}")
     public void setDriverClassName(String driverClassName) {
         this.driverClassName = driverClassName;
@@ -80,9 +79,9 @@ public class MyDatabaseInitializer {
 
     public static String getSql(PreparedStatement preparedStatement) {
         String sql;
-        com.mysql.cj.jdbc.ClientPreparedStatement unwarpedPreparedStatement;
+        ClientPreparedStatement unwarpedPreparedStatement;
         try {
-            unwarpedPreparedStatement = preparedStatement.unwrap(com.mysql.cj.jdbc.ClientPreparedStatement.class);
+            unwarpedPreparedStatement = preparedStatement.unwrap(ClientPreparedStatement.class);
             sql = ((PreparedQuery) unwarpedPreparedStatement.getQuery()).asSql();
         } catch (Exception e) {
             try {
@@ -105,7 +104,6 @@ public class MyDatabaseInitializer {
     }
 
     public void initMySQL() throws SQLException, IOException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         ConnectionUrl originURL = ConnectionUrl.getConnectionUrlInstance(url, null);
         MysqlJdbcUrlBean mysqlJdbcUrlBean = new MysqlJdbcUrlBean(originURL);
 
@@ -135,10 +133,10 @@ public class MyDatabaseInitializer {
         try {
             if (rs.next()) {
                 log.info("Database is exist!");
-                tryExecuteResourceSqlFile(connection, classLoader, "cc/xfl12345/mybigdata/server/mysql/sql/db_restart_init.sql", ";");
+                tryExecuteResourceSqlFile(connection, "db_restart_init.sql", ";");
             } else {
                 log.info("Database is not exist!");
-                initDatabaseSchema(connection, targetDatabaseName, classLoader);
+                initDatabaseSchema(connection, targetDatabaseName);
             }
             connection.commit();
             log.info("Database initiated!");
@@ -152,7 +150,7 @@ public class MyDatabaseInitializer {
         }
     }
 
-    protected void initDatabaseSchema(Connection connection, String targetDatabaseName, ClassLoader classLoader) throws SQLException, IOException {
+    protected void initDatabaseSchema(Connection connection, String targetDatabaseName) throws SQLException, IOException {
         String dropDatabaseIfExists = "drop database if exists " + targetDatabaseName;
         String createDatabase = "create database " + targetDatabaseName + " DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
         String switchDatabase = "use " + targetDatabaseName;
@@ -166,19 +164,19 @@ public class MyDatabaseInitializer {
         logExecutingSQL(switchDatabase);
         connection.createStatement().execute(switchDatabase);
 
-        tryExecuteResourceSqlFile(connection, classLoader, "cc/xfl12345/mybigdata/server/mysql/sql/db_init_create_schema.sql", ";");
-        tryExecuteResourceSqlFile(connection, classLoader, "cc/xfl12345/mybigdata/server/mysql/sql/db_init_create_procedure.sql", "$$");
-        tryExecuteResourceSqlFile(connection, classLoader, "cc/xfl12345/mybigdata/server/mysql/sql/db_init_insert_pre_data.sql", ";");
+        tryExecuteResourceSqlFile(connection, "db_init_create_schema.sql", ";");
+        tryExecuteResourceSqlFile(connection, "db_init_create_procedure.sql", "$$");
+        tryExecuteResourceSqlFile(connection, "db_init_insert_pre_data.sql", ";");
     }
 
-    protected void tryExecuteResourceSqlFile(Connection connection, ClassLoader classLoader, String fileResourcePath, String delimiter) throws SQLException, IOException {
-        URL fileURL = classLoader.getResource(fileResourcePath);
+    protected void tryExecuteResourceSqlFile(Connection connection, String resourceFileName, String delimiter) throws SQLException, IOException {
+        URL fileURL = PackageLandmark.class.getResource(resourceFileName);
         if (fileURL != null) {
             log.info("Executing SQL file URL=" + getFormattedLogURL(fileURL.toString()));
             executeSqlFile(connection, fileURL, delimiter);
             log.info("Execution done. SQL file URL=" + getFormattedLogURL(fileURL.toString()));
         } else {
-            log.info("Execution will not process. Because file is not found. SQL file resource path=[" + fileResourcePath + ']');
+            log.info("Execution will not process. Because file is not found. SQL file resource path=[" + resourceFileName + ']');
         }
     }
 
