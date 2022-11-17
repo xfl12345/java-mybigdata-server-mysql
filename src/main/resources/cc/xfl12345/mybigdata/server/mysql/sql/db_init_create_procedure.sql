@@ -1,5 +1,12 @@
 DELIMITER $$
 
+CREATE TRIGGER string_content_auto_fill_length_trigger BEFORE INSERT ON string_content FOR EACH ROW
+BEGIN
+  IF new.content_length IS NULL THEN
+    SET new.content_length = CHAR_LENGTH(new.content);
+  END IF;
+END $$
+
 # 准备插入一些初始信息
 # 来个插入数据的正规流程示范
 # 先向 global_data_record 表注册，通过查询 UUID 拿到 global_id

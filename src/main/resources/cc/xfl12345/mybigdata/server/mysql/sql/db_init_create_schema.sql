@@ -6,9 +6,9 @@
 * Date: 2021/6/9 17:00:00
 */
 
-# 优先创建 字符串记录表 ，毕竟 全局ID记录表 对 字符串表 存在必要依赖
-# 所以必须临时关闭外键检查
-SET FOREIGN_KEY_CHECKS = 0;
+
+# 启用外键检查
+SET FOREIGN_KEY_CHECKS = 1;
 
 /**
   一个庞大的 字符串记录表，暂时还没做来源系统
@@ -16,27 +16,20 @@ SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE string_content
 (
     `global_id`      bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
-    `data_format`    bigint comment '字符串结构格式',
     `content_length` smallint        NOT NULL default -1 comment '字符串长度',
     `content`        varchar(768)    NOT NULL comment '字符串内容，最大长度为 768 个字符',
     unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
-    index boost_query_id (data_format, content_length) comment '加速查询主键，避免全表扫描',
+    index boost_query_length (content_length) comment '加速查询主键，避免全表扫描',
     unique key boost_query_content (content(768)) comment '加速检索字符串内容'
 ) ENGINE = InnoDB
   COMMENT '字符串记录表'
   ROW_FORMAT = DYNAMIC;
 
-INSERT INTO string_content (global_id, data_format, content)
-    # 第一个字符串，关于数据格式——text
-values (1, 1, 'text');
-
-# 设置字符串格式的默认值为 text
-ALTER TABLE string_content
-    ALTER COLUMN data_format SET DEFAULT 1;
-
 INSERT INTO string_content (global_id, content)
-    # 第二个字符串，是一个空字符串
-VALUES (2, ''),
+       # 第一个字符串，是一个空字符串
+values (1, ''),
+       # 第二个字符串，关于数据格式——text
+       (2, 'text'),
        # 第三个字符串，关于 "描述" 本身
        (3, '说明、描述'),
        # 第四个字符串，关于 第一个字符串 的描述
@@ -58,6 +51,10 @@ VALUES (2, ''),
        # 第十二个字符串，关于 布尔值表 的名称
        (12, 'boolean_content');
 
+# 补完字符串长度
+UPDATE string_content
+SET content_length = CHAR_LENGTH(content)
+WHERE content_length = default(content_length);
 
 
 /**
@@ -85,33 +82,30 @@ CREATE TABLE global_data_record
 
 INSERT INTO global_data_record (id, uuid, table_name, description)
     # 先斩后奏 之 关联已有的 字符串 数据
-VALUES (1, '00000000-cb7a-11eb-0000-f828196a1686', 6, 4),
-       (2, '00000001-cb7a-11eb-0000-f828196a1686', 6, 2),
+VALUES (1, '00000000-cb7a-11eb-0000-f828196a1686', 6, 1),
+       (2, '00000001-cb7a-11eb-0000-f828196a1686', 6, 4),
        (3, '00000002-cb7a-11eb-0000-f828196a1686', 6, 3),
        (4, '00000003-cb7a-11eb-0000-f828196a1686', 6, 3),
        (5, '00000004-cb7a-11eb-0000-f828196a1686', 6, 3),
        (6, '00000005-cb7a-11eb-0000-f828196a1686', 6, 5),
        (7, '00000006-cb7a-11eb-0000-f828196a1686', 6, 3),
        (8, '00000007-cb7a-11eb-0000-f828196a1686', 6, 7),
-       (9, '00000008-cb7a-11eb-0000-f828196a1686', 6, 2),
-       (10, '00000009-cb7a-11eb-0000-f828196a1686', 6, 2),
-       (11, '0000000a-cb7a-11eb-0000-f828196a1686', 6, 2),
-       (12, '0000000b-cb7a-11eb-0000-f828196a1686', 6, 2);
+       # 常量，自己解释自己
+       (9, '00000008-cb7a-11eb-0000-f828196a1686', 6, 9),
+       (10, '00000009-cb7a-11eb-0000-f828196a1686', 6, 10),
+       (11, '0000000a-cb7a-11eb-0000-f828196a1686', 6, 3),
+       (12, '0000000b-cb7a-11eb-0000-f828196a1686', 6, 11);
 
-# 常量，自己解释自己
-UPDATE global_data_record SET description = 9 WHERE id = 9;
-UPDATE global_data_record SET description = 10 WHERE id = 10;
 
 # 为 字符串表 添加 全局ID 约束
 ALTER TABLE string_content
     add foreign key (global_id) references global_data_record (id) on delete restrict on update cascade;
+# 为 全局记录表的每行描述 添加 字符串ID来源 约束
+# 如果 string_content 删除一行，在 global_data_record 表里，与该行里的 global_id 有关联的所有行里的 description 都会赋值成 null
+# 如果 string_content 更新某行 global_id ，在 global_data_record 表里，与该行里的 global_id 有关联的所有行里的 description 都会同步更新成新的 global_id
+ALTER TABLE global_data_record
+    add foreign key (description) references string_content (global_id) on delete set null on update cascade;
 
-# 添加 字符串格式 引用出处（自环）
-ALTER TABLE string_content
-    add foreign key (data_format) references string_content (global_id) on delete restrict on update cascade;
-
-# 启用外键检查
-SET FOREIGN_KEY_CHECKS = 1;
 
 /**
   布尔值表。只有两行数据的表。为的只是维护架构逻辑的一致性。
@@ -136,22 +130,6 @@ INSERT INTO boolean_content (global_id, content) VALUES (21, false);
 
 
 ALTER TABLE global_data_record AUTO_INCREMENT = 100;
-
-/**
-  因为自环引用会导致自锁，所以以下给出 将 string_content 表里的
-  global_id 从 1 改成 1000 的方法：
-
-    UPDATE string_content
-    SET data_format = 2
-    WHERE data_format = 1
-
-    UPDATE global_data_record SET global_id = 1000 WHERE global_id = 1
-
-    UPDATE string_content
-    SET data_format = 1000
-    WHERE data_format = 2
-
- */
 
 /**
   MyBigData 特色功能之一，就是使用JSON Schema完成对MySQL模型化操作
@@ -281,8 +259,3 @@ CREATE TABLE auth_account
 ) ENGINE = InnoDB
   COMMENT '账号表'
   ROW_FORMAT = Dynamic;
-
-# 补完字符串长度
-UPDATE string_content
-SET content_length = CHAR_LENGTH(content)
-WHERE content_length = default(content_length);

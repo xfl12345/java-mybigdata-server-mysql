@@ -26,13 +26,6 @@ public class StringContent implements OpenCloneable, Serializable {
     private Long globalId;
 
     /**
-     * 字符串结构格式
-     */
-    @javax.persistence.Column(name = "data_format", nullable = true)
-    @io.swagger.annotations.ApiModelProperty("字符串结构格式")
-    private Long dataFormat;
-
-    /**
      * 字符串长度
      */
     @javax.persistence.Column(name = "content_length", nullable = false)

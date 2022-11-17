@@ -100,11 +100,6 @@ SELECT insert_description_to_string_content(
 #    "description": "string_content表的插表模型",
 #    "type": "object",
 #    "properties": {
-#        "data_format": {
-#            "description": "字符串结构格式",
-#            "type": "string",
-#            "maxLength": 16000
-#        },
 #        "content": {
 #            "description": "字符串内容，最大长度为16000个字符",
 #            "type": "string",
