@@ -1,10 +1,13 @@
 DELIMITER $$
 
-CREATE TRIGGER string_content_auto_fill_length_trigger BEFORE INSERT ON string_content FOR EACH ROW
+CREATE TRIGGER string_content_insert_auto_fill_length_trigger BEFORE INSERT ON string_content FOR EACH ROW
 BEGIN
-  IF new.content_length IS NULL THEN
-    SET new.content_length = CHAR_LENGTH(new.content);
-  END IF;
+  SET new.content_length = CHAR_LENGTH(new.content);
+END $$
+
+CREATE TRIGGER string_content_update_auto_fill_length_trigger BEFORE UPDATE ON string_content FOR EACH ROW
+BEGIN
+  SET new.content_length = CHAR_LENGTH(new.content);
 END $$
 
 # 准备插入一些初始信息

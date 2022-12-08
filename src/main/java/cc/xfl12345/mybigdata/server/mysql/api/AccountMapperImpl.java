@@ -1,9 +1,10 @@
 package cc.xfl12345.mybigdata.server.mysql.api;
 
 import cc.xfl12345.mybigdata.server.common.api.AccountMapper;
-import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
+import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
 import cc.xfl12345.mybigdata.server.common.database.pojo.CommonAccount;
+import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
 import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.AuthAccount;
 import lombok.Getter;
@@ -23,16 +24,12 @@ public class AccountMapperImpl implements AccountMapper {
 
     @Getter
     @Setter
-    protected String fieldCanNotBeNullMessageTemplate = AppConst.FIELD_CAN_NOT_BE_NULL_MESSAGE_TEMPLATE;
+    protected FieldNotNullChecker fieldNotNullChecker = DefaultSingleton.FIELD_NOT_NULL_CHECKER;
 
     @PostConstruct
     public void init() throws Exception {
-        if (authAccountMapper == null) {
-            throw new IllegalArgumentException(fieldCanNotBeNullMessageTemplate.formatted("authAccountMapper"));
-        }
-        if (idTypeConverter == null) {
-            throw new IllegalArgumentException(fieldCanNotBeNullMessageTemplate.formatted("idTypeConverter"));
-        }
+        fieldNotNullChecker.check(authAccountMapper, AuthAccount.class);
+        fieldNotNullChecker.check(idTypeConverter, "idTypeConverter");
     }
 
     public CommonAccount cast(AuthAccount account) {
@@ -47,10 +44,10 @@ public class AccountMapperImpl implements AccountMapper {
 
     public AuthAccount cast(CommonAccount account) {
         AuthAccount item = new AuthAccount();
-        idTypeConverter.injectId2Object(account.getAccountId(), item::setAccountId);
+        item.setAccountId(idTypeConverter.convert(account.getAccountId()));
         item.setPasswordHash(account.getPasswordHash());
         item.setPasswordSalt(account.getPasswordSalt());
-        idTypeConverter.injectId2Object(account.getExtraInfoId(), item::setExtraInfoId);
+        item.setExtraInfoId(idTypeConverter.convert(account.getExtraInfoId()));
 
         return item;
     }
@@ -81,6 +78,11 @@ public class AccountMapperImpl implements AccountMapper {
     }
 
     @Override
+    public List<CommonAccount> selectBatchById(List<Object> globalIdList, String... fields) {
+        return authAccountMapper.selectBatchById(globalIdList, fields).parallelStream().map(this::cast).toList();
+    }
+
+    @Override
     public Object selectId(CommonAccount account) {
         return authAccountMapper.selectId(cast(account));
     }
@@ -93,6 +95,26 @@ public class AccountMapperImpl implements AccountMapper {
     @Override
     public void deleteById(Object globalId) {
         authAccountMapper.deleteById(globalId);
+    }
+
+    @Override
+    public void deleteBatchById(List<Object> globalIdList) {
+        authAccountMapper.deleteBatchById(globalIdList);
+    }
+
+    @Override
+    public boolean isForUpdate() {
+        return authAccountMapper.isForUpdate();
+    }
+
+    @Override
+    public void setForUpdate(boolean forUpdate) {
+        authAccountMapper.setForUpdate(forUpdate);
+    }
+
+    @Override
+    public void clearForUpdateFlag() {
+        authAccountMapper.clearForUpdateFlag();
     }
 
     @Override

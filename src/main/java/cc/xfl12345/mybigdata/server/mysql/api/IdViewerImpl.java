@@ -3,12 +3,11 @@ package cc.xfl12345.mybigdata.server.mysql.api;
 import cc.xfl12345.mybigdata.server.common.api.IdViewer;
 import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
 import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
+import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.data.requirement.DataRequirementPack;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
-import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
+import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.TableMapperProperties;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.DaoPack;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,38 +19,21 @@ import javax.annotation.PostConstruct;
 public class IdViewerImpl implements IdViewer {
     @Getter
     @Setter
-    protected String fieldCanNotBeNullMessageTemplate = AppConst.FIELD_CAN_NOT_BE_NULL_MESSAGE_TEMPLATE;
-
-    protected String mapperNotFoundMessageTemplate = AppConst.MAPPER_NOT_FOUND_MESSAGE_TEMPLATE;
+    protected FieldNotNullChecker fieldNotNullChecker = DefaultSingleton.FIELD_NOT_NULL_CHECKER;
 
     @Getter
     @Setter
-    protected DaoPack daoPack;
-
     protected TableBasicMapper<GlobalDataRecord> globalDataRecordMapper;
 
+    @Getter
+    @Setter
     protected CoreTableCache coreTableCache;
 
-    protected AppIdTypeConverter idTypeConverter;
 
     @PostConstruct
     public void init() throws Exception {
-        if (daoPack == null) {
-            throw new IllegalArgumentException(fieldCanNotBeNullMessageTemplate.formatted("daoPack"));
-        }
-
-        TableMapperProperties tableMapperProperties = daoPack.getTableMapperProperties();
-        tableMapperProperties.checkProperties();
-
-        coreTableCache = tableMapperProperties.getCoreTableCache();
-        idTypeConverter = tableMapperProperties.getIdTypeConverter();
-        globalDataRecordMapper = daoPack.getMapper(GlobalDataRecord.class);
-
-        if (globalDataRecordMapper == null) {
-            throw new IllegalArgumentException(
-                mapperNotFoundMessageTemplate.formatted(GlobalDataRecord.class.getCanonicalName())
-            );
-        }
+        fieldNotNullChecker.check(coreTableCache, "coreTableCache");
+        fieldNotNullChecker.check(globalDataRecordMapper, GlobalDataRecord.class);
     }
 
     @Override
@@ -71,9 +53,8 @@ public class IdViewerImpl implements IdViewer {
         }
 
         AppDataType appDataType = AppDataType.Null;
-        String tableName = coreTableCache.getTableNameCache().getKey(idTypeConverter.convert(tableNameId));
-        if (tableName != null) {
-            appDataType = daoPack.getMapperPackByTableName(tableName).getDataType();
+        if (tableNameId != null) {
+            appDataType = coreTableCache.getPoInfo(coreTableCache.getPojoClass(tableNameId)).getDataType();
         }
 
         return appDataType;

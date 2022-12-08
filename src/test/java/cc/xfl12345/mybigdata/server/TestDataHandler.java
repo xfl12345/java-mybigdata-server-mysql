@@ -1,6 +1,5 @@
 package cc.xfl12345.mybigdata.server;
 
-import cc.xfl12345.mybigdata.server.common.data.handler.StringTypeHandler;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.spring.helper.JdbcContextFinalizer;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -17,7 +16,6 @@ public class TestDataHandler {
 
 
 
-        StringTypeHandler stringTypeHandler = new StringTypeHandler();
         // stringTypeHandler.setUuidGenerator(Generators.timeBasedGenerator());
         // stringTypeHandler.setCoreTableCache(coreTableCache);
         // stringTypeHandler.init();
@@ -26,7 +24,7 @@ public class TestDataHandler {
 
         // StringTypeResult stringTypeResult = stringTypeHandler.selectStringByFullText("text", null);
         // printJSON(stringTypeResult);
-        // if (stringTypeResult.getSimpleResult().equals(SimpleCoreTableCurdResult.SUCCEED)) {
+        // if (stringTypeResult.getSimpleResult().equals(TableCurdResult.SUCCEED)) {
         //     printJSON(stringTypeHandler.updateStringByGlobalId("text666", stringTypeResult.getStringContent().getGlobalId()));
         //     printJSON(stringTypeHandler.updateStringByFullText("text666", "text"));
         // }

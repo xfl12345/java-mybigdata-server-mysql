@@ -2,6 +2,7 @@ package cc.xfl12345.mybigdata.server;
 
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
+import cc.xfl12345.mybigdata.server.mysql.spring.helper.JdbcContextFinalizer;
 import com.alibaba.druid.DbType;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.sql.SQLUtils;
@@ -14,18 +15,14 @@ import org.teasoft.bee.osql.BeeException;
 import org.teasoft.bee.osql.Condition;
 import org.teasoft.bee.osql.Op;
 import org.teasoft.bee.osql.SuidRich;
-import org.teasoft.bee.osql.chain.Select;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
 import org.teasoft.honey.osql.core.HoneyFactory;
 import org.teasoft.honey.osql.core.ObjectToSQLRich;
 
 import java.io.IOException;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 @Slf4j
@@ -39,24 +36,7 @@ public class StudyBeeOrm {
         StudyBeeOrm studyBeeOrm = new StudyBeeOrm();
         studyBeeOrm.justTest(BeeFactory.getHoneyFactory());
 
-        Enumeration<Driver> drivers = DriverManager.getDrivers();
-        Driver d = null;
-        String driverInstanceName;
-        int failedCount = 0;
-        while (drivers.hasMoreElements()) {
-            try {
-                d = drivers.nextElement();
-                driverInstanceName = d.toString();
-                DriverManager.deregisterDriver(d);
-                log.info(String.format("Driver %s deregistered", driverInstanceName));
-            } catch (SQLException ex) {
-                failedCount += 1;
-                log.error(String.format("Error deregistering driver %s", d) + ":" + ex);
-                if (failedCount >= 3) {
-                    break;
-                }
-            }
-        }
+        JdbcContextFinalizer.deregister(null);
     }
 
     public void justTest(HoneyFactory honeyFactory) {
@@ -65,6 +45,7 @@ public class StudyBeeOrm {
         SuidRich suid = honeyFactory.getSuidRich();
 
         // 插入两行空的 GlobalDataRecord
+        printStart();
         ArrayList<GlobalDataRecord> records = new ArrayList<>();
         GlobalDataRecord globalDataRecord = new GlobalDataRecord();
         globalDataRecord.setUuid(uuidGenerator.generate().toString());
@@ -73,30 +54,45 @@ public class StudyBeeOrm {
         globalDataRecord.setUuid(uuidGenerator.generate().toString());
         records.add(globalDataRecord);
         System.out.println(suid.insert(records));
+        printEnd();
 
-        Condition condition = new ConditionImpl();
-        condition.op("table_name", Op.eq, null);
-        List<GlobalDataRecord> recordList = suid.select(new GlobalDataRecord(), condition);
-
+        // 批量查询测试
+        printStart();
+        List<GlobalDataRecord> recordList = suid.select(
+            new GlobalDataRecord(),
+            new ConditionImpl().op(
+                GlobalDataRecord.Fields.uuid,
+                Op.in,
+                records.stream().map(GlobalDataRecord::getUuid).toList()
+            )
+        );
         System.out.println(recordList);
+        printEnd();
+
 
         // 超字段长度测试
+        printStart();
         StringContent stringContent = new StringContent();
         stringContent.setContent("0123456789".repeat(100));
         stringContent.setGlobalId(recordList.get(0).getId());
         executeInsert(honeyFactory, stringContent);
+        printEnd();
 
         // unique key 冲突测试
+        printStart();
         stringContent = new StringContent();
         stringContent.setContent("text");
         stringContent.setGlobalId(recordList.get(0).getId());
         executeInsert(honeyFactory, stringContent);
+        printEnd();
 
         // 主键重复测试
+        printStart();
         globalDataRecord = new GlobalDataRecord();
         globalDataRecord.setUuid(uuidGenerator.generate().toString());
         globalDataRecord.setId(recordList.get(0).getId());
         executeInsert(honeyFactory, globalDataRecord);
+        printEnd();
 
 
         // // 关联查询测试
@@ -107,6 +103,7 @@ public class StudyBeeOrm {
 
 
         // 外键约束拒绝删除测试
+        printStart();
         stringContent = new StringContent();
         stringContent.setContent("text");
         try {
@@ -118,6 +115,18 @@ public class StudyBeeOrm {
                 handleSqlException(sqlException, stringContent);
             }
         }
+        printEnd();
+
+        // 条件测试
+        printStart();
+        Condition condition = new ConditionImpl();
+        condition.op(GlobalDataRecord.Fields.tableName, Op.eq, null);
+        recordList = suid.select(new GlobalDataRecord(), condition);
+        System.out.println(recordList);
+        System.out.println(suid.delete(new GlobalDataRecord(), condition));
+        printEnd();
+
+
 
         // honeyFactory.getPreparedSql()
         // honeyFactory.getBeeSql().select()
@@ -203,6 +212,16 @@ public class StudyBeeOrm {
             }
             default -> System.out.println("Not supported database.");
         }
+    }
+
+
+    public void printStart() {
+        System.out.print("\n".repeat(10));
+        System.out.println("#".repeat(60));
+    }
+    public void printEnd() {
+        System.out.println("#".repeat(60));
+        System.out.print("\n".repeat(10));
     }
 
 }

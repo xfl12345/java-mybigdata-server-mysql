@@ -2,8 +2,10 @@ package cc.xfl12345.mybigdata.server.mysql.api;
 
 import cc.xfl12345.mybigdata.server.common.api.DatabaseViewer;
 import cc.xfl12345.mybigdata.server.common.pojo.DatabaseDataSourceInfo;
+import cc.xfl12345.mybigdata.server.common.pojo.SuperObjectDatabase;
 import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.DaoPack;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
+import cc.xfl12345.mybigdata.server.mysql.pojo.PojoInfo;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.stat.DruidStatManagerFacade;
 import org.teasoft.bee.osql.SuidRich;
@@ -17,46 +19,56 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DatabaseViewerImpl implements DatabaseViewer {
     protected static DruidStatManagerFacade statManagerFacade = DruidStatManagerFacade.getInstance();
-    protected List<String> allTableName = Arrays.stream(EnumCoreTable.values()).parallel().map(EnumCoreTable::getName).toList();
+    protected List<String> allTableName;
 
     protected HashMap<String, List<String>> tableFieldNames;
 
     protected HashMap<String, Object> tableName2PojoInstance;
 
-    protected DaoPack daoPack;
+    protected CoreTableCache coreTableCache;
 
-    public DaoPack getDaoManager() {
-        return daoPack;
+    public CoreTableCache getCoreTableCache() {
+        return coreTableCache;
     }
 
-    public void setDaoManager(DaoPack daoPack) {
-        this.daoPack = daoPack;
+    public void setCoreTableCache(CoreTableCache coreTableCache) {
+        this.coreTableCache = coreTableCache;
     }
 
     @PostConstruct
     public void init() throws Exception {
         int coreTableCount = EnumCoreTable.values().length;
-        tableFieldNames = new HashMap<>(coreTableCount + 2);
-        tableName2PojoInstance = new HashMap<>(coreTableCount + 2);
+        allTableName = new ArrayList<>(coreTableCount);
+        tableFieldNames = new HashMap<>(coreTableCount);
+        tableName2PojoInstance = new HashMap<>(coreTableCount);
 
-        for (Class<?> cls : daoPack.getPojoClasses()) {
-            String tableName = daoPack.getMapperPackByPojoClass(cls).getTableName();
-            Object pojoInstance = cls.getDeclaredConstructor().newInstance();
+        SuperObjectDatabase<PojoInfo> pojoInfoDatabase = coreTableCache.getPojoInfoDatabase();
+        Map<Object, PojoInfo> pojoClassMap = pojoInfoDatabase.getSecondLevelMap(PojoInfo.Fields.pojoClass);
 
-            tableFieldNames.put(
-                tableName,
-                daoPack.getMapperPackByPojoClass(cls).getClassDeclaredInfo()
-                    .getPropertiesMap().keySet().stream().toList()
-            );
+        pojoInfoDatabase.getSecondLevelMap(PojoInfo.Fields.pojoClass).keySet().parallelStream()
+            .map(obj -> (Class<?>) obj)
+            .toList()
+            .forEach(pojoClass -> {
+                String tableName = pojoClassMap.get(pojoClass).getTableName();
+                allTableName.add(tableName);
 
-            tableName2PojoInstance.put(tableName, pojoInstance);
-        }
+                tableFieldNames.put(
+                    tableName,
+                    pojoClassMap.get(pojoClass).getClassDeclaredInfo()
+                        .getPropertiesMap().keySet().stream().toList()
+                );
+
+                tableName2PojoInstance.put(
+                    tableName,
+                    coreTableCache.getEmptyPoEntity(pojoClass)
+                );
+            });
     }
 
 

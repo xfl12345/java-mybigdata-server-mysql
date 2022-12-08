@@ -65,9 +65,9 @@ public class SqlErrorAnalystImpl implements SqlErrorAnalyst {
 
     @Override
     public TableCurdResult getTableCurdResult(@NonNull Exception exception) {
-        Throwable cause;
+        Throwable cause = exception;
         do {
-            cause = exception.getCause();
+            cause = cause.getCause();
         } while (cause != null && !(cause instanceof SQLException));
 
         if (cause instanceof SQLException sqlException) {

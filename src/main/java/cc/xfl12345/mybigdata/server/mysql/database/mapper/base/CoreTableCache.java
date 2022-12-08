@@ -1,11 +1,16 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
+import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
+import cc.xfl12345.mybigdata.server.common.pojo.SuperObjectDatabase;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
+import cc.xfl12345.mybigdata.server.common.utility.MyReflectUtils;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTableNames;
 import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.BooleanContent;
+import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
+import cc.xfl12345.mybigdata.server.mysql.pojo.PojoInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,12 +24,24 @@ import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
 import org.teasoft.honey.osql.core.SessionFactory;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
-public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
+public class CoreTableCache extends AbstractCoreTableCache<Object, String> {
+    @Getter
+    @Setter
+    protected ObjectMapper jacksonObjectMapper;
+
+    @Getter
+    protected SuperObjectDatabase<PojoInfo> pojoInfoDatabase;
+
+    @Getter
+    protected Map<Class<?>, PojoInfo> pojoClass2PojoInfoMap;
+
+    protected TwoWayMap<Object, Class<?>> tableNameId2ClassCache;
+
+    @Getter
+    protected Map<Class<?>, OpenCloneable> emptyPoEntites;
 
     public CoreTableCache() {
         tableNameCache = new TwoWayMap<>(EnumCoreTable.values().length + 1);
@@ -35,12 +52,58 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
         if (jacksonObjectMapper == null) {
             jacksonObjectMapper = new ObjectMapper();
         }
+        pojoInfoDatabase = new SuperObjectDatabase<>(
+            new PojoInfo(),
+            Set.of(PojoInfo.Fields.classDeclaredInfo, PojoInfo.Fields.emptyObject)
+        );
+
+        try {
+            Collection<Class<?>> pojoClasses = MyReflectUtils.getClasses(
+                GlobalDataRecord.class.getPackageName(),
+                false,
+                false,
+                true
+            );
+
+            emptyPoEntites = new HashMap<>(pojoClasses.size());
+            pojoClass2PojoInfoMap = new HashMap<>(pojoClasses.size());
+            Object hashMapThreadSafeLock = new Object();
+
+            pojoClasses.parallelStream().forEach(pojoClass -> {
+                OpenCloneable poInstance;
+                try {
+                    @SuppressWarnings("unchecked")
+                    PojoInfo pojoInfo = generatePojoInfo((Class<OpenCloneable>) pojoClass);
+                    poInstance = pojoInfo.getNewPoInstance();
+                    pojoInfoDatabase.add(pojoInfo);
+                    synchronized (hashMapThreadSafeLock) {
+                        emptyPoEntites.put(pojoClass, poInstance);
+                        pojoClass2PojoInfoMap.put(pojoClass, pojoInfo);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (RuntimeException runtimeException) {
+            if (runtimeException.getCause() instanceof Exception exception) {
+                throw exception;
+            } else {
+                throw runtimeException;
+            }
+        }
+
         super.init();
+
+        tableNameId2ClassCache = new TwoWayMap<>(EnumCoreTable.values().length);
+        tableNameCache.getValue2KeyMap().keySet().forEach(tableNameId -> tableNameId2ClassCache.put(
+            tableNameId,
+            pojoInfoDatabase.getObject(PojoInfo.Fields.tableName, tableNameCache.getKey(tableNameId)).getPojoClass()
+        ));
     }
 
-    @Getter
-    @Setter
-    protected ObjectMapper jacksonObjectMapper;
+    protected PojoInfo generatePojoInfo(Class<OpenCloneable> pojoClass) throws Exception {
+        return new PojoInfo(pojoClass);
+    }
 
     @Override
     public void refreshBooleanCache() throws Exception {
@@ -115,5 +178,28 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     @Override
     protected String tableNameOfBoolean() {
         return CoreTableNames.BOOLEAN_CONTENT;
+    }
+
+    @Override
+    public Object getTableNameId(Class<?> pojoClass) {
+        return tableNameId2ClassCache.getKey(pojoClass);
+    }
+
+    @Override
+    public Class<?> getPojoClass(Object id) {
+        return tableNameId2ClassCache.getValue(id);
+    }
+
+    @Override
+    public Object getEmptyPoEntity(Class<?> pojoClass) {
+        try {
+            return emptyPoEntites.get(pojoClass).clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public PojoInfo getPoInfo(Class<?> pojoClass) {
+        return pojoClass2PojoInfoMap.get(pojoClass);
     }
 }

@@ -5,7 +5,9 @@ public interface BeeTableMapperConfig<Pojo> {
 
     String getIdFieldName();
 
-    Object getId(Pojo value);
+    Object getId(Pojo pojo);
+
+    void setId(Pojo pojo, Object id);
 
     Pojo getNewPojoInstance();
 }

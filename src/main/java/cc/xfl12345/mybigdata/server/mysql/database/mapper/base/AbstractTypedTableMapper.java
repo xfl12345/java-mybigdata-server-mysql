@@ -1,54 +1,30 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
-import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
+import cc.xfl12345.mybigdata.server.common.appconst.CURD;
+import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
-import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
-import cc.xfl12345.mybigdata.server.mysql.pojo.ClassDeclaredInfo;
-import cc.xfl12345.mybigdata.server.mysql.pojo.MapperPack;
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.persistence.Table;
+import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
 
 public abstract class AbstractTypedTableMapper<Pojo>
     extends AbstractTableMapper
     implements TableBasicMapper<Pojo> {
-    @Getter
-    @Setter
-    protected MapperPack<Pojo> mapperPack;
+    protected AffectedRowsCountChecker affectedRowsCountChecker;
 
-    protected MapperPack<Pojo> generateMapperPack() throws Exception {
-        return generateMapperPack(this);
-    }
-
-    protected <T> MapperPack<T> generateMapperPack(TableBasicMapper<T> mapper) throws Exception {
-        Class<T> pojoClass = mapper.getPojoType();
-        ClassDeclaredInfo classDeclaredInfo = new ClassDeclaredInfo();
-        classDeclaredInfo.setClazz(pojoClass);
-        classDeclaredInfo.init();
-
-        String databaseTableName = classDeclaredInfo.getJpaAnnotationByType(Table.class).get(0).name();
-        EnumCoreTable enumCoreTable = EnumCoreTable.getByName(databaseTableName);
-        AppDataType dataType = null;
-
-        if (enumCoreTable != null) {
-            switch (enumCoreTable) {
-                case TABLE_SCHEMA_RECORD -> dataType = AppDataType.JsonSchema;
-                case STRING_CONTENT -> dataType = AppDataType.String;
-                case BOOLEAN_CONTENT -> dataType = AppDataType.Boolean;
-                case NUMBER_CONTENT -> dataType = AppDataType.Number;
-                case GROUP_RECORD -> dataType = AppDataType.Array;
-                case OBJECT_RECORD -> dataType = AppDataType.Object;
-            }
+    @Override
+    public void init() throws Exception {
+        super.init();
+        affectedRowsCountChecker = mapperProperties.getAffectedRowsCountChecker();
+        if (affectedRowsCountChecker == null) {
+            affectedRowsCountChecker = DefaultSingleton.AFFECTED_ROWS_COUNT_CHECKER;
         }
-
-        return MapperPack.<T>builder()
-            .pojoClass(pojoClass)
-            .dataType(dataType)
-            .mapper(mapper)
-            .coreTable(enumCoreTable)
-            .classDeclaredInfo(classDeclaredInfo)
-            .tableName(databaseTableName)
-            .build();
     }
+
+    public void checkAffectedRowShouldBeOne(long affectedRowsCount, CURD operation) {
+        affectedRowsCountChecker.checkAffectedRowShouldBeOne(affectedRowsCount, operation, getTableName());
+    }
+
+    public void checkAffectedRowsCountDoesNotMatch(long affectedRowsCount, long expectCount, CURD operation) {
+        affectedRowsCountChecker.checkAffectedRowsCountDoesNotMatch(affectedRowsCount, expectCount, operation, getTableName());
+    }
+    public abstract String getTableName();
 }

@@ -117,11 +117,11 @@ dependencies {
         // runtimeClasspath platform(myDependencyParent)
         testAnnotationProcessor platform(myDependencyParent)
         testImplementation platform(myDependencyParent)
-        testRuntimeOnly platform(myDependencyParent)
+        // testRuntimeOnly platform(myDependencyParent)
         // testRuntimeClasspath platform(myDependencyParent)
     }
 
-    String depsParentVersion = '0.0.5'
+    String depsParentVersion = '0.0.8'
     String parentModuleVersion = getProject().getVersion()
     if (isLocalDevMode) {
         applyPlatform2All(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
@@ -152,8 +152,9 @@ dependencies {
     // 注解神器 getter setter toString builder
     // https://mvnrepository.com/artifact/org.projectlombok/lombok
     annotationProcessor group: 'org.projectlombok', name: 'lombok'
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok'
     testImplementation group: 'org.projectlombok', name: 'lombok'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok'
+    // testRuntimeOnly group: 'org.projectlombok', name: 'lombok'
 
     // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
     api group: 'javax.servlet', name: 'javax.servlet-api'
@@ -222,6 +223,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-logging
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-logging'
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
     // api fileTree(dir:'lib',includes:['**/*.*'])
 }

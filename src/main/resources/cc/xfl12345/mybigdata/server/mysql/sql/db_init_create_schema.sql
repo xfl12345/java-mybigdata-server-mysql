@@ -16,7 +16,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE string_content
 (
     `global_id`      bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
-    `content_length` smallint        NOT NULL default -1 comment '字符串长度',
+    `content_length` smallint        comment '字符串长度',
     `content`        varchar(768)    NOT NULL comment '字符串内容，最大长度为 768 个字符',
     unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
     index boost_query_length (content_length) comment '加速查询主键，避免全表扫描',
