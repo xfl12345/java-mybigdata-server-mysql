@@ -5,7 +5,6 @@ import cc.xfl12345.mybigdata.server.common.data.source.GlobalDataRecordDataSourc
 import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractDataSource;
 import cc.xfl12345.mybigdata.server.common.database.pojo.CommonGlobalDataRecord;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
-import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.BeeTableMapper;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,10 +13,6 @@ public abstract class AbstractBeeDoubleLayerTableDataSource<Value, Pojo> extends
     @Getter
     @Setter
     protected AffectedRowsCountChecker affectedRowsCountChecker = DefaultSingleton.AFFECTED_ROWS_COUNT_CHECKER;
-
-    @Getter
-    @Setter
-    protected AppIdTypeConverter idTypeConverter;
 
     @Getter
     @Setter
@@ -31,7 +26,6 @@ public abstract class AbstractBeeDoubleLayerTableDataSource<Value, Pojo> extends
     public void init() throws Exception {
         fieldNotNullChecker.check(globalDataRecordDataSource, CommonGlobalDataRecord.class);
         fieldNotNullChecker.check(mapper, getPojoClass());
-        fieldNotNullChecker.check(idTypeConverter, "idTypeConverter");
         super.init();
     }
 

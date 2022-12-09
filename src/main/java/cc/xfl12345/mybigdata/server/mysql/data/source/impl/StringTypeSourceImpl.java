@@ -3,10 +3,12 @@ package cc.xfl12345.mybigdata.server.mysql.data.source.impl;
 
 import cc.xfl12345.mybigdata.server.common.data.source.DataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.StringTypeSource;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTableNames;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.AbstractBeeDoubleLayerTableDataSource;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.raw.bee.AbstractBeeDoubleLayerTableRawDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
+import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 
 public class StringTypeSourceImpl
     extends AbstractBeeDoubleLayerTableDataSource<String, StringContent>
@@ -34,9 +36,9 @@ public class StringTypeSourceImpl
             }
 
             @Override
-            protected StringContent getPojo(Object globalId, String value) {
+            protected StringContent getPojo(MbdId<?> globalId, String value) {
                 return StringContent.builder()
-                    .globalId(idTypeConverter.convert(globalId))
+                    .globalId(MysqlMbdId.getValue(globalId))
                     .content(value)
                     .build();
             }

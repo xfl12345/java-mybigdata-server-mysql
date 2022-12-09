@@ -3,14 +3,18 @@ package cc.xfl12345.mybigdata.server.mysql.data.source.impl;
 import cc.xfl12345.mybigdata.server.common.data.source.DataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.GroupTypeSource;
 import cc.xfl12345.mybigdata.server.common.data.source.StringTypeSource;
+import cc.xfl12345.mybigdata.server.common.data.source.pojo.CommonMbdId;
+import cc.xfl12345.mybigdata.server.common.data.source.pojo.CommonMdbGroup;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdGroup;
-import cc.xfl12345.mybigdata.server.common.data.source.pojo.PlainMdbGroup;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.common.pojo.ReactiveMode;
 import cc.xfl12345.mybigdata.server.mysql.data.pojo.ReactiveNoCacheMbdGroup;
-import cc.xfl12345.mybigdata.server.mysql.data.source.base.raw.AbstractTripleLayerTableRawDataSource;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.AbstractBeeTripleLayerTableDataSource;
+import cc.xfl12345.mybigdata.server.mysql.data.source.base.MysqlMbdGroup;
+import cc.xfl12345.mybigdata.server.mysql.data.source.base.raw.AbstractTripleLayerTableRawDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GroupContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GroupRecord;
+import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import lombok.Getter;
 import lombok.Setter;
 import org.teasoft.bee.osql.Condition;
@@ -18,60 +22,53 @@ import org.teasoft.bee.osql.Op;
 import org.teasoft.bee.osql.OrderType;
 import org.teasoft.honey.osql.core.ConditionImpl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.stream.IntStream;
 
 public class GroupTypeSourceImpl
-    extends AbstractBeeTripleLayerTableDataSource<MbdGroup, GroupRecord, GroupContent>
+    extends AbstractBeeTripleLayerTableDataSource<CommonMdbGroup, GroupRecord, GroupContent>
     implements GroupTypeSource {
     @Getter
     @Setter
     protected StringTypeSource stringTypeSource;
 
     @Override
-    protected DataSource<MbdGroup> generateRawImpl() {
+    protected DataSource<CommonMdbGroup> generateRawImpl() {
         return new AbstractTripleLayerTableRawDataSource<>(globalDataRecordDataSource, firstMapper, secondMapper) {
             @Override
-            public Object selectId(MbdGroup mbdGroup) {
+            public MbdId<?> selectId(CommonMdbGroup mbdGroup) {
                 return null;
             }
 
             @Override
-            public Class<MbdGroup> getValueType() {
-                return MbdGroup.class;
+            public Class<CommonMdbGroup> getValueType() {
+                return CommonMdbGroup.class;
             }
 
-            // @Override
-            // protected GroupRecord getFirstPojo(MbdGroup objects) {
-            //     return GroupRecord.builder()
-            //         .globalId(idTypeConverter.convert(objects.getGlobalId()))
-            //         .groupName(idTypeConverter.convert(stringTypeSource.insert4IdOrGetId(objects.getName())))
-            //         .uniqueItems(objects.isUniqueItems())
-            //         .build();
-            // }
-
             @Override
-            protected GroupRecord getFirstPojo(Object globalId, MbdGroup objects) {
+            protected GroupRecord getFirstPojo(MbdId<?> globalId, CommonMdbGroup objects) {
                 return GroupRecord.builder()
-                    .globalId(idTypeConverter.convert(globalId))
-                    .groupName(idTypeConverter.convert(stringTypeSource.insert4IdOrGetId(objects.getName())))
-                    // .groupName(2L)
+                    .globalId(MysqlMbdId.getValue(globalId))
+                    .groupName(MysqlMbdId.getValue(stringTypeSource.insert4IdOrGetId(objects.getName())))
                     .uniqueItems(objects.isUniqueItems())
                     .build();
             }
 
             @Override
-            protected List<GroupContent> getSecondPojo(Object globalId, MbdGroup objects) {
-                List<Object> itemList = objects.getItems();
+            protected List<GroupContent> getSecondPojo(MbdId<?> globalId, CommonMdbGroup objects) {
+                List<CommonMbdId> itemList = objects.getItems();
                 int arrayLength = itemList.size();
                 List<GroupContent> groupContentList = new ArrayList<>(arrayLength);
                 for (int i = 0; i < arrayLength; i++) {
                     GroupContent groupContent = new GroupContent();
-                    groupContent.setGlobalId(idTypeConverter.convert(globalId));
+                    groupContent.setGlobalId(MysqlMbdId.getValue(globalId));
                     groupContent.setItemIndex((long) i);
-                    groupContent.setItem(idTypeConverter.convert(itemList.get(i)));
+                    groupContent.setItem(MysqlMbdId.getValue(itemList.get(i)));
                     groupContentList.add(groupContent);
                 }
 
@@ -79,22 +76,22 @@ public class GroupTypeSourceImpl
             }
 
             @Override
-            protected MbdGroup getValue(GroupRecord groupRecord, List<GroupContent> groupContents) {
-                PlainMdbGroup mbdGroup = new PlainMdbGroup();
-                mbdGroup.setGlobalId(groupRecord.getGlobalId());
-                mbdGroup.setName(stringTypeSource.selectById(groupRecord.getGroupName()));
+            protected CommonMdbGroup getValue(GroupRecord groupRecord, List<GroupContent> groupContents) {
+                CommonMdbGroup mbdGroup = new CommonMdbGroup();
+                mbdGroup.setGlobalId(new CommonMbdId(groupRecord.getGlobalId()));
+                mbdGroup.setName(stringTypeSource.selectById(new MysqlMbdId(groupRecord.getGroupName())));
                 mbdGroup.setUniqueItems(groupRecord.getUniqueItems());
                 mbdGroup.setItems(groupContents.parallelStream().map(
-                    item -> (Object) item.getItem()
+                    item -> new CommonMbdId(item.getItem())
                 ).toList());
 
                 return mbdGroup;
             }
 
             @Override
-            protected List<MbdGroup> getValue(List<GroupRecord> groupRecords, List<GroupContent> groupContents) {
+            protected List<CommonMdbGroup> getValue(List<GroupRecord> groupRecords, List<GroupContent> groupContents) {
                 int arrayLength = groupRecords.size();
-                MbdGroup[] resultArray = new MbdGroup[arrayLength];
+                CommonMdbGroup[] resultArray = new CommonMdbGroup[arrayLength];
 
                 // 先给 GroupContent 根据 id 分开来，随便排个序
                 Map<Object, ConcurrentSkipListMap<Long, GroupContent>> categorizedContent = new ConcurrentHashMap<>(arrayLength);
@@ -112,7 +109,10 @@ public class GroupTypeSourceImpl
                 IntStream.range(0, arrayLength).parallel().forEach(i -> {
                     GroupRecord groupRecord = groupRecords.get(i);
                     List<GroupContent> groupContentList = categorizedContent
-                        .get(groupRecord.getGlobalId()).values().parallelStream().toList();
+                        .get(groupRecord.getGlobalId())
+                        .values()
+                        .parallelStream()
+                        .toList();
                     resultArray[i] = getValue(groupRecord, groupContentList);
                 });
 
@@ -120,30 +120,33 @@ public class GroupTypeSourceImpl
             }
 
             @Override
-            protected Condition getEqualIdCondition(Object id) {
-                return new ConditionImpl().op(GroupContent.Fields.globalId, Op.eq, id);
+            protected Condition getEqualIdCondition(MbdId<?> id) {
+                return new ConditionImpl().op(GroupContent.Fields.globalId, Op.eq, MysqlMbdId.getValue(id));
             }
 
             @Override
-            protected Condition getEqualIdAndSortCondition(Object id) {
+            protected Condition getEqualIdAndSortCondition(MbdId<?> id) {
                 return getEqualIdCondition(id).orderBy(GroupContent.Fields.itemIndex, OrderType.ASC);
             }
 
             @Override
-            protected Condition getEqualIdCondition(List<Object> idList) {
-                return new ConditionImpl().op(GroupContent.Fields.globalId, Op.in, idList);
+            protected Condition getEqualIdCondition(List<MbdId<?>> idList) {
+                return new ConditionImpl().op(
+                    GroupContent.Fields.globalId,
+                    Op.in,
+                    idList.parallelStream().map(MysqlMbdId::getValue).toList()
+                );
             }
         };
     }
 
     @Override
-    public MbdGroup getReactiveMbdGroup(Object globalId, ReactiveMode mode) {
-        MbdGroup result;
+    public MbdGroup<MbdId<?>> getReactiveMbdGroup(CommonMbdId globalId, ReactiveMode mode) {
+        MbdGroup<MbdId<?>> result;
 
         if (mode.getCacheFlag().isDisable()) {
-            ReactiveNoCacheMbdGroup group = new ReactiveNoCacheMbdGroup(globalId, mode.getLockFlag().getBoolean());
+            ReactiveNoCacheMbdGroup group = new ReactiveNoCacheMbdGroup(new MysqlMbdId(globalId), mode.getLockFlag().getBoolean());
             group.setGroupContentMapper(secondMapper);
-            group.setIdTypeConverter(idTypeConverter);
             group.setStringTypeSource(stringTypeSource);
             result = group;
         } else {
@@ -153,8 +156,5 @@ public class GroupTypeSourceImpl
         return result;
     }
 
-    @Override
-    public Class<MbdGroup> getValueType() {
-        return MbdGroup.class;
-    }
+
 }

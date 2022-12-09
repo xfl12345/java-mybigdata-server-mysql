@@ -7,12 +7,13 @@ import cc.xfl12345.mybigdata.server.common.data.source.GlobalDataRecordDataSourc
 import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractDataSource;
 import cc.xfl12345.mybigdata.server.common.database.pojo.CommonGlobalDataRecord;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTableNames;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.raw.AbstractIndependentTableRawDataSource;
-import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.BeeTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
+import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,10 +31,6 @@ public class GlobalDataRecordDataSourceImpl
     @Getter
     @Setter
     protected AffectedRowsCountChecker affectedRowsCountChecker = DefaultSingleton.AFFECTED_ROWS_COUNT_CHECKER;
-
-    @Getter
-    @Setter
-    protected AppIdTypeConverter idTypeConverter = null;
 
     @Getter
     @Setter
@@ -55,7 +52,6 @@ public class GlobalDataRecordDataSourceImpl
     public void init() throws Exception {
         fieldNotNullChecker.check(tableMapper, GlobalDataRecord.class);
         fieldNotNullChecker.check(coreTableCache, "coreTableCache");
-        fieldNotNullChecker.check(idTypeConverter, "idTypeConverter");
         fieldNotNullChecker.check(uuidGenerator, "uuidGenerator");
         if (dateFormat == null) {
             dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -118,46 +114,29 @@ public class GlobalDataRecordDataSourceImpl
 
     protected GlobalDataRecord getPojo(CommonGlobalDataRecord commonGlobalDataRecord) {
         GlobalDataRecord record = new GlobalDataRecord();
-        record.setId(idTypeConverter.convert(commonGlobalDataRecord.getId()));
+        record.setId(MysqlMbdId.getValue(commonGlobalDataRecord.getId()));
         record.setUuid(commonGlobalDataRecord.getUuid());
         record.setCreateTime(commonGlobalDataRecord.getCreateTime());
         record.setUpdateTime(commonGlobalDataRecord.getUpdateTime());
         record.setModifiedCount(commonGlobalDataRecord.getModifiedCount());
-        record.setTableName(idTypeConverter.convert(commonGlobalDataRecord.getTableName()));
-        record.setDescription(idTypeConverter.convert(commonGlobalDataRecord.getDescription()));
+        record.setTableName(MysqlMbdId.getValue(commonGlobalDataRecord.getTableName()));
+        record.setDescription(MysqlMbdId.getValue(commonGlobalDataRecord.getDescription()));
 
         return record;
     }
 
     protected CommonGlobalDataRecord getValue(GlobalDataRecord globalDataRecord) {
         CommonGlobalDataRecord record = new CommonGlobalDataRecord();
-        record.setId(globalDataRecord.getId());
+        record.setId(new MysqlMbdId(globalDataRecord.getId()));
         record.setUuid(globalDataRecord.getUuid());
         record.setCreateTime(globalDataRecord.getCreateTime());
         record.setUpdateTime(globalDataRecord.getUpdateTime());
         record.setModifiedCount(globalDataRecord.getModifiedCount());
-        record.setTableName(globalDataRecord.getTableName());
-        record.setDescription(globalDataRecord.getDescription());
+        record.setTableName(new MysqlMbdId(globalDataRecord.getTableName()));
+        record.setDescription(new MysqlMbdId(globalDataRecord.getDescription()));
 
         return record;
     }
-
-    // protected void checkAffectedRowsCountDoesNotMatch(long affectedRowsCount, long expectAffectedRowsCount, CURD operation) {
-    //     affectedRowsCountChecker.checkAffectedRowsCountDoesNotMatch(
-    //         affectedRowsCount,
-    //         expectAffectedRowsCount,
-    //         operation,
-    //         CoreTableNames.GLOBAL_DATA_RECORD
-    //     );
-    // }
-    //
-    // protected void checkAffectedRowShouldBeOne(long affectedRowsCount, CURD operation) {
-    //     affectedRowsCountChecker.checkAffectedRowShouldBeOne(
-    //         affectedRowsCount,
-    //         operation,
-    //         CoreTableNames.GLOBAL_DATA_RECORD
-    //     );
-    // }
 
     @Override
     public List<CommonGlobalDataRecord> getNewDataInstances(Date createTime, Class<?> pojoClass, int batchSize) {
@@ -186,7 +165,7 @@ public class GlobalDataRecordDataSourceImpl
     }
 
     @Override
-    public CommonGlobalDataRecord getNewDataInstance(Date createTime, Object tableNameId) {
+    public CommonGlobalDataRecord getNewDataInstance(Date createTime, MbdId<?> tableNameId) {
         CommonGlobalDataRecord globalDataRecord = new CommonGlobalDataRecord();
         globalDataRecord.setUuid(getUuidInString());
         globalDataRecord.setCreateTime(createTime);
@@ -197,9 +176,9 @@ public class GlobalDataRecordDataSourceImpl
     }
 
     @Override
-    public CommonGlobalDataRecord getNewRegisteredDataInstance(Date createTime, Object tableNameId) {
+    public CommonGlobalDataRecord getNewRegisteredDataInstance(Date createTime, MbdId<?> tableNameId) {
         CommonGlobalDataRecord globalDataRecord = getNewDataInstance(createTime, tableNameId);
-        Object id = insertAndReturnId(globalDataRecord);
+        MbdId<?> id = insertAndReturnId(globalDataRecord);
         globalDataRecord.setId(id);
         return globalDataRecord;
     }
@@ -237,7 +216,7 @@ public class GlobalDataRecordDataSourceImpl
     }
 
     @Override
-    public void updateOneRow(Object id, Date updateTime) {
+    public void updateOneRow(MbdId<?> id, Date updateTime) {
         ConditionImpl condition = new ConditionImpl();
         condition.setAdd(GlobalDataRecord.Fields.modifiedCount, 1);
         condition.set(GlobalDataRecord.Fields.updateTime, dateFormat.format(updateTime));

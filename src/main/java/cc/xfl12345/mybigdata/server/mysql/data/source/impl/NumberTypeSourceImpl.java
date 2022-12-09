@@ -3,10 +3,12 @@ package cc.xfl12345.mybigdata.server.mysql.data.source.impl;
 
 import cc.xfl12345.mybigdata.server.common.data.source.DataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.NumberTypeSource;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTableNames;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.AbstractBeeDoubleLayerTableDataSource;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.raw.bee.AbstractBeeDoubleLayerTableRawDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.NumberContent;
+import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 
 import java.math.BigDecimal;
 
@@ -42,9 +44,9 @@ public class NumberTypeSourceImpl
             }
 
             @Override
-            protected NumberContent getPojo(Object globalId, BigDecimal bigDecimal) {
+            protected NumberContent getPojo(MbdId<?> globalId, BigDecimal bigDecimal) {
                 return NumberContent.builder()
-                    .globalId(idTypeConverter.convert(globalId))
+                    .globalId(MysqlMbdId.getValue(globalId))
                     .content(bigDecimal.toPlainString())
                     .build();
             }

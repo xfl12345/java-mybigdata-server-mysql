@@ -2,6 +2,7 @@ package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
 import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.common.pojo.SuperObjectDatabase;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
 import cc.xfl12345.mybigdata.server.common.utility.MyReflectUtils;
@@ -10,6 +11,7 @@ import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.BooleanContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
+import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import cc.xfl12345.mybigdata.server.mysql.pojo.PojoInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
@@ -27,7 +29,7 @@ import org.teasoft.honey.osql.core.SessionFactory;
 import java.util.*;
 
 @Slf4j
-public class CoreTableCache extends AbstractCoreTableCache<Object, String> {
+public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     @Getter
     @Setter
     protected ObjectMapper jacksonObjectMapper;
@@ -38,7 +40,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Object, String> {
     @Getter
     protected Map<Class<?>, PojoInfo> pojoClass2PojoInfoMap;
 
-    protected TwoWayMap<Object, Class<?>> tableNameId2ClassCache;
+    protected TwoWayMap<MbdId<Long>, Class<?>> tableNameId2ClassCache;
 
     @Getter
     protected Map<Class<?>, OpenCloneable> emptyPoEntites;
@@ -101,6 +103,11 @@ public class CoreTableCache extends AbstractCoreTableCache<Object, String> {
         ));
     }
 
+    @Override
+    public Class<Long> getIdType() {
+        return Long.class;
+    }
+
     protected PojoInfo generatePojoInfo(Class<OpenCloneable> pojoClass) throws Exception {
         return new PojoInfo(pojoClass);
     }
@@ -117,9 +124,9 @@ public class CoreTableCache extends AbstractCoreTableCache<Object, String> {
             List<BooleanContent> booleanContents = suid.select(new BooleanContent());
             for (BooleanContent booleanContent : booleanContents) {
                 if (booleanContent.getContent()) {
-                    idOfTrue = booleanContent.getGlobalId();
+                    idOfTrue = new MysqlMbdId(booleanContent.getGlobalId());
                 } else {
-                    idOfFalse = booleanContent.getGlobalId();
+                    idOfFalse = new MysqlMbdId(booleanContent.getGlobalId());
                 }
             }
 
@@ -157,7 +164,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Object, String> {
             }
 
             for (StringContent content : contents) {
-                tableNameCache.put(content.getContent(), content.getGlobalId());
+                tableNameCache.put(content.getContent(), new MysqlMbdId(content.getGlobalId()));
             }
 
             transaction.commit();
@@ -181,24 +188,20 @@ public class CoreTableCache extends AbstractCoreTableCache<Object, String> {
     }
 
     @Override
-    public Object getTableNameId(Class<?> pojoClass) {
+    public MbdId<Long> getTableNameId(Class<?> pojoClass) {
         return tableNameId2ClassCache.getKey(pojoClass);
     }
 
     @Override
-    public Class<?> getPojoClass(Object id) {
+    public <ID2 extends MbdId<Long>> Class<?> getPojoClassByTableNameId(ID2 id) {
         return tableNameId2ClassCache.getValue(id);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Object getEmptyPoEntity(Class<?> pojoClass) {
-        try {
-            return emptyPoEntites.get(pojoClass).clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    public <T> T getEmptyPoEntity(Class<T> pojoClass) {
+        return (T) pojoClass2PojoInfoMap.get(pojoClass).getNewPoInstance();
     }
-
     public PojoInfo getPoInfo(Class<?> pojoClass) {
         return pojoClass2PojoInfoMap.get(pojoClass);
     }

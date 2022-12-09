@@ -1,11 +1,11 @@
 package cc.xfl12345.mybigdata.server.mysql.data.source.base.raw;
 
 
-import cc.xfl12345.mybigdata.server.common.appconst.CURD;
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.data.source.DataSource;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,13 +32,13 @@ public abstract class AbstractIndependentTableRawDataSource<Value, Pojo, Conditi
     protected abstract String getTableName();
 
     @Override
-    public Object insert4IdOrGetId(Value value) {
+    public MbdId<?> insert4IdOrGetId(Value value) {
         // 由于不是原子操作，所以理应禁止使用。
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Object insertAndReturnId(Value value) {
+    public MbdId<?> insertAndReturnId(Value value) {
         return mapper.insertAndReturnId(getPojo(value));
     }
 
@@ -53,7 +53,7 @@ public abstract class AbstractIndependentTableRawDataSource<Value, Pojo, Conditi
     }
 
     @Override
-    public Object selectId(Value value) {
+    public MbdId<?> selectId(Value value) {
         try {
             mapper.setForUpdate(true);
             return mapper.selectId(getPojo(value));
@@ -63,7 +63,7 @@ public abstract class AbstractIndependentTableRawDataSource<Value, Pojo, Conditi
     }
 
     @Override
-    public Value selectById(Object globalId) {
+    public Value selectById(MbdId<?> globalId) {
         try {
             mapper.setForUpdate(true);
             return getValue(mapper.selectById(globalId, getSelectContentFieldOnly()));
@@ -73,7 +73,7 @@ public abstract class AbstractIndependentTableRawDataSource<Value, Pojo, Conditi
     }
 
     @Override
-    public List<Value> selectBatchById(List<Object> globalIdList) {
+    public List<Value> selectBatchById(List<MbdId<?>> globalIdList) {
         try {
             mapper.setForUpdate(true);
             return mapper.selectBatchById(globalIdList).parallelStream().map(this::getValue).toList();
@@ -83,17 +83,17 @@ public abstract class AbstractIndependentTableRawDataSource<Value, Pojo, Conditi
     }
 
     @Override
-    public void updateById(Value value, Object globalId) {
+    public void updateById(Value value, MbdId<?> globalId) {
         mapper.updateById(getPojo(value), globalId);
     }
 
     @Override
-    public void deleteById(Object globalId) {
+    public void deleteById(MbdId<?> globalId) {
         mapper.deleteById(globalId);
     }
 
     @Override
-    public void deleteBatchById(List<Object> globalIdList) {
+    public void deleteBatchById(List<MbdId<?>> globalIdList) {
         mapper.deleteBatchById(globalIdList);
     }
 

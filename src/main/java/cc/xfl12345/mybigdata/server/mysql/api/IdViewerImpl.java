@@ -1,14 +1,15 @@
 package cc.xfl12345.mybigdata.server.mysql.api;
 
 import cc.xfl12345.mybigdata.server.common.api.IdViewer;
-import cc.xfl12345.mybigdata.server.common.appconst.AppConst;
 import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.data.requirement.DataRequirementPack;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
 import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
+import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import lombok.Getter;
 import lombok.Setter;
 import org.teasoft.bee.osql.transaction.Transaction;
@@ -37,31 +38,27 @@ public class IdViewerImpl implements IdViewer {
     }
 
     @Override
-    public AppDataType getDataTypeById(Object id) {
-        Object tableNameId;
+    public AppDataType getDataTypeById(MbdId<?> id) {
+        MysqlMbdId tableNameId;
         Transaction transaction = SessionFactory.getTransaction();
         try {
             transaction.begin();
             GlobalDataRecord globalDataRecord = globalDataRecordMapper.selectById(
                 id, GlobalDataRecord.Fields.id, GlobalDataRecord.Fields.tableName
             );
-            tableNameId = globalDataRecord.getTableName();
+            tableNameId = new MysqlMbdId(globalDataRecord.getTableName());
             transaction.commit();
         } catch (RuntimeException e) {
             transaction.rollback();
             throw e;
         }
 
-        AppDataType appDataType = AppDataType.Null;
-        if (tableNameId != null) {
-            appDataType = coreTableCache.getPoInfo(coreTableCache.getPojoClass(tableNameId)).getDataType();
-        }
-
-        return appDataType;
+        return coreTableCache.getPoInfo(coreTableCache.getPojoClassByTableNameId(tableNameId)).getDataType();
     }
 
     @Override
-    public Object getDataById(Object id, DataRequirementPack dataRequirement) {
+    public Object getDataById(MbdId<?> id, DataRequirementPack dataRequirement) {
+        // TODO
         return null;
     }
 

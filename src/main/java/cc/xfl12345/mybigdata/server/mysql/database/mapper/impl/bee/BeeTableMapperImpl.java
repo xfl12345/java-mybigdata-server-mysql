@@ -1,11 +1,13 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee;
 
 import cc.xfl12345.mybigdata.server.common.appconst.CURD;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AbstractTypedTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config.BeeTableMapperConfig;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config.BeeTableMapperConfigGenerator;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.AuthAccount;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
+import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import lombok.Getter;
 import lombok.Setter;
 import org.teasoft.bee.osql.Condition;
@@ -30,7 +32,7 @@ public class BeeTableMapperImpl<Pojo>
 
     protected String[] selectIdFieldOnly;
 
-    protected Function<Pojo, Object> insertAndReturnIdImpl = (pojo) -> {
+    protected Function<Pojo, MysqlMbdId> insertAndReturnIdImpl = (pojo) -> {
         throw new UnsupportedOperationException();
     };
 
@@ -43,7 +45,7 @@ public class BeeTableMapperImpl<Pojo>
         Class<Pojo> pojoClass = getPojoType();
         // 仅仅支持有 自增主键 的表
         if (GlobalDataRecord.class.equals(pojoClass) || AuthAccount.class.equals(pojoClass)) {
-            insertAndReturnIdImpl = (pojo) -> getSuidRich().insertAndReturnId(pojo);
+            insertAndReturnIdImpl = (pojo) -> new MysqlMbdId(getSuidRich().insertAndReturnId(pojo));
         }
 
         if (mapperConfig == null) {
@@ -81,7 +83,7 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public Object insertAndReturnId(Pojo pojo) {
+    public MbdId<?> insertAndReturnId(Pojo pojo) {
         return insertAndReturnIdImpl.apply(pojo);
     }
 
@@ -102,7 +104,7 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public Pojo selectById(Object globalId, String... fields) {
+    public Pojo selectById(MbdId<?> globalId, String... fields) {
         Condition condition = getConditionWithSelectedFields(fields);
         intiConditionWithForUpdate(condition);
         addId2Condition(condition, globalId);
@@ -113,17 +115,17 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public List<Pojo> selectBatchById(List<Object> globalIdList, String... fields) {
+    public List<Pojo> selectBatchById(List<MbdId<?>> globalIdList, String... fields) {
         Condition condition = getConditionWithSelectedFields(fields);
         intiConditionWithForUpdate(condition);
-        condition.op(mapperConfig.getIdFieldName(), Op.in, globalIdList);
+        addMbdIdList2Condition(globalIdList, condition);
         List<Pojo> result = getSuidRich().select(mapperConfig.getNewPojoInstance(), condition);
         checkAffectedRowsCountDoesNotMatch(result.size(), globalIdList.size(), CURD.RETRIEVE);
         return result;
     }
 
     @Override
-    public Object selectId(Pojo pojo) {
+    public MbdId<?> selectId(Pojo pojo) {
         Pojo item = selectOne(pojo, selectIdFieldOnly);
         return mapperConfig.getId(item);
     }
@@ -134,8 +136,8 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public void updateById(Pojo pojo, Object globalId) {
-        mapperConfig.setId(pojo, mapperProperties.getIdTypeConverter().convert(globalId));
+    public void updateById(Pojo pojo, MbdId<?> globalId) {
+        mapperConfig.setId(pojo, globalId);
         long affectedRowCount = getSuidRich().updateBy(pojo, mapperConfig.getIdFieldName());
         checkAffectedRowShouldBeOne(affectedRowCount, CURD.UPDATE);
     }
@@ -146,17 +148,16 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public void deleteById(Object globalId) {
+    public void deleteById(MbdId<?> globalId) {
         long affectedRowCount = getSuidRich().delete(mapperConfig.getNewPojoInstance(), getConditionWithId(globalId));
         checkAffectedRowShouldBeOne(affectedRowCount, CURD.DELETE);
     }
 
     @Override
-    public void deleteBatchById(List<Object> globalIdList) {
-        long affectedRowCount = getSuidRich().delete(
-            mapperConfig.getNewPojoInstance(),
-            new ConditionImpl().op(mapperConfig.getIdFieldName(), Op.in, globalIdList)
-        );
+    public void deleteBatchById(List<MbdId<?>> globalIdList) {
+        Condition condition = new ConditionImpl();
+        addMbdIdList2Condition(globalIdList, condition);
+        long affectedRowCount = getSuidRich().delete(mapperConfig.getNewPojoInstance(), condition);
         checkAffectedRowsCountDoesNotMatch(affectedRowCount, globalIdList.size(), CURD.DELETE);
     }
 
@@ -185,6 +186,14 @@ public class BeeTableMapperImpl<Pojo>
         return BeeFactory.getHoneyFactory().getSuidRich();
     }
 
+    protected void addMbdIdList2Condition(List<MbdId<?>> idList, Condition condition) {
+        condition.op(
+            mapperConfig.getIdFieldName(),
+            Op.in,
+            idList.parallelStream().map(MysqlMbdId::getValue).toList()
+        );
+    }
+
     @Override
     public Condition getConditionWithSelectedFields(String... fields) {
         Condition condition = new ConditionImpl();
@@ -200,14 +209,14 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public Condition getConditionWithId(Object id) {
+    public Condition getConditionWithId(MbdId<?> id) {
         Condition condition = new ConditionImpl();
         addId2Condition(condition, id);
         return condition;
     }
 
     @Override
-    public void addId2Condition(Condition condition, Object id) {
-        condition.op(mapperConfig.getIdFieldName(), Op.eq, id);
+    public void addId2Condition(Condition condition, MbdId<?> id) {
+        condition.op(mapperConfig.getIdFieldName(), Op.eq, id.getValue());
     }
 }

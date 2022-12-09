@@ -7,6 +7,8 @@ import cc.xfl12345.mybigdata.server.common.data.source.GlobalDataRecordDataSourc
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import cc.xfl12345.mybigdata.server.common.database.pojo.CommonGlobalDataRecord;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
+import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,32 +36,32 @@ public abstract class AbstractTripleLayerTableRawDataSource<Value, FirstPojo, Se
         this.secondMapper = secondMapper;
     }
 
-    protected abstract FirstPojo getFirstPojo(Object globalId, Value value);
+    protected abstract FirstPojo getFirstPojo(MbdId<?> globalId, Value value);
 
-    protected abstract List<SecondPojo> getSecondPojo(Object globalId, Value value);
+    protected abstract List<SecondPojo> getSecondPojo(MbdId<?> globalId, Value value);
 
     protected abstract Value getValue(FirstPojo firstPojo, List<SecondPojo> secondPojoList);
 
     protected abstract List<Value> getValue(List<FirstPojo> firstPojoList, List<SecondPojo> secondPojoList);
 
-    protected abstract Condition getEqualIdCondition(Object id);
+    protected abstract Condition getEqualIdCondition(MbdId<?> id);
 
-    protected abstract Condition getEqualIdAndSortCondition(Object id);
+    protected abstract Condition getEqualIdAndSortCondition(MbdId<?> id);
 
-    protected abstract Condition getEqualIdCondition(List<Object> idList);
+    protected abstract Condition getEqualIdCondition(List<MbdId<?>> idList);
 
 
     @Override
-    public Object insert4IdOrGetId(Value value) {
+    public MysqlMbdId insert4IdOrGetId(Value value) {
         // 由于不是原子操作，所以理应禁止使用。
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Object insertAndReturnId(Value value) {
+    public MysqlMbdId insertAndReturnId(Value value) {
         CommonGlobalDataRecord globalDataRecord = globalDataRecordDataSource
             .getNewRegisteredDataInstance(new Date(), firstMapper.getPojoType());
-        Object id = globalDataRecord.getId();
+        MysqlMbdId id = new MysqlMbdId(globalDataRecord.getId());
         firstMapper.insert(getFirstPojo(id, value));
         secondMapper.insertBatch(getSecondPojo(id, value));
         return id;
@@ -70,7 +72,7 @@ public abstract class AbstractTripleLayerTableRawDataSource<Value, FirstPojo, Se
         long affectedRowsCount = 0;
         CommonGlobalDataRecord globalDataRecord = globalDataRecordDataSource
             .getNewRegisteredDataInstance(new Date(), firstMapper.getPojoType());
-        Object id = globalDataRecord.getId();
+        MysqlMbdId id = new MysqlMbdId(globalDataRecord.getId());
         // 已影响到 全局记录表 的一行
         affectedRowsCount += 1;
         affectedRowsCount += firstMapper.insert(getFirstPojo(id, value));
@@ -88,7 +90,7 @@ public abstract class AbstractTripleLayerTableRawDataSource<Value, FirstPojo, Se
         List<FirstPojo> firstPojoList = new ArrayList<>(values.size());
         List<SecondPojo> secondPojoList = new ArrayList<>(values.size());
         for (int i = 0; i < values.size(); i++) {
-            Object id = globalDataRecords.get(i).getId();
+            MysqlMbdId id = new MysqlMbdId(globalDataRecords.get(i).getId());
             Value value = values.get(i);
             firstPojoList.add(getFirstPojo(id, value));
             secondPojoList.addAll(getSecondPojo(id, value));
@@ -100,21 +102,21 @@ public abstract class AbstractTripleLayerTableRawDataSource<Value, FirstPojo, Se
     }
 
     @Override
-    public Value selectById(Object globalId) {
+    public Value selectById(MbdId<?> globalId) {
         FirstPojo firstPojo = firstMapper.selectById(globalId);
         List<SecondPojo> secondPojoList = secondMapper.selectByCondition(getEqualIdAndSortCondition(globalId));
         return getValue(firstPojo, secondPojoList);
     }
 
     @Override
-    public List<Value> selectBatchById(List<Object> globalIdList) {
+    public List<Value> selectBatchById(List<MbdId<?>> globalIdList) {
         List<FirstPojo> firstPojoList = firstMapper.selectBatchById(globalIdList);
         List<SecondPojo> secondPojoList = secondMapper.selectByCondition(getEqualIdCondition(globalIdList));
         return getValue(firstPojoList, secondPojoList);
     }
 
     @Override
-    public void updateById(Value value, Object globalId) {
+    public void updateById(Value value, MbdId<?> globalId) {
         Date date = new Date();
         CommonGlobalDataRecord globalDataRecord = globalDataRecordDataSource.selectById(globalId);
         FirstPojo firstPojo = getFirstPojo(globalId, value);
@@ -126,7 +128,7 @@ public abstract class AbstractTripleLayerTableRawDataSource<Value, FirstPojo, Se
     }
 
     @Override
-    public void deleteById(Object globalId) {
+    public void deleteById(MbdId<?> globalId) {
         // 更新类型的操作，先上锁
         globalDataRecordDataSource.selectById(globalId);
         // 删除从表记录
@@ -137,7 +139,7 @@ public abstract class AbstractTripleLayerTableRawDataSource<Value, FirstPojo, Se
     }
 
     @Override
-    public void deleteBatchById(List<Object> globalIdList) {
+    public void deleteBatchById(List<MbdId<?>> globalIdList) {
         globalDataRecordDataSource.selectBatchById(globalIdList);
         secondMapper.deleteBatchById(globalIdList);
         firstMapper.deleteBatchById(globalIdList);

@@ -5,6 +5,7 @@ import cc.xfl12345.mybigdata.server.common.data.source.DataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.GlobalDataRecordDataSource;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import cc.xfl12345.mybigdata.server.common.database.pojo.CommonGlobalDataRecord;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.SessionFactory;
 
@@ -25,10 +26,10 @@ public abstract class AbstractDoubleLayerTableRawDataSource<Value, Pojo, Conditi
         this.globalDataRecordDataSource = globalDataRecordDataSource;
     }
 
-    protected abstract Pojo getPojo(Object globalId, Value value);
+    protected abstract Pojo getPojo(MbdId<?> globalId, Value value);
 
     @Override
-    public Object insert4IdOrGetId(Value value) {
+    public MbdId<?> insert4IdOrGetId(Value value) {
         // 由于不是原子操作，所以理应禁止使用。
         throw new UnsupportedOperationException();
     }
@@ -44,10 +45,10 @@ public abstract class AbstractDoubleLayerTableRawDataSource<Value, Pojo, Conditi
         }
     }
 
-    protected abstract Object insertAndReturnIdImpl(Value value);
+    protected abstract MbdId<?> insertAndReturnIdImpl(Value value);
 
     @Override
-    public Object insertAndReturnId(Value value) {
+    public MbdId<?> insertAndReturnId(Value value) {
         return runTask(new FutureTask<>(() -> insertAndReturnIdImpl(value)));
     }
 
@@ -80,7 +81,7 @@ public abstract class AbstractDoubleLayerTableRawDataSource<Value, Pojo, Conditi
     }
 
     @Override
-    public void updateById(Value value, Object globalId) {
+    public void updateById(Value value, MbdId<?> globalId) {
         Date updateTime = new Date();
         CommonGlobalDataRecord globalDataRecord = globalDataRecordDataSource.selectById(globalId);
         super.updateById(value, globalId);

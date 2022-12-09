@@ -3,6 +3,7 @@ package cc.xfl12345.mybigdata.server.mysql.data.source.base.raw.bee;
 
 import cc.xfl12345.mybigdata.server.common.data.source.GlobalDataRecordDataSource;
 import cc.xfl12345.mybigdata.server.common.database.pojo.CommonGlobalDataRecord;
+import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.raw.AbstractDoubleLayerTableRawDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.BeeTableMapper;
 import org.teasoft.bee.osql.Condition;
@@ -18,13 +19,13 @@ public abstract class AbstractBeeDoubleLayerTableRawDataSource<Value, Pojo>
     }
 
     @Override
-    protected Object insertAndReturnIdImpl(Value value) {
+    protected MbdId<?> insertAndReturnIdImpl(Value value) {
         Transaction transaction = SessionFactory.getTransaction();
         try {
             transaction.begin();
             CommonGlobalDataRecord globalDataRecord = globalDataRecordDataSource
                 .getNewRegisteredDataInstance(new Date(), mapper.getPojoType());
-            Object id = globalDataRecord.getId();
+            MbdId<?> id = globalDataRecord.getId();
             mapper.insert(getPojo(id, value));
             transaction.commit();
             return id;

@@ -5,6 +5,7 @@ import cc.xfl12345.mybigdata.server.common.data.condition.SingleTableCondition;
 import cc.xfl12345.mybigdata.server.common.pojo.IdAndValue;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.NumberContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
+import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import org.teasoft.bee.osql.Condition;
 import org.teasoft.bee.osql.Op;
 import org.teasoft.bee.osql.SuidRich;
@@ -35,7 +36,7 @@ public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
 
             result = contents.parallelStream().map(item -> {
                 IdAndValue<String> idAndValue = new IdAndValue<>();
-                idAndValue.id = item.getGlobalId();
+                idAndValue.id = new MysqlMbdId(item.getGlobalId());
                 idAndValue.value = item.getContent();
                 return idAndValue;
             }).toList();
@@ -67,7 +68,7 @@ public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
 
             result = contents.parallelStream().map(item -> {
                 IdAndValue<BigDecimal> idAndValue = new IdAndValue<>();
-                idAndValue.id = item.getGlobalId();
+                idAndValue.id = new MysqlMbdId(item.getGlobalId());
                 idAndValue.value = new BigDecimal(item.getContent());
                 return idAndValue;
             }).toList();

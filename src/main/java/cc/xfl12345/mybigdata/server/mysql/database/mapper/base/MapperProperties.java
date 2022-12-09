@@ -4,7 +4,6 @@ import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.database.error.SqlErrorAnalyst;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
 import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
-import cc.xfl12345.mybigdata.server.mysql.database.converter.AppIdTypeConverter;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,10 +35,6 @@ public class MapperProperties {
 
     @Getter
     @Setter
-    protected volatile AppIdTypeConverter idTypeConverter = null;
-
-    @Getter
-    @Setter
     protected SqlErrorAnalyst sqlErrorAnalyst;
 
     @PostConstruct
@@ -54,7 +49,6 @@ public class MapperProperties {
         fieldNotNullChecker.check(getAffectedRowsCountChecker(), Fields.affectedRowsCountChecker);
         fieldNotNullChecker.check(getUuidGenerator(), Fields.uuidGenerator);
         fieldNotNullChecker.check(getCoreTableCache(), Fields.coreTableCache);
-        fieldNotNullChecker.check(getIdTypeConverter(), Fields.idTypeConverter);
         fieldNotNullChecker.check(getSqlErrorAnalyst(), Fields.sqlErrorAnalyst);
     }
 }
