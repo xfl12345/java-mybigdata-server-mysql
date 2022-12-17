@@ -1,6 +1,6 @@
 package cc.xfl12345.mybigdata.server.mysql.pojo;
 
-import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
+import cc.xfl12345.mybigdata.server.common.pojo.OpenCloneable;
 import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
 import cc.xfl12345.mybigdata.server.common.pojo.ClassDeclaredInfo;
 import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;

@@ -1,6 +1,6 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
-import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
+import cc.xfl12345.mybigdata.server.common.pojo.OpenCloneable;
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
 import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.common.pojo.SuperObjectDatabase;

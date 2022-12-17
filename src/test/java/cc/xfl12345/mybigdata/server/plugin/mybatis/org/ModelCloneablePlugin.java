@@ -15,7 +15,7 @@ package cc.xfl12345.mybigdata.server.plugin.mybatis.org;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
+import cc.xfl12345.mybigdata.server.common.pojo.OpenCloneable;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
@@ -56,7 +56,7 @@ public class ModelCloneablePlugin extends PluginAdapter {
     /**
      * 支持Cloneable
      */
-    private void supportCloneable(TopLevelClass topLevelClass) {
+    protected void supportCloneable(TopLevelClass topLevelClass) {
         topLevelClass.addImportedType(new FullyQualifiedJavaType(OpenCloneable.class.getCanonicalName()));
         // implement
         topLevelClass.addSuperInterface(new FullyQualifiedJavaType(OpenCloneable.class.getCanonicalName()));

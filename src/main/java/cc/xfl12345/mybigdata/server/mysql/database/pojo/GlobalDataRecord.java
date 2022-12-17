@@ -1,6 +1,6 @@
 package cc.xfl12345.mybigdata.server.mysql.database.pojo;
 
-import cc.xfl12345.mybigdata.server.common.api.OpenCloneable;
+import cc.xfl12345.mybigdata.server.common.pojo.OpenCloneable;
 
 import java.io.Serializable;
 import java.util.Date;
