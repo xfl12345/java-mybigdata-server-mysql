@@ -1,10 +1,11 @@
 package cc.xfl12345.mybigdata.server.mysql.data.source.base;
 
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
-import cc.xfl12345.mybigdata.server.common.data.source.GlobalDataRecordDataSource;
+import cc.xfl12345.mybigdata.server.common.data.source.IdDataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractDataSource;
-import cc.xfl12345.mybigdata.server.common.database.pojo.CommonGlobalDataRecord;
+import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
+import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.BeeTableMapper;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,11 @@ public abstract class AbstractBeeDoubleLayerTableDataSource<Value, Pojo> extends
 
     @Getter
     @Setter
-    protected GlobalDataRecordDataSource globalDataRecordDataSource;
+    protected CoreTableCache coreTableCache;
+
+    @Getter
+    @Setter
+    protected IdDataSource idDataSource;
 
     @Getter
     @Setter
@@ -24,7 +29,8 @@ public abstract class AbstractBeeDoubleLayerTableDataSource<Value, Pojo> extends
 
     @Override
     public void init() throws Exception {
-        fieldNotNullChecker.check(globalDataRecordDataSource, CommonGlobalDataRecord.class);
+        fieldNotNullChecker.check(coreTableCache, "coreTableCache");
+        fieldNotNullChecker.check(idDataSource, MbdId.class);
         fieldNotNullChecker.check(mapper, getPojoClass());
         super.init();
     }

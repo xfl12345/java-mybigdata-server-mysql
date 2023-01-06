@@ -139,7 +139,6 @@ CREATE TABLE table_schema_record
 (
   `global_id`      bigint NOT NULL comment '当前表所在数据库实例里的全局ID',
   `schema_name`    bigint NOT NULL comment '插表模型名称',
-  `content_length` smallint        NOT NULL default -1 comment 'json_schema 字段的长度',
   # 这里不遵循 “一切普通文本 由 字符串记录表” 的原则
   # 是因为json格式的字符串可以使用json格式存储，MySQL原生支持JSON格式
   # 暂不考虑使用JSON格式存储JSON字符串，暂且先保留修改空间
@@ -148,7 +147,7 @@ CREATE TABLE table_schema_record
   foreign key (schema_name) references string_content (global_id) on delete restrict on update cascade,
   unique key unique_global_id (global_id) comment '确保每一行数据对应一个相对于数据库唯一的global_id',
   unique key index_schema_name (schema_name) comment '确保插表模型名称的唯一性',
-  index boost_query_id (global_id, schema_name, content_length) comment '加速查询主键，避免全表扫描'
+  index boost_query_id (global_id, schema_name) comment '加速查询主键，避免全表扫描'
 ) ENGINE = InnoDB
   COMMENT 'MyBigData 表模型'
   ROW_FORMAT = DYNAMIC;

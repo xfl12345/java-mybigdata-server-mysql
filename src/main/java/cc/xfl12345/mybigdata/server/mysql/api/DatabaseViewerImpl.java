@@ -1,13 +1,17 @@
 package cc.xfl12345.mybigdata.server.mysql.api;
 
 import cc.xfl12345.mybigdata.server.common.api.DatabaseViewer;
+import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.pojo.DatabaseDataSourceInfo;
+import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
 import cc.xfl12345.mybigdata.server.common.pojo.SuperObjectDatabase;
 import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.pojo.PojoInfo;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.stat.DruidStatManagerFacade;
+import lombok.Getter;
+import lombok.Setter;
 import org.teasoft.bee.osql.SuidRich;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.BeeFactory;
@@ -24,27 +28,28 @@ import java.util.List;
 import java.util.Map;
 
 public class DatabaseViewerImpl implements DatabaseViewer {
+    @Getter
+    @Setter
+    protected FieldNotNullChecker fieldNotNullChecker = DefaultSingleton.FIELD_NOT_NULL_CHECKER;
+
     protected static DruidStatManagerFacade statManagerFacade = DruidStatManagerFacade.getInstance();
-    protected List<String> allTableName;
+
+    protected List<String> allTableNames;
 
     protected HashMap<String, List<String>> tableFieldNames;
 
     protected HashMap<String, Object> tableName2PojoInstance;
 
+    @Getter
+    @Setter
     protected CoreTableCache coreTableCache;
-
-    public CoreTableCache getCoreTableCache() {
-        return coreTableCache;
-    }
-
-    public void setCoreTableCache(CoreTableCache coreTableCache) {
-        this.coreTableCache = coreTableCache;
-    }
 
     @PostConstruct
     public void init() throws Exception {
+        fieldNotNullChecker.check(coreTableCache, "coreTableCache");
+
         int coreTableCount = EnumCoreTable.values().length;
-        allTableName = new ArrayList<>(coreTableCount);
+        allTableNames = new ArrayList<>(coreTableCount);
         tableFieldNames = new HashMap<>(coreTableCount);
         tableName2PojoInstance = new HashMap<>(coreTableCount);
 
@@ -56,7 +61,7 @@ public class DatabaseViewerImpl implements DatabaseViewer {
             .toList()
             .forEach(pojoClass -> {
                 String tableName = pojoClassMap.get(pojoClass).getTableName();
-                allTableName.add(tableName);
+                allTableNames.add(tableName);
 
                 tableFieldNames.put(
                     tableName,
@@ -73,8 +78,8 @@ public class DatabaseViewerImpl implements DatabaseViewer {
 
 
     @Override
-    public List<String> getAllTableName() {
-        return allTableName;
+    public List<String> getAllTableNames() {
+        return allTableNames;
     }
 
     @Override
@@ -106,6 +111,7 @@ public class DatabaseViewerImpl implements DatabaseViewer {
     @Override
     public List<Object> getTableContent(String tableName, long offset, long limit) {
         List<Object> result = new ArrayList<>();
+
         Object pojo = tableName2PojoInstance.get(tableName);
 
         if (pojo == null) {

@@ -2,6 +2,7 @@ package cc.xfl12345.mybigdata.server.mysql.api;
 
 import cc.xfl12345.mybigdata.server.common.api.AdvanceSearchMapper;
 import cc.xfl12345.mybigdata.server.common.data.condition.SingleTableCondition;
+import cc.xfl12345.mybigdata.server.common.data.source.pojo.BaseMbdObject;
 import cc.xfl12345.mybigdata.server.common.pojo.IdAndValue;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.NumberContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.StringContent;
@@ -88,7 +89,7 @@ public class AdvanceSearchMapperImpl implements AdvanceSearchMapper {
     }
 
     @Override
-    public List<Object> selectByCondition(SingleTableCondition condition) {
+    public List<BaseMbdObject> selectByCondition(SingleTableCondition condition) {
         return null;
     }
 }

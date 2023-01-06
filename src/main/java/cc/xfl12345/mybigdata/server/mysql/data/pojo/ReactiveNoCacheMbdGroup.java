@@ -4,10 +4,10 @@ import cc.xfl12345.mybigdata.server.common.appconst.CURD;
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.data.source.StringTypeSource;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdGroup;
+import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
 import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
-import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.mysql.appconst.CoreTableNames;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GroupContent;
@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
+public class ReactiveNoCacheMbdGroup implements MbdGroup {
     protected final MysqlMbdId globalId;
 
     protected boolean lockFlag = false;
@@ -34,13 +34,13 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
     protected ReactiveList reactiveList;
 
     @Override
-    public void setItems(List<MbdId<?>> items) {
+    public void setItems(List<MbdId> items) {
         reactiveList.clear();
         reactiveList.addAll(items);
     }
 
     @Override
-    public List<MbdId<?>> getItems() {
+    public List<MbdId> getItems() {
         return reactiveList;
     }
 
@@ -128,13 +128,13 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
 
     @Override
     public void setName(String name) {
-        MbdId<?> id = stringTypeSource.insert4IdOrGetId(name);
+        MbdId id = stringTypeSource.selectIdOrInsert4Id(name);
 
         SuidRich suidRich = getSuidRich();
         Condition condition = new ConditionImpl();
         condition.setIncludeType(IncludeType.EXCLUDE_BOTH);
         GroupRecord groupRecord = new GroupRecord();
-        groupRecord.setGlobalId(globalId.getValue());
+        groupRecord.setGlobalId(globalId.getLongValue());
         groupRecord.setGroupName(MysqlMbdId.getValue(id));
         suidRich.updateById(new GroupRecord(), condition);
     }
@@ -150,7 +150,7 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
         Condition condition = new ConditionImpl();
         condition.setIncludeType(IncludeType.EXCLUDE_BOTH);
         GroupRecord groupRecord = new GroupRecord();
-        groupRecord.setGlobalId(globalId.getValue());
+        groupRecord.setGlobalId(globalId.getLongValue());
         groupRecord.setUniqueItems(unique);
         suidRich.updateById(new GroupRecord(), condition);
     }
@@ -160,7 +160,7 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
         Condition condition = new ConditionImpl();
         condition.forUpdate();
         GlobalDataRecord globalDataRecord = new GlobalDataRecord();
-        globalDataRecord.setId(globalId.getValue());
+        globalDataRecord.setId(globalId.getLongValue());
         suidRich.selectOne(globalDataRecord);
     }
 
@@ -168,7 +168,7 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
     }
 
 
-    public class ReactiveList extends AbstractList<MbdId<?>> {
+    public class ReactiveList extends AbstractList<MbdId> {
         @Override
         public int size() {
             SuidRich suidRich = getSuidRich();
@@ -179,7 +179,7 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
 
         @Override
         public boolean contains(Object object) {
-            if (object instanceof MbdId<?> id) {
+            if (object instanceof MbdId id) {
                 return getSuidRich().selectOne(GroupContent.builder().item(MysqlMbdId.getValue(id)).build()) != null;
             }
 
@@ -187,10 +187,10 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
         }
 
         @Override
-        public boolean add(MbdId<?> id) {
+        public boolean add(MbdId id) {
             int affectedRowCount = getSuidRich().insert(
                 GroupContent.builder()
-                    .globalId(globalId.getValue())
+                    .globalId(globalId.getLongValue())
                     .itemIndex((long) size())
                     .item(MysqlMbdId.getValue(id))
                     .build()
@@ -201,11 +201,11 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
 
         @Override
         public boolean remove(Object object) {
-            if (object instanceof MbdId<?> id) {
+            if (object instanceof MbdId id) {
                 SuidRich suidRich = getSuidRich();
                 GroupContent content = suidRich.selectOne(
                     GroupContent.builder()
-                        .globalId(globalId.getValue())
+                        .globalId(globalId.getLongValue())
                         .item(MysqlMbdId.getValue(id))
                         .build()
                 );
@@ -232,11 +232,11 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
         }
 
         @Override
-        public boolean addAll(Collection<? extends MbdId<?>> collection) {
+        public boolean addAll(Collection<? extends MbdId> collection) {
             List<GroupContent> contents = new ArrayList<>(collection.size());
 
             int i = size();
-            for (MbdId<?> item : collection) {
+            for (MbdId item : collection) {
                 contents.add(GroupContent.builder()
                     .itemIndex((long) i)
                     .item(MysqlMbdId.getValue(item))
@@ -258,7 +258,7 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
         }
 
         @Override
-        public boolean addAll(int index, Collection<? extends MbdId<?>> c) {
+        public boolean addAll(int index, Collection<? extends MbdId> c) {
             return false;
         }
 
@@ -278,23 +278,23 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
         }
 
         @Override
-        public MbdId<?> get(int index) {
+        public MbdId get(int index) {
             return null;
         }
 
         @Override
-        public MbdId<?> set(int index, MbdId<?> element) {
+        public MbdId set(int index, MbdId element) {
             return null;
         }
 
         @Override
-        public void add(int index, MbdId<?> element) {
+        public void add(int index, MbdId element) {
 
 
         }
 
         @Override
-        public MbdId<?> remove(int index) {
+        public MbdId remove(int index) {
             return null;
         }
 
@@ -310,7 +310,7 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup<MbdId<?>> {
 
 
         @Override
-        public List<MbdId<?>> subList(int fromIndex, int toIndex) {
+        public List<MbdId> subList(int fromIndex, int toIndex) {
             return super.subList(fromIndex, toIndex);
         }
     }

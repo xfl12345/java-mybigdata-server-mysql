@@ -2,7 +2,7 @@ package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
 import cc.xfl12345.mybigdata.server.common.pojo.OpenCloneable;
 import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
-import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
+import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.common.pojo.SuperObjectDatabase;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
 import cc.xfl12345.mybigdata.server.common.utility.MyReflectUtils;
@@ -40,7 +40,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     @Getter
     protected Map<Class<?>, PojoInfo> pojoClass2PojoInfoMap;
 
-    protected TwoWayMap<MbdId<Long>, Class<?>> tableNameId2ClassCache;
+    protected TwoWayMap<MbdId, Class<?>> tableNameId2ClassCache;
 
     @Getter
     protected Map<Class<?>, OpenCloneable> emptyPoEntites;
@@ -188,12 +188,12 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     }
 
     @Override
-    public MbdId<Long> getTableNameId(Class<?> pojoClass) {
+    public MbdId getTableNameId(Class<?> pojoClass) {
         return tableNameId2ClassCache.getKey(pojoClass);
     }
 
     @Override
-    public <ID2 extends MbdId<Long>> Class<?> getPojoClassByTableNameId(ID2 id) {
+    public Class<?> getPojoClassByTableNameId(MbdId id) {
         return tableNameId2ClassCache.getValue(id);
     }
 

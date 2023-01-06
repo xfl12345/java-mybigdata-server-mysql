@@ -2,6 +2,8 @@ package cc.xfl12345.mybigdata.server.mysql.database.error;
 
 import cc.xfl12345.mybigdata.server.common.appconst.TableCurdResult;
 import cc.xfl12345.mybigdata.server.common.database.error.SqlErrorAnalyst;
+import cc.xfl12345.mybigdata.server.common.database.error.TableDataException;
+import cc.xfl12345.mybigdata.server.common.database.error.TableOperationException;
 import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Getter;
 import lombok.NonNull;
@@ -66,13 +68,24 @@ public class SqlErrorAnalystImpl implements SqlErrorAnalyst {
     @Override
     public TableCurdResult getTableCurdResult(@NonNull Exception exception) {
         Throwable cause = exception;
-        do {
-            cause = cause.getCause();
-        } while (cause != null && !(cause instanceof SQLException));
+        while (cause != null) {
+            if (cause instanceof TableOperationException e) {
+                if (e.getAffectedRowsCount() == 0) {
+                    return TableCurdResult.FAILED_NOT_FOUND;
+                } else if (e.getAffectedRowsCount() != e.getExpectAffectedRowsCount()) {
+                    return TableCurdResult.FAILED_COUNTS_NOT_MATCH;
+                } else {
+                    break;
+                }
+            } else if (cause instanceof SQLException e) {
+                return getTableCurdResult(e);
+            } else if (cause instanceof TableDataException e) {
+                return TableCurdResult.FAILED_ILLEGAL_DATA;
+            }
 
-        if (cause instanceof SQLException sqlException) {
-            return getTableCurdResult(sqlException);
+            cause = cause.getCause();
         }
+
         return TableCurdResult.UNKNOWN_FAILED;
     }
 

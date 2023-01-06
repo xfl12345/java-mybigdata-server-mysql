@@ -33,13 +33,6 @@ public class TableSchemaRecord implements OpenCloneable, Serializable {
     private Long schemaName;
 
     /**
-     * json_schema 字段的长度
-     */
-    @javax.persistence.Column(name = "content_length", nullable = false)
-    @io.swagger.annotations.ApiModelProperty("json_schema 字段的长度")
-    private Short contentLength;
-
-    /**
      * 插表模型
      */
     @javax.persistence.Column(name = "json_schema", nullable = false, length = 16000)

@@ -1,7 +1,7 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee;
 
 import cc.xfl12345.mybigdata.server.common.appconst.CURD;
-import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
+import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AbstractTypedTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config.BeeTableMapperConfig;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.config.BeeTableMapperConfigGenerator;
@@ -17,8 +17,16 @@ import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class BeeTableMapperImpl<Pojo>
     extends AbstractTypedTableMapper<Pojo> implements BeeTableMapper<Pojo> {
@@ -83,7 +91,7 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public MbdId<?> insertAndReturnId(Pojo pojo) {
+    public MbdId insertAndReturnId(Pojo pojo) {
         return insertAndReturnIdImpl.apply(pojo);
     }
 
@@ -104,7 +112,7 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public Pojo selectById(MbdId<?> globalId, String... fields) {
+    public Pojo selectById(MbdId globalId, String... fields) {
         Condition condition = getConditionWithSelectedFields(fields);
         intiConditionWithForUpdate(condition);
         addId2Condition(condition, globalId);
@@ -115,19 +123,54 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public List<Pojo> selectBatchById(List<MbdId<?>> globalIdList, String... fields) {
+    public LinkedHashMap<MbdId, Pojo> selectBatchById(List<MbdId> globalIdList, String... fields) {
+        List<Long> theDatabaseIdList = globalIdList.parallelStream().map(MysqlMbdId::getValue).toList();
+
         Condition condition = getConditionWithSelectedFields(fields);
         intiConditionWithForUpdate(condition);
-        addMbdIdList2Condition(globalIdList, condition);
-        List<Pojo> result = getSuidRich().select(mapperConfig.getNewPojoInstance(), condition);
-        checkAffectedRowsCountDoesNotMatch(result.size(), globalIdList.size(), CURD.RETRIEVE);
-        return result;
+        addIdList2Condition(theDatabaseIdList, condition);
+
+        int arrayLength = globalIdList.size();
+
+        // 先安排 缓存下标的异步任务
+        ConcurrentHashMap<Object, Integer> idIndexMap = new ConcurrentHashMap<>();
+        FutureTask<Void> futureTask = new FutureTask<>(() -> {
+            IntStream.range(0, arrayLength).parallel()
+                .forEach(index -> idIndexMap.put(theDatabaseIdList.get(index), index));
+            return null;
+        });
+        futureTask.run();
+
+        // 查询数据库
+        List<Pojo> tmpResult = getSuidRich().select(mapperConfig.getNewPojoInstance(), condition);
+        checkAffectedRowsCountDoesNotMatch(tmpResult.size(), globalIdList.size(), CURD.RETRIEVE);
+
+        try {
+            // 异步变同步
+            futureTask.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 排序，对号入座
+        @SuppressWarnings("unchecked")
+        Pojo[] resultArray = (Pojo[]) Array.newInstance(getPojoType(), arrayLength);
+        tmpResult.parallelStream().forEach(item -> {
+            resultArray[idIndexMap.get(mapperConfig.getId(item))] = item;
+        });
+
+        return Arrays.asList(resultArray).parallelStream().collect(Collectors.toMap(
+            mapperConfig::getMbdId,
+            item -> item,
+            (key1, key2) -> key2,
+            LinkedHashMap::new
+        ));
     }
 
     @Override
-    public MbdId<?> selectId(Pojo pojo) {
+    public MbdId selectId(Pojo pojo) {
         Pojo item = selectOne(pojo, selectIdFieldOnly);
-        return mapperConfig.getId(item);
+        return mapperConfig.getMbdId(item);
     }
 
     @Override
@@ -136,8 +179,8 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public void updateById(Pojo pojo, MbdId<?> globalId) {
-        mapperConfig.setId(pojo, globalId);
+    public void updateById(Pojo pojo, MbdId globalId) {
+        mapperConfig.setMbdId(pojo, globalId);
         long affectedRowCount = getSuidRich().updateBy(pojo, mapperConfig.getIdFieldName());
         checkAffectedRowShouldBeOne(affectedRowCount, CURD.UPDATE);
     }
@@ -148,15 +191,15 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public void deleteById(MbdId<?> globalId) {
+    public void deleteById(MbdId globalId) {
         long affectedRowCount = getSuidRich().delete(mapperConfig.getNewPojoInstance(), getConditionWithId(globalId));
         checkAffectedRowShouldBeOne(affectedRowCount, CURD.DELETE);
     }
 
     @Override
-    public void deleteBatchById(List<MbdId<?>> globalIdList) {
+    public void deleteBatchById(List<MbdId> globalIdList) {
         Condition condition = new ConditionImpl();
-        addMbdIdList2Condition(globalIdList, condition);
+        addIdList2Condition(globalIdList.parallelStream().map(MysqlMbdId::getValue).toList(), condition);
         long affectedRowCount = getSuidRich().delete(mapperConfig.getNewPojoInstance(), condition);
         checkAffectedRowsCountDoesNotMatch(affectedRowCount, globalIdList.size(), CURD.DELETE);
     }
@@ -186,11 +229,12 @@ public class BeeTableMapperImpl<Pojo>
         return BeeFactory.getHoneyFactory().getSuidRich();
     }
 
-    protected void addMbdIdList2Condition(List<MbdId<?>> idList, Condition condition) {
+    protected void addIdList2Condition(List<Long> idList, Condition condition) {
         condition.op(
             mapperConfig.getIdFieldName(),
             Op.in,
-            idList.parallelStream().map(MysqlMbdId::getValue).toList()
+            idList
+            // idList.parallelStream().map(MysqlMbdId::getValue).toList()
         );
     }
 
@@ -209,14 +253,14 @@ public class BeeTableMapperImpl<Pojo>
     }
 
     @Override
-    public Condition getConditionWithId(MbdId<?> id) {
+    public Condition getConditionWithId(MbdId id) {
         Condition condition = new ConditionImpl();
         addId2Condition(condition, id);
         return condition;
     }
 
     @Override
-    public void addId2Condition(Condition condition, MbdId<?> id) {
+    public void addId2Condition(Condition condition, MbdId id) {
         condition.op(mapperConfig.getIdFieldName(), Op.eq, id.getValue());
     }
 }

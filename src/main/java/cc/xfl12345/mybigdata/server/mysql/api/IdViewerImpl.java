@@ -4,16 +4,12 @@ import cc.xfl12345.mybigdata.server.common.api.IdViewer;
 import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.data.requirement.DataRequirementPack;
-import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
+import cc.xfl12345.mybigdata.server.common.data.source.DataSourceHome;
+import cc.xfl12345.mybigdata.server.common.data.source.pojo.BaseMbdObject;
+import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
-import cc.xfl12345.mybigdata.server.common.pojo.MbdId;
-import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
-import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
-import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import lombok.Getter;
 import lombok.Setter;
-import org.teasoft.bee.osql.transaction.Transaction;
-import org.teasoft.honey.osql.core.SessionFactory;
 
 import javax.annotation.PostConstruct;
 
@@ -24,42 +20,21 @@ public class IdViewerImpl implements IdViewer {
 
     @Getter
     @Setter
-    protected TableBasicMapper<GlobalDataRecord> globalDataRecordMapper;
-
-    @Getter
-    @Setter
-    protected CoreTableCache coreTableCache;
-
+    protected DataSourceHome dataSourceHome;
 
     @PostConstruct
     public void init() throws Exception {
-        fieldNotNullChecker.check(coreTableCache, "coreTableCache");
-        fieldNotNullChecker.check(globalDataRecordMapper, GlobalDataRecord.class);
+        fieldNotNullChecker.check(dataSourceHome, "dataSourceHome");
     }
 
     @Override
-    public AppDataType getDataTypeById(MbdId<?> id) {
-        MysqlMbdId tableNameId;
-        Transaction transaction = SessionFactory.getTransaction();
-        try {
-            transaction.begin();
-            GlobalDataRecord globalDataRecord = globalDataRecordMapper.selectById(
-                id, GlobalDataRecord.Fields.id, GlobalDataRecord.Fields.tableName
-            );
-            tableNameId = new MysqlMbdId(globalDataRecord.getTableName());
-            transaction.commit();
-        } catch (RuntimeException e) {
-            transaction.rollback();
-            throw e;
-        }
-
-        return coreTableCache.getPoInfo(coreTableCache.getPojoClassByTableNameId(tableNameId)).getDataType();
+    public AppDataType getDataTypeById(MbdId id) {
+        return dataSourceHome.getDataTypeById(id);
     }
 
     @Override
-    public Object getDataById(MbdId<?> id, DataRequirementPack dataRequirement) {
-        // TODO
-        return null;
+    public BaseMbdObject getDataById(MbdId id, DataRequirementPack dataRequirement) {
+        return dataSourceHome.getDataById(id, dataRequirement);
     }
 
 }
