@@ -1,8 +1,9 @@
-package cc.xfl12345.mybigdata.server.mysql.data.source.base.raw;
+package cc.xfl12345.mybigdata.server.mysql.data.source.base;
 
 
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.data.source.DataSource;
+import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractDataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
@@ -15,7 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class AbstractIndependentTableRawDataSource<Value, Pojo, Condition> implements DataSource<Value> {
+public abstract class AbstractIndependentTableDataSource<Value, Pojo, Condition>
+    extends AbstractDataSource<Value>
+    implements DataSource<Value> {
+
     @Getter
     @Setter
     protected AffectedRowsCountChecker affectedRowsCountChecker = DefaultSingleton.AFFECTED_ROWS_COUNT_CHECKER;
@@ -27,12 +31,6 @@ public abstract class AbstractIndependentTableRawDataSource<Value, Pojo, Conditi
     protected abstract Value getValue(Pojo pojo);
 
     protected abstract Pojo getPojo(Value value);
-
-    @Override
-    public MbdId selectIdOrInsert4Id(Value value) {
-        // 由于不是原子操作，所以理应禁止使用。
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public MbdId insertAndReturnId(Value value) {

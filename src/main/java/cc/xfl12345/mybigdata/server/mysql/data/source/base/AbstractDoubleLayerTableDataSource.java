@@ -1,7 +1,6 @@
-package cc.xfl12345.mybigdata.server.mysql.data.source.base.raw;
+package cc.xfl12345.mybigdata.server.mysql.data.source.base;
 
 
-import cc.xfl12345.mybigdata.server.common.data.source.DataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.IdDataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
 
@@ -9,9 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public abstract class AbstractDoubleLayerTableRawDataSource<Value, Pojo, Condition>
-    extends AbstractIndependentTableRawDataSource<Value, Pojo, Condition>
-    implements DataSource<Value> {
+public abstract class AbstractDoubleLayerTableDataSource<Value, Pojo, Condition>
+    extends AbstractIndependentTableDataSource<Value, Pojo, Condition> {
 
     protected abstract Pojo getPojo(MbdId globalId, Value value);
 

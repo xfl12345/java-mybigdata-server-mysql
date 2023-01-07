@@ -7,7 +7,7 @@ import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import cc.xfl12345.mybigdata.server.common.database.pojo.CommonGlobalDataRecord;
 import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
-import cc.xfl12345.mybigdata.server.mysql.data.source.base.raw.AbstractIndependentTableRawDataSource;
+import cc.xfl12345.mybigdata.server.mysql.data.source.base.AbstractIndependentTableDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.GlobalDataRecordBeeTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
@@ -18,13 +18,12 @@ import org.teasoft.bee.osql.Condition;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.SessionFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class IdDataSourceImpl extends AbstractIndependentTableRawDataSource<MbdId, GlobalDataRecord, Condition> implements IdDataSource {
+public class IdDataSourceImpl extends AbstractIndependentTableDataSource<MbdId, GlobalDataRecord, Condition> implements IdDataSource {
     @Getter
     @Setter
     protected FieldNotNullChecker fieldNotNullChecker = DefaultSingleton.FIELD_NOT_NULL_CHECKER;
@@ -37,14 +36,15 @@ public class IdDataSourceImpl extends AbstractIndependentTableRawDataSource<MbdI
     @Setter
     protected CoreTableCache coreTableCache;
 
+    public void init() throws Exception {
+        fieldNotNullChecker.check(globalDataRecordMapper, CommonGlobalDataRecord.class);
+        fieldNotNullChecker.check(coreTableCache, "coreTableCache");
+        super.init();
+    }
+
     @Override
     protected TableMapper<GlobalDataRecord, Condition> getTableMapper() {
         return globalDataRecordMapper.getRawTableMapper();
-    }
-
-    @PostConstruct
-    public void init() {
-        fieldNotNullChecker.check(globalDataRecordMapper, CommonGlobalDataRecord.class);
     }
 
     @Override

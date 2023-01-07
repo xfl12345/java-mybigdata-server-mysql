@@ -1,10 +1,12 @@
-package cc.xfl12345.mybigdata.server.mysql.data.source.base.raw;
+package cc.xfl12345.mybigdata.server.mysql.data.source.base;
 
 
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.data.source.DataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.IdDataSource;
+import cc.xfl12345.mybigdata.server.common.data.source.impl.AbstractDataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
+import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
 import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
@@ -16,24 +18,32 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public abstract class AbstractTripleLayerTableRawDataSource<Value, FirstPojo, SecondPojo, Condition> implements DataSource<Value> {
+public abstract class AbstractTripleLayerTableDataSource<Value, FirstPojo, SecondPojo, Condition>
+    extends AbstractDataSource<Value>
+    implements DataSource<Value> {
+
     @Getter
     @Setter
     protected AffectedRowsCountChecker affectedRowsCountChecker = DefaultSingleton.AFFECTED_ROWS_COUNT_CHECKER;
 
+    @Getter
+    @Setter
     protected IdDataSource idDataSource;
 
+    @Getter
+    @Setter
     protected TableMapper<FirstPojo, Condition> firstMapper;
 
+    @Getter
+    @Setter
     protected TableMapper<SecondPojo, Condition> secondMapper;
 
-    public AbstractTripleLayerTableRawDataSource(
-        IdDataSource idDataSource,
-        TableMapper<FirstPojo, Condition> firstMapper,
-        TableMapper<SecondPojo, Condition> secondMapper) {
-        this.idDataSource = idDataSource;
-        this.firstMapper = firstMapper;
-        this.secondMapper = secondMapper;
+    @Override
+    public void init() throws Exception {
+        fieldNotNullChecker.check(idDataSource, MbdId.class);
+        fieldNotNullChecker.check(firstMapper, getFirstPojoType());
+        fieldNotNullChecker.check(secondMapper, getSecondPojoType());
+        super.init();
     }
 
     protected abstract FirstPojo getFirstPojo(MbdId globalId, Value value);
@@ -135,5 +145,22 @@ public abstract class AbstractTripleLayerTableRawDataSource<Value, FirstPojo, Se
         secondMapper.deleteBatchById(globalIdList);
         firstMapper.deleteBatchById(globalIdList);
         idDataSource.deleteBatchById(globalIdList);
+    }
+
+    @Override
+    public Class<Value> getValueType() {
+        return getTypeFromRuntime(0);
+    }
+
+    protected <T> Class<T> getMapperPojoType(TableBasicMapper<T> mapper, int genericTypeIndex) {
+        return mapper == null ? getTypeFromRuntime(genericTypeIndex) : mapper.getPojoType();
+    }
+
+    public Class<FirstPojo> getFirstPojoType() {
+        return getMapperPojoType(firstMapper, 1);
+    }
+
+    public Class<SecondPojo> getSecondPojoType() {
+        return getMapperPojoType(secondMapper, 2);
     }
 }

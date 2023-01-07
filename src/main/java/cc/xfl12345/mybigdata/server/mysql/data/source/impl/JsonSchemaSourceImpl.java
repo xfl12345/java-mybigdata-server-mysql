@@ -1,8 +1,6 @@
 package cc.xfl12345.mybigdata.server.mysql.data.source.impl;
 
 
-import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
-import cc.xfl12345.mybigdata.server.common.data.source.DataSource;
 import cc.xfl12345.mybigdata.server.common.data.source.JsonSchemaSource;
 import cc.xfl12345.mybigdata.server.common.data.source.StringTypeSource;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
@@ -10,15 +8,15 @@ import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdJsonSchema;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.PlainMbdJsonSchema;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.AbstractBeeDoubleLayerTableDataSource;
-import cc.xfl12345.mybigdata.server.mysql.data.source.base.raw.AbstractIndependentTableRawDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.TableSchemaRecord;
 import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import com.networknt.schema.JsonSchemaFactory;
 import lombok.Getter;
 import lombok.Setter;
 import org.teasoft.bee.osql.Condition;
+import org.teasoft.bee.osql.Op;
+import org.teasoft.honey.osql.core.ConditionImpl;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
 
@@ -42,64 +40,76 @@ public class JsonSchemaSourceImpl
     }
 
     @Override
-    protected DataSource<MbdJsonSchema> generateRawImpl() {
-        DataSource<?> myself = this;
-        return new AbstractIndependentTableRawDataSource<MbdJsonSchema, TableSchemaRecord, Condition>() {
-            @Override
-            protected TableMapper<TableSchemaRecord, Condition> getTableMapper() {
-                return mapper;
-            }
+    protected Class<TableSchemaRecord> getPojoClass() {
+        return TableSchemaRecord.class;
+    }
 
-            private final String[] fieldNames4Select = new String[]{
-                TableSchemaRecord.Fields.schemaName,
-                TableSchemaRecord.Fields.jsonSchema
-            };
+    @Override
+    protected String getIdFieldName() {
+        return TableSchemaRecord.Fields.globalId;
+    }
 
-            @Override
-            protected String[] getFieldNames4Select() {
-                return fieldNames4Select;
-            }
+    @Override
+    protected MbdId getId(TableSchemaRecord tableSchemaRecord) {
+        return new MysqlMbdId(tableSchemaRecord.getGlobalId());
+    }
 
-            @Override
-            protected MbdJsonSchema getValue(TableSchemaRecord tableSchemaRecord) {
-                PlainMbdJsonSchema mbdJsonSchema = new PlainMbdJsonSchema();
-                mbdJsonSchema.setGlobalId(new MysqlMbdId(tableSchemaRecord.getGlobalId()));
-                mbdJsonSchema.setName(stringTypeSource.selectById(new MbdId(tableSchemaRecord.getSchemaName())));
-                mbdJsonSchema.setJsonSchema(jsonSchemaFactory.getSchema(tableSchemaRecord.getJsonSchema()));
+    @Override
+    protected Condition getSelectBatchIdCondition(List<MbdJsonSchema> values) {
+        return new ConditionImpl()
+            .selectField(getIdFieldName())
+            .op(
+                TableSchemaRecord.Fields.jsonSchema,
+                Op.in,
+                values.parallelStream().map(item -> item.getJsonSchema().getSchemaNode().toString()).toList()
+            );
+    }
 
-                return mbdJsonSchema;
-            }
+    @Override
+    protected TableMapper<TableSchemaRecord, Condition> getTableMapper() {
+        return mapper;
+    }
 
-            @Override
-            protected TableSchemaRecord getPojo(MbdJsonSchema mbdJsonSchema) {
-                return TableSchemaRecord.builder()
-                    .globalId(MysqlMbdId.getValue(mbdJsonSchema.getGlobalId()))
-                    .schemaName(MysqlMbdId.getValue(stringTypeSource.selectIdOrInsert4Id(mbdJsonSchema.getName())))
-                    .build();
-            }
+    private final String[] fieldNames4Select = new String[]{
+        TableSchemaRecord.Fields.schemaName,
+        TableSchemaRecord.Fields.jsonSchema
+    };
 
-            @Override
-            public LinkedHashMap<MbdJsonSchema, MbdId> selectBatchId(List<MbdJsonSchema> mbdJsonSchemas) {
-                // TODO support this feature
-                throw new UnsupportedOperationException();
-                // return null;
-            }
+    @Override
+    protected String[] getFieldNames4Select() {
+        return fieldNames4Select;
+    }
 
-            @Override
-            public AppDataType getDataEnumType() {
-                return AppDataType.JsonSchema;
-            }
+    @Override
+    protected MbdJsonSchema getValue(TableSchemaRecord tableSchemaRecord) {
+        PlainMbdJsonSchema mbdJsonSchema = new PlainMbdJsonSchema();
+        mbdJsonSchema.setGlobalId(new MysqlMbdId(tableSchemaRecord.getGlobalId()));
+        mbdJsonSchema.setName(stringTypeSource.selectById(new MbdId(tableSchemaRecord.getSchemaName())));
+        mbdJsonSchema.setJsonSchema(jsonSchemaFactory.getSchema(tableSchemaRecord.getJsonSchema()));
 
-        };
+        return mbdJsonSchema;
+    }
+
+    @Override
+    protected TableSchemaRecord getPojo(MbdJsonSchema mbdJsonSchema) {
+        return getPojo(mbdJsonSchema.getGlobalId(), mbdJsonSchema);
+    }
+
+    @Override
+    protected TableSchemaRecord getPojo(MbdId globalId, MbdJsonSchema mbdJsonSchema) {
+        return TableSchemaRecord.builder()
+            .globalId(MysqlMbdId.getValue(globalId))
+            .schemaName(MysqlMbdId.getValue(stringTypeSource.selectIdOrInsert4Id(mbdJsonSchema.getName())))
+            .build();
+    }
+
+    @Override
+    protected MbdId getTableNameId(Class<?> pojoClass) {
+        return coreTableCache.getTableNameId(pojoClass);
     }
 
     @Override
     public Class<MbdJsonSchema> getValueType() {
         return MbdJsonSchema.class;
-    }
-
-    @Override
-    protected Class<TableSchemaRecord> getPojoClass() {
-        return TableSchemaRecord.class;
     }
 }
