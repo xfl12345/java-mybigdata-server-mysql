@@ -74,10 +74,10 @@ public class JdbcContextFinalizer implements ApplicationListener<ApplicationFail
                     }
 
                     retryCounts.put(d, count);
-                    log.error(String.format("Error deregistering driver [%s]. Retry %s.", d, count) + " Error msg: " + ex);
+                    log.error(String.format("Error deregister driver [%s]. Retry %s.", d, count) + " Error msg: " + ex);
 
                     if (count >= 3) {
-                        log.warn("Max retry reached. Stop deregistering.");
+                        log.warn("Max retry reached. Stop deregister.");
                         break;
                     }
                 }
