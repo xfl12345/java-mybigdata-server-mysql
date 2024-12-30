@@ -1,8 +1,11 @@
 package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
-import cc.xfl12345.mybigdata.server.common.pojo.OpenCloneable;
-import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
+import cc.xfl12345.mybigdata.server.common.appconst.CURD;
+import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
+import cc.xfl12345.mybigdata.server.common.database.AbstractCoreTableCache;
+import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
+import cc.xfl12345.mybigdata.server.common.pojo.OpenCloneable;
 import cc.xfl12345.mybigdata.server.common.pojo.SuperObjectDatabase;
 import cc.xfl12345.mybigdata.server.common.pojo.TwoWayMap;
 import cc.xfl12345.mybigdata.server.common.utility.MyReflectUtils;
@@ -17,10 +20,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.teasoft.bee.osql.BeeException;
-import org.teasoft.bee.osql.Condition;
+import org.teasoft.bee.mvc.service.ObjSQLRichService;
 import org.teasoft.bee.osql.Op;
-import org.teasoft.bee.osql.SuidRich;
+import org.teasoft.bee.osql.api.Condition;
+import org.teasoft.bee.osql.api.SuidRich;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
@@ -30,6 +33,15 @@ import java.util.*;
 
 @Slf4j
 public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
+
+    @Getter
+    @Setter
+    protected AffectedRowsCountChecker affectedRowsCountChecker = DefaultSingleton.AFFECTED_ROWS_COUNT_CHECKER;
+
+    @Getter
+    @Setter
+    protected ObjSQLRichService objSQLRichService;
+
     @Getter
     @Setter
     protected ObjectMapper jacksonObjectMapper;
@@ -95,6 +107,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
         }
 
         super.init();
+        fieldNotNullChecker.check(objSQLRichService, "objSQLRichService");
 
         tableNameId2ClassCache = new TwoWayMap<>(EnumCoreTable.values().length);
         tableNameCache.getValue2KeyMap().keySet().forEach(tableNameId -> tableNameId2ClassCache.put(
@@ -118,10 +131,17 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
         Transaction transaction = SessionFactory.getTransaction();
         try {
             transaction.begin();
-            SuidRich suid = BeeFactory.getHoneyFactory().getSuidRich();
 
             // 查询数据
-            List<BooleanContent> booleanContents = suid.select(new BooleanContent());
+            List<BooleanContent> booleanContents = objSQLRichService.select(new BooleanContent());
+
+            affectedRowsCountChecker.checkAffectedRowsCountDoesNotMatch(
+                booleanContents.size(),
+                2,
+                CURD.RETRIEVE,
+                CoreTableNames.BOOLEAN_CONTENT
+            );
+
             for (BooleanContent booleanContent : booleanContents) {
                 if (booleanContent.getContent()) {
                     idOfTrue = new MysqlMbdId(booleanContent.getGlobalId());
@@ -131,13 +151,42 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
             }
 
             transaction.commit();
-        } catch (BeeException e) {
-            log.error(e.getMessage());
+        } catch (Exception e) {
             transaction.rollback();
             throw e;
         }
-        log.info("Cache \"global_id\" for JSON constant - boolean value: true <---> " + idOfTrue);
-        log.info("Cache \"global_id\" for JSON constant - boolean value: false <---> " + idOfFalse);
+        log.info("Cache \"global_id\" for JSON constant value: true <---> " + idOfTrue);
+        log.info("Cache \"global_id\" for JSON constant value: false <---> " + idOfFalse);
+    }
+
+    @Override
+    public void refreshNullCache() throws Exception {
+        // 开启事务
+        Transaction transaction = SessionFactory.getTransaction();
+        try {
+            transaction.begin();
+            SuidRich suid = BeeFactory.getHoneyFactory().getSuidRich();
+
+            // 查询数据
+            List<GlobalDataRecord> globalDataRecords = suid.select(
+                GlobalDataRecord.builder().uuid("00000000-0000-0000-0000-000000000000").build(),
+                new ConditionImpl().selectField(GlobalDataRecord.Fields.id)
+            );
+
+            affectedRowsCountChecker.checkAffectedRowShouldBeOne(
+                globalDataRecords.size(),
+                CURD.RETRIEVE,
+                CoreTableNames.GLOBAL_DATA_RECORD
+            );
+
+            idOfNull = new MysqlMbdId(globalDataRecords.get(0).getId());
+
+            transaction.commit();
+        } catch (Exception e) {
+            transaction.rollback();
+            throw e;
+        }
+        log.info("Cache \"global_id\" for JSON constant value: NULL <---> " + idOfNull);
     }
 
     protected void refreshCoreTableNameCache(List<String> values) throws Exception {
@@ -183,11 +232,6 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     }
 
     @Override
-    protected String tableNameOfBoolean() {
-        return CoreTableNames.BOOLEAN_CONTENT;
-    }
-
-    @Override
     public MbdId getTableNameId(Class<?> pojoClass) {
         return tableNameId2ClassCache.getKey(pojoClass);
     }
@@ -202,6 +246,7 @@ public class CoreTableCache extends AbstractCoreTableCache<Long, String> {
     public <T> T getEmptyPoEntity(Class<T> pojoClass) {
         return (T) pojoClass2PojoInfoMap.get(pojoClass).getNewPoInstance();
     }
+
     public PojoInfo getPoInfo(Class<?> pojoClass) {
         return pojoClass2PojoInfoMap.get(pojoClass);
     }

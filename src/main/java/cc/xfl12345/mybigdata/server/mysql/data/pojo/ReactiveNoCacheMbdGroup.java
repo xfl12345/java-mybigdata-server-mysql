@@ -16,10 +16,12 @@ import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import lombok.Getter;
 import lombok.Setter;
 import org.teasoft.bee.osql.*;
+import org.teasoft.bee.osql.api.Condition;
+import org.teasoft.bee.osql.api.SuidRich;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,11 +85,6 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup {
     }
 
     @Override
-    public void destoryInstance() {
-        unlockRow();
-    }
-
-    @Override
     public MysqlMbdId getGlobalId() {
         return globalId;
     }
@@ -140,12 +137,13 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup {
     }
 
     @Override
-    public boolean isUniqueItems() {
+    public Boolean isUniqueItems() {
         return groupRecordMapper.selectById(globalId).getUniqueItems();
     }
 
     @Override
-    public void setUniqueItems(boolean unique) {
+    public void setUniqueItems(Boolean unique) {
+        unique = unique != null && unique;
         SuidRich suidRich = getSuidRich();
         Condition condition = new ConditionImpl();
         condition.setIncludeType(IncludeType.EXCLUDE_BOTH);
@@ -163,10 +161,6 @@ public class ReactiveNoCacheMbdGroup implements MbdGroup {
         globalDataRecord.setId(globalId.getLongValue());
         suidRich.selectOne(globalDataRecord);
     }
-
-    protected void unlockRow() {
-    }
-
 
     public class ReactiveList extends AbstractList<MbdId> {
         @Override

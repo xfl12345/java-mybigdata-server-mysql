@@ -10,7 +10,7 @@ import cc.xfl12345.mybigdata.server.mysql.data.source.base.AbstractBeeTripleLaye
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GroupContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.GroupRecord;
 import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
-import org.teasoft.bee.osql.Condition;
+import org.teasoft.bee.osql.api.Condition;
 import org.teasoft.bee.osql.Op;
 import org.teasoft.bee.osql.OrderType;
 import org.teasoft.honey.osql.core.ConditionImpl;
@@ -173,7 +173,7 @@ public class GroupTypeSourceImpl
 
     @Override
     public MbdGroup getReactiveMbdGroup(MbdId globalId, ReactiveMode mode) {
-        MbdGroup result;
+        MbdGroup result = null;
 
         if (mode.getCacheFlag().isDisable()) {
             ReactiveNoCacheMbdGroup group = new ReactiveNoCacheMbdGroup(new MysqlMbdId(globalId), mode.getLockFlag().getBoolean());

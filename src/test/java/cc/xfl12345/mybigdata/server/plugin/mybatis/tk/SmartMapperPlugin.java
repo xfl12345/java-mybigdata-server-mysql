@@ -136,7 +136,7 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
         if (introspectedColumn.isStringColumn()) {
             javaCode += ", length = "+ introspectedColumn.getLength();
         }
-        justAddAnnotation2Field(topLevelClass, field, javax.persistence.Column.class, javaCode);
+        justAddAnnotation2Field(topLevelClass, field, jakarta.persistence.Column.class, javaCode);
     }
 
     @Override
@@ -148,11 +148,11 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
         //添加注解
         if (field.isTransient()) {
             //@Column
-            justAddAnnotation2Field(topLevelClass, field, javax.persistence.Transient.class, null);
+            justAddAnnotation2Field(topLevelClass, field, jakarta.persistence.Transient.class, null);
         }
         for (IntrospectedColumn column : introspectedTable.getPrimaryKeyColumns()) {
             if (introspectedColumn == column) {
-                justAddAnnotation2Field(topLevelClass, field, javax.persistence.Id.class, null);
+                justAddAnnotation2Field(topLevelClass, field, jakarta.persistence.Id.class, null);
                 break;
             }
         }
@@ -172,15 +172,15 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
         }
         if (introspectedColumn.isIdentity()) {
             if ("JDBC".equals(introspectedTable.getTableConfiguration().getGeneratedKey().getRuntimeSqlStatement())) {
-                justAddAnnotation2Field(topLevelClass, field, javax.persistence.GeneratedValue.class, "generator = \"JDBC\"");
+                justAddAnnotation2Field(topLevelClass, field, jakarta.persistence.GeneratedValue.class, "generator = \"JDBC\"");
             } else {
-                justAddAnnotation2Field(topLevelClass, field, javax.persistence.GeneratedValue.class, "strategy = GenerationType.IDENTITY");
+                justAddAnnotation2Field(topLevelClass, field, jakarta.persistence.GeneratedValue.class, "strategy = GenerationType.IDENTITY");
             }
         } else if (introspectedColumn.isSequenceColumn()) {
             //在 Oracle 中，如果需要是 SEQ_TABLENAME，那么可以配置为 select SEQ_{1} from dual
             String tableName = introspectedTable.getFullyQualifiedTableNameAtRuntime();
             String sql = MessageFormat.format(introspectedTable.getTableConfiguration().getGeneratedKey().getRuntimeSqlStatement(), tableName, tableName.toUpperCase());
-            justAddAnnotation2Field(topLevelClass, field, javax.persistence.GeneratedValue.class, "strategy = GenerationType.IDENTITY, generator = \"" + sql + "\"");
+            justAddAnnotation2Field(topLevelClass, field, jakarta.persistence.GeneratedValue.class, "strategy = GenerationType.IDENTITY, generator = \"" + sql + "\"");
         }
         // region swagger注解
         if (this.needsSwagger) {
@@ -199,7 +199,7 @@ public class SmartMapperPlugin extends FalseMethodPlugin {
 
 
     protected void addJpaTableAnnotation(TopLevelClass topLevelClass, IntrospectedTable introspectedTable, String tableName) {
-        justAddAnnotation2Class(topLevelClass, javax.persistence.Table.class, "name = \"" + getDelimiterName(tableName) + "\"");
+        justAddAnnotation2Class(topLevelClass, jakarta.persistence.Table.class, "name = \"" + getDelimiterName(tableName) + "\"");
     }
 
     /**

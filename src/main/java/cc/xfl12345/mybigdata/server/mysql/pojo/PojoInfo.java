@@ -10,7 +10,7 @@ import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.Table;
+import jakarta.persistence.Table;
 
 @NoArgsConstructor
 @FieldNameConstants

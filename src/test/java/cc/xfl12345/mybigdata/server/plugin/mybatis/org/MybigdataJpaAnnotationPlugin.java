@@ -2,7 +2,6 @@ package cc.xfl12345.mybigdata.server.plugin.mybatis.org;
 
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
-import org.mybatis.generator.api.Plugin;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.Field;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
@@ -48,7 +47,7 @@ public class MybigdataJpaAnnotationPlugin extends PluginAdapter {
                                        IntrospectedTable introspectedTable,
                                        ModelClassType modelClassType) {
         if (addJpaIdAnnotation && introspectedColumn.isIdentity()) {
-            justAddAnnotation2Field(topLevelClass, field, javax.persistence.Id.class, null);
+            justAddAnnotation2Field(topLevelClass, field, jakarta.persistence.Id.class, null);
         }
         // if (introspectedColumn.getActualColumnName().equals("global_id")) {
         //     System.out.println("Table:[" + introspectedTable.getFullyQualifiedTableNameAtRuntime() + "], "

@@ -13,29 +13,29 @@ import java.io.Serializable;
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants
 @io.swagger.annotations.ApiModel("专门记录 \"JSON Object\" 的表。")
-@javax.persistence.Table(name = "object_content")
-@javax.persistence.Entity
+@jakarta.persistence.Table(name = "object_content")
+@jakarta.persistence.Entity
 public class ObjectContent implements OpenCloneable, Serializable {
     /**
      * 对象id
      */
-    @javax.persistence.Column(name = "global_id", nullable = false)
-    @javax.persistence.GeneratedValue(generator = "JDBC")
+    @jakarta.persistence.Column(name = "global_id", nullable = false)
+    @jakarta.persistence.GeneratedValue(generator = "JDBC")
     @io.swagger.annotations.ApiModelProperty("对象id")
-    @javax.persistence.Id
+    @jakarta.persistence.Id
     private Long globalId;
 
     /**
      * 属性名称
      */
-    @javax.persistence.Column(name = "the_key", nullable = false)
+    @jakarta.persistence.Column(name = "the_key", nullable = false)
     @io.swagger.annotations.ApiModelProperty("属性名称")
     private Long theKey;
 
     /**
      * 属性值
      */
-    @javax.persistence.Column(name = "the_value", nullable = true)
+    @jakarta.persistence.Column(name = "the_value", nullable = true)
     @io.swagger.annotations.ApiModelProperty("属性值")
     private Long theValue;
 

@@ -8,7 +8,7 @@ import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.BeeTableMapper;
 import lombok.Getter;
 import lombok.Setter;
-import org.teasoft.bee.osql.Condition;
+import org.teasoft.bee.osql.api.Condition;
 
 import java.util.Date;
 import java.util.LinkedHashMap;

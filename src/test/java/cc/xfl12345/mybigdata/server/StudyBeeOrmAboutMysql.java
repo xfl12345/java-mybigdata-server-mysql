@@ -11,10 +11,9 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mysql.cj.conf.ConnectionUrl;
 import lombok.extern.slf4j.Slf4j;
-import org.teasoft.bee.osql.Condition;
-import org.teasoft.bee.osql.MoreTable;
+import org.teasoft.bee.osql.api.Condition;
 import org.teasoft.bee.osql.Op;
-import org.teasoft.bee.osql.SuidRich;
+import org.teasoft.bee.osql.api.SuidRich;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
 

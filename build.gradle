@@ -121,7 +121,7 @@ dependencies {
         // testRuntimeClasspath platform(myDependencyParent)
     }
 
-    String depsParentVersion = '0.0.10'
+    String depsParentVersion = '0.1.0'
     String parentModuleVersion = getProject().getVersion()
     if (isLocalDevMode) {
         applyPlatform2All(group: 'cc.xfl12345.mybigdata', name: 'server-deps-parent', version: depsParentVersion)
@@ -137,12 +137,8 @@ dependencies {
         // api group: 'com.github.xfl12345', name: 'java-mybigdata-server-common', version: parentModuleVersion, ext: 'pom'
     }
 
-    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
-    api group: 'mysql', name: 'mysql-connector-java'
-
-    // 阿里巴巴 Druid Datasource
-    // https://mvnrepository.com/artifact/com.alibaba/druid
-    api group: 'com.alibaba', name: 'druid'
+    // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
+    api group: 'com.mysql', name: 'mysql-connector-j'
 
     // 国产ORM框架 bee
     // https://mvnrepository.com/artifact/org.teasoft/bee-spring-boot
@@ -155,9 +151,6 @@ dependencies {
     testImplementation group: 'org.projectlombok', name: 'lombok'
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok'
     // testRuntimeOnly group: 'org.projectlombok', name: 'lombok'
-
-    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
-    api group: 'javax.servlet', name: 'javax.servlet-api'
 
     // 不能使用 api 关键字，因为日后假如想转用 Spring Webflux 会比较麻烦。
     // https://mvnrepository.com/artifact/org.springframework/spring-webmvc
@@ -229,6 +222,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+
+    // https://mvnrepository.com/artifact/com.alibaba/druid
+    compileOnlyApi group: 'com.alibaba', name: 'druid', version: '1.2.24'
 
     // api fileTree(dir:'lib',includes:['**/*.*'])
 }

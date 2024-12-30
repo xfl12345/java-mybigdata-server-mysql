@@ -2,11 +2,10 @@ package cc.xfl12345.mybigdata.server.mysql.database.mapper.base;
 
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 public abstract class AbstractTableMapper {
     @Getter

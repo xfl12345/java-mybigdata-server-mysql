@@ -5,32 +5,28 @@ import cc.xfl12345.mybigdata.server.database.pojo.schema.KeyColumnUsage;
 import org.teasoft.bee.osql.annotation.JoinTable;
 import org.teasoft.bee.osql.annotation.JoinType;
 
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-
 
 @lombok.Data
 @lombok.experimental.SuperBuilder
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants
 @io.swagger.annotations.ApiModel("")
-@javax.persistence.Table(name = "COLUMNS")
+@jakarta.persistence.Table(name = "COLUMNS")
 @org.teasoft.bee.osql.annotation.Table("COLUMNS")
 public class SimpleColumnMeta {
-    @javax.persistence.Column(name = "TABLE_SCHEMA", nullable = false, length = 64)
+    @jakarta.persistence.Column(name = "TABLE_SCHEMA", nullable = false, length = 64)
     private String tableSchema;
 
-    @javax.persistence.Column(name = "TABLE_NAME", nullable = false, length = 64)
+    @jakarta.persistence.Column(name = "TABLE_NAME", nullable = false, length = 64)
     private String tableName;
 
-    @javax.persistence.Column(name = "COLUMN_NAME", nullable = false, length = 64)
+    @jakarta.persistence.Column(name = "COLUMN_NAME", nullable = false, length = 64)
     private String columnName;
 
-    @javax.persistence.Column(name = "ORDINAL_POSITION", nullable = false)
+    @jakarta.persistence.Column(name = "ORDINAL_POSITION", nullable = false)
     private Long ordinalPosition;
 
-    @javax.persistence.Column(name = "DATA_TYPE", nullable = false, length = 64)
+    @jakarta.persistence.Column(name = "DATA_TYPE", nullable = false, length = 64)
     private String dataType;
 
     // @OneToOne(targetEntity = KeyColumnUsage.class)

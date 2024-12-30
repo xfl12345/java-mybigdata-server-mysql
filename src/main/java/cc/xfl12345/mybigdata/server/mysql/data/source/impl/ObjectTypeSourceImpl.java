@@ -4,6 +4,7 @@ import cc.xfl12345.mybigdata.server.common.appconst.TableCurdResult;
 import cc.xfl12345.mybigdata.server.common.data.source.JsonSchemaSource;
 import cc.xfl12345.mybigdata.server.common.data.source.ObjectTypeSource;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.*;
+import cc.xfl12345.mybigdata.server.common.pojo.ReactiveMode;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.AbstractBeeTripleLayerTableDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.ObjectContent;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.ObjectRecord;
@@ -12,7 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.IteratorUtils;
-import org.teasoft.bee.osql.Condition;
+import org.teasoft.bee.osql.api.Condition;
 import org.teasoft.bee.osql.Op;
 import org.teasoft.honey.osql.core.ConditionImpl;
 
@@ -59,6 +60,24 @@ public class ObjectTypeSourceImpl
         throw new UnsupportedOperationException();
         // return null;
     }
+
+    // @Override
+    // public long insert(MbdObject mbdObject) {
+    //     checkMbdObject(mbdObject);
+    //     return super.insert(mbdObject);
+    // }
+    //
+    // @Override
+    // public MysqlMbdId insertAndReturnId(MbdObject mbdObject) {
+    //     checkMbdObject(mbdObject);
+    //     return super.insertAndReturnId(mbdObject);
+    // }
+    //
+    // @Override
+    // public long insertBatch(List<MbdObject> mbdObjects) {
+    //     mbdObjects.parallelStream().forEach(this::checkMbdObject);
+    //     return super.insertBatch(mbdObjects);
+    // }
 
     @Override
     public Class<MbdObject> getValueType() {
@@ -108,12 +127,12 @@ public class ObjectTypeSourceImpl
     @Override
     protected MbdObject getValue(ObjectRecord objectRecord, List<ObjectContent> objectContents) {
         MbdJsonSchema mbdJsonSchema = jsonSchemaSource.selectById(new MysqlMbdId(objectRecord.getObjectSchema()));
-        // 获取字段
+        // 获取所有字段各自对应的 id
         JsonNode properties = mbdJsonSchema.getJsonSchema().getSchemaNode().at(
             stringTypeSource.selectById(new MysqlMbdId(objectRecord.getSchemaPath()))
         );
 
-
+        // 制作 小型 id->字符串 映射表
         LinkedHashMap<MbdId, String> keysIdCache = stringTypeSource
             .selectBatchId(IteratorUtils.toList(properties.fieldNames(), properties.size()))
             .entrySet()
@@ -125,16 +144,17 @@ public class ObjectTypeSourceImpl
                 LinkedHashMap::new
             ));
 
-
+        // 生成 MbdObject 的 Map 部分
         int contentsMaxSize = properties.size();
         ConcurrentHashMap<String, MbdId> contents = new ConcurrentHashMap<>(contentsMaxSize);
         objectContents.parallelStream().forEach(item -> {
             contents.put(
-                keysIdCache.get(new MysqlMbdId(item.getTheKey())),
-                new MysqlMbdId(item.getTheValue())
+                keysIdCache.get(new MysqlMbdId(item.getTheKey())), // 获取字段名
+                new MysqlMbdId(item.getTheValue()) // 获取字段引用 id
             );
         });
 
+        // 生成最终结果
         PlainMbdObject mbdObject = new PlainMbdObject();
         mbdObject.setGlobalId(new MysqlMbdId(objectRecord.getGlobalId()));
         mbdObject.setName(stringTypeSource.selectById(new MysqlMbdId(objectRecord.getObjectName())));
@@ -240,5 +260,10 @@ public class ObjectTypeSourceImpl
     @Override
     protected MbdId getTableNameId(Class<?> pojoClass) {
         return coreTableCache.getTableNameId(pojoClass);
+    }
+
+    @Override
+    public MbdObject getReactiveMbdObject(MbdId globalId, ReactiveMode mode) {
+        return null;
     }
 }

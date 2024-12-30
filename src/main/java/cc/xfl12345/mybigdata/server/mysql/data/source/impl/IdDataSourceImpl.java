@@ -14,7 +14,7 @@ import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import lombok.Getter;
 import lombok.Setter;
-import org.teasoft.bee.osql.Condition;
+import org.teasoft.bee.osql.api.Condition;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.SessionFactory;
 

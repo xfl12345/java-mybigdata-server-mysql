@@ -5,10 +5,9 @@ import cc.xfl12345.mybigdata.server.common.database.error.SqlErrorAnalyst;
 import cc.xfl12345.mybigdata.server.common.pojo.AffectedRowsCountChecker;
 import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
 import com.fasterxml.uuid.NoArgGenerator;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.annotation.PostConstruct;
 
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants

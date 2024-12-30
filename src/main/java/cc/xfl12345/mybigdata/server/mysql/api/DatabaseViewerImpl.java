@@ -9,30 +9,24 @@ import cc.xfl12345.mybigdata.server.mysql.appconst.EnumCoreTable;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.CoreTableCache;
 import cc.xfl12345.mybigdata.server.mysql.pojo.PojoInfo;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.stat.DruidStatManagerFacade;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
-import org.teasoft.bee.osql.SuidRich;
+import org.teasoft.bee.osql.api.SuidRich;
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.SessionFactory;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DatabaseViewerImpl implements DatabaseViewer {
     @Getter
     @Setter
     protected FieldNotNullChecker fieldNotNullChecker = DefaultSingleton.FIELD_NOT_NULL_CHECKER;
-
-    protected static DruidStatManagerFacade statManagerFacade = DruidStatManagerFacade.getInstance();
 
     protected List<String> allTableNames;
 
@@ -44,9 +38,14 @@ public class DatabaseViewerImpl implements DatabaseViewer {
     @Setter
     protected CoreTableCache coreTableCache;
 
+    @Getter
+    @Setter
+    protected List<DataSource> dataSources;
+
     @PostConstruct
     public void init() throws Exception {
         fieldNotNullChecker.check(coreTableCache, "coreTableCache");
+        dataSources = Collections.emptyList();
 
         int coreTableCount = EnumCoreTable.values().length;
         allTableNames = new ArrayList<>(coreTableCount);
@@ -137,12 +136,10 @@ public class DatabaseViewerImpl implements DatabaseViewer {
 
     @Override
     public List<DatabaseDataSourceInfo> getAllDataSourceInfos() {
-        return statManagerFacade.getDataSourceStatDataList()
+        return dataSources
             .parallelStream()
-            .filter(item -> item instanceof DataSource)
-            .map(item -> {
+            .map(dataSource -> {
                     DatabaseDataSourceInfo info = new DatabaseDataSourceInfo();
-                    DataSource dataSource = (DataSource) item;
                     if (dataSource instanceof DruidDataSource druidDataSource) {
                         info.setName(druidDataSource.getName());
                         info.setDbType(druidDataSource.getDbType());

@@ -1,9 +1,7 @@
 package cc.xfl12345.mybigdata.server.mysql.database.error;
 
 import cc.xfl12345.mybigdata.server.common.appconst.TableCurdResult;
-import cc.xfl12345.mybigdata.server.common.database.error.SqlErrorAnalyst;
-import cc.xfl12345.mybigdata.server.common.database.error.TableDataException;
-import cc.xfl12345.mybigdata.server.common.database.error.TableOperationException;
+import cc.xfl12345.mybigdata.server.common.database.error.*;
 import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Getter;
 import lombok.NonNull;
@@ -11,7 +9,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.teasoft.honey.osql.core.BeeFactory;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -79,8 +77,14 @@ public class SqlErrorAnalystImpl implements SqlErrorAnalyst {
                 }
             } else if (cause instanceof SQLException e) {
                 return getTableCurdResult(e);
-            } else if (cause instanceof TableDataException e) {
+            } else if (cause instanceof DataValidationException e) {
                 return TableCurdResult.FAILED_ILLEGAL_DATA;
+            } else if (cause instanceof TypeNotMatchException e) {
+                return TableCurdResult.FAILED_TYPE_ERROR;
+            } else if (cause instanceof IllegalDataException e) {
+                return TableCurdResult.FAILED_ILLEGAL_DATA;
+            } else if (cause instanceof ProtectedBackupException e) {
+                return TableCurdResult.FAILED_OPERATION_REJECTED;
             }
 
             cause = cause.getCause();

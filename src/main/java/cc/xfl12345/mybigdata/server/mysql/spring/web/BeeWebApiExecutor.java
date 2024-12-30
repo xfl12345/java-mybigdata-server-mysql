@@ -5,7 +5,7 @@ import cc.xfl12345.mybigdata.server.common.web.pojo.response.JsonApiResponseData
 import org.teasoft.bee.osql.transaction.Transaction;
 import org.teasoft.honey.osql.core.SessionFactory;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.function.Function;
 
 public class BeeWebApiExecutor extends WebApiExecutor {
@@ -18,14 +18,14 @@ public class BeeWebApiExecutor extends WebApiExecutor {
     }
 
     @Override
-    public <Param> JsonApiResponseData handle(HttpServletResponse httpServletResponse, Param param, Function<Param, Object> action) {
+    public <Param> JsonApiResponseData handle(HttpServletRequest request, Param param, Function<Param, Object> action) {
         Transaction transaction = SessionFactory.getTransaction();
         TransactionAndOkFlag transactionAndOkFlag = new TransactionAndOkFlag(transaction, true);
         threadLocal.set(transactionAndOkFlag);
 
         try {
             transaction.begin();
-            JsonApiResponseData responseData = super.handle(httpServletResponse, param, action);
+            JsonApiResponseData responseData = super.handle(request, param, action);
             if (transactionAndOkFlag.isOk()) {
                 transaction.commit();
             }
@@ -37,11 +37,11 @@ public class BeeWebApiExecutor extends WebApiExecutor {
     }
 
     @Override
-    protected <Param> void onError(HttpServletResponse httpServletResponse, Param param, JsonApiResponseData responseData, Exception exception) {
+    protected <Param> void onError(HttpServletRequest request, Param param, JsonApiResponseData responseData, Exception exception) {
         TransactionAndOkFlag transactionAndOkFlag = threadLocal.get();
         transactionAndOkFlag.setOk(false);
         transactionAndOkFlag.getTransaction().rollback();
-        super.onError(httpServletResponse, param, responseData, exception);
+        super.onError(request, param, responseData, exception);
     }
 
     protected static class TransactionAndOkFlag {

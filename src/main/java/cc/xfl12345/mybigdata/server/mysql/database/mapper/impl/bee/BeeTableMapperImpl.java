@@ -10,13 +10,13 @@ import cc.xfl12345.mybigdata.server.mysql.database.pojo.GlobalDataRecord;
 import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
 import lombok.Getter;
 import lombok.Setter;
-import org.teasoft.bee.osql.Condition;
+import org.teasoft.bee.osql.api.Condition;
 import org.teasoft.bee.osql.Op;
-import org.teasoft.bee.osql.SuidRich;
+import org.teasoft.bee.osql.api.SuidRich;
 import org.teasoft.honey.osql.core.BeeFactory;
 import org.teasoft.honey.osql.core.ConditionImpl;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.LinkedHashMap;

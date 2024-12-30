@@ -13,29 +13,29 @@ import java.io.Serializable;
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants
 @io.swagger.annotations.ApiModel("MyBigData 表模型")
-@javax.persistence.Table(name = "table_schema_record")
-@javax.persistence.Entity
+@jakarta.persistence.Table(name = "table_schema_record")
+@jakarta.persistence.Entity
 public class TableSchemaRecord implements OpenCloneable, Serializable {
     /**
      * 当前表所在数据库实例里的全局ID
      */
-    @javax.persistence.Column(name = "global_id", nullable = false)
-    @javax.persistence.GeneratedValue(generator = "JDBC")
+    @jakarta.persistence.Column(name = "global_id", nullable = false)
+    @jakarta.persistence.GeneratedValue(generator = "JDBC")
     @io.swagger.annotations.ApiModelProperty("当前表所在数据库实例里的全局ID")
-    @javax.persistence.Id
+    @jakarta.persistence.Id
     private Long globalId;
 
     /**
      * 插表模型名称
      */
-    @javax.persistence.Column(name = "schema_name", nullable = false)
+    @jakarta.persistence.Column(name = "schema_name", nullable = false)
     @io.swagger.annotations.ApiModelProperty("插表模型名称")
     private Long schemaName;
 
     /**
      * 插表模型
      */
-    @javax.persistence.Column(name = "json_schema", nullable = false, length = 16000)
+    @jakarta.persistence.Column(name = "json_schema", nullable = false, length = 16000)
     @io.swagger.annotations.ApiModelProperty("插表模型")
     private String jsonSchema;
 

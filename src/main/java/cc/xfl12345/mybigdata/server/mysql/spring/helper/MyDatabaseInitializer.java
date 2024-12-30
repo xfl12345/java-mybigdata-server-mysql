@@ -3,17 +3,18 @@ package cc.xfl12345.mybigdata.server.mysql.spring.helper;
 import cc.xfl12345.mybigdata.server.common.appconst.CommonConst;
 import cc.xfl12345.mybigdata.server.mysql.sql.PackageLandmark;
 import cc.xfl12345.mybigdata.server.mysql.util.MysqlJdbcUrlBean;
-import com.alibaba.druid.pool.DruidDataSource;
 import com.mysql.cj.PreparedQuery;
 import com.mysql.cj.conf.ConnectionUrl;
 import com.mysql.cj.conf.PropertyKey;
 import com.mysql.cj.jdbc.ClientPreparedStatement;
+import com.mysql.cj.jdbc.MysqlDataSource;
+import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,24 +27,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@Getter
 @Slf4j
 public class MyDatabaseInitializer {
     protected String username;
     protected String password;
     protected String url;
-    protected String driverClassName;
-
-    public String getUsername() {
-        return username;
-    }
 
     @Value("${spring.datasource.username}")
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     @Value("${spring.datasource.password}")
@@ -51,22 +44,9 @@ public class MyDatabaseInitializer {
         this.password = password;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
     @Value("${spring.datasource.url}")
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public String getDriverClassName() {
-        return driverClassName;
-    }
-
-    @Value("${spring.datasource.driver-class-name}")
-    public void setDriverClassName(String driverClassName) {
-        this.driverClassName = driverClassName;
     }
 
     @PostConstruct
@@ -115,18 +95,17 @@ public class MyDatabaseInitializer {
         url = mysqlJdbcUrlBean.buildURL();
         log.info("Temporary JDBC URL=" + getFormattedLogURL(url));
 
-        DruidDataSource mysqlTableSchemaDataSource = new DruidDataSource();
-        mysqlTableSchemaDataSource.setUsername(username);
+        MysqlDataSource mysqlTableSchemaDataSource = new MysqlDataSource();
+        mysqlTableSchemaDataSource.setUser(username);
         mysqlTableSchemaDataSource.setPassword(password);
-        mysqlTableSchemaDataSource.setDriverClassName(driverClassName);
         mysqlTableSchemaDataSource.setUrl(url);
 
         // 创建一个临时连接，用于试探MySQL数据库
         Connection connection = mysqlTableSchemaDataSource.getConnection();
         connection.setAutoCommit(false);
         log.info("Database server connected.Checking database.");
-        // 检查 MySQL中 某个数据库是否存在（其它数据库暂未适配，所以这个 dataSource 并非万能）
-        PreparedStatement ps = connection.prepareStatement("select * from information_schema.SCHEMATA where SCHEMA_NAME = ?");
+        // 检查 MySQL中 某个数据库是否存在
+        PreparedStatement ps = connection.prepareStatement("select SCHEMA_NAME from information_schema.SCHEMATA where SCHEMA_NAME = ?");
         ps.setString(1, targetDatabaseName);
         logExecutingSQL(getSql(ps));
         ResultSet rs = ps.executeQuery();
@@ -146,7 +125,6 @@ public class MyDatabaseInitializer {
             throw exception;
         } finally {
             connection.close();
-            mysqlTableSchemaDataSource.close();
         }
     }
 
@@ -182,19 +160,20 @@ public class MyDatabaseInitializer {
 
     public static void executeSqlFile(Connection connection, URL sqlFileURL, String delimiter) throws IOException, SQLException {
         connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-        Resources.setCharset(StandardCharsets.UTF_8); //设置字符集,不然中文乱码插入错误
+        Resources.setCharset(StandardCharsets.UTF_8); // 设置字符集,不然中文乱码插入错误
 
-        InputStream inputStream = sqlFileURL.openStream();
-        Reader read = new InputStreamReader(inputStream);
-        ScriptRunner scriptRunner = new ScriptRunner(connection);
-        // scriptRunner.setFullLineDelimiter(true);
-        scriptRunner.setDelimiter(delimiter);
-        scriptRunner.setLogWriter(null);//设置是否输出日志
-        scriptRunner.runScript(read);
+        try (
+            InputStream inputStream = sqlFileURL.openStream();
+            Reader reader = new InputStreamReader(inputStream)
+        ) {
+            ScriptRunner scriptRunner = new ScriptRunner(connection);
+            // scriptRunner.setFullLineDelimiter(true);
+            scriptRunner.setDelimiter(delimiter);
+            scriptRunner.setLogWriter(null);// 设置是否输出日志
+            scriptRunner.runScript(reader);
+        }
 
         connection.commit();
-        read.close();
-        inputStream.close();
         // connection.close();
     }
 }

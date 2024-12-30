@@ -2,7 +2,6 @@ package cc.xfl12345.mybigdata.server.mysql.database.mapper.impl;
 
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
 import cc.xfl12345.mybigdata.server.common.database.mapper.TableBasicMapper;
-import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.AbstractTypedTableMapper;
 import cc.xfl12345.mybigdata.server.mysql.database.mapper.base.MapperProperties;
@@ -11,7 +10,7 @@ import cc.xfl12345.mybigdata.server.mysql.database.mapper.impl.bee.BeeTableMappe
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

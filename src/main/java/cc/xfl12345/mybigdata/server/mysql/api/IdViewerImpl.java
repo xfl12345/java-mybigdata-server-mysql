@@ -3,7 +3,6 @@ package cc.xfl12345.mybigdata.server.mysql.api;
 import cc.xfl12345.mybigdata.server.common.api.IdViewer;
 import cc.xfl12345.mybigdata.server.common.appconst.AppDataType;
 import cc.xfl12345.mybigdata.server.common.appconst.DefaultSingleton;
-import cc.xfl12345.mybigdata.server.common.data.requirement.DataRequirementPack;
 import cc.xfl12345.mybigdata.server.common.data.source.DataSourceHome;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.BaseMbdObject;
 import cc.xfl12345.mybigdata.server.common.data.source.pojo.MbdId;
@@ -11,7 +10,7 @@ import cc.xfl12345.mybigdata.server.common.pojo.FieldNotNullChecker;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 public class IdViewerImpl implements IdViewer {
     @Getter
@@ -33,8 +32,8 @@ public class IdViewerImpl implements IdViewer {
     }
 
     @Override
-    public BaseMbdObject getDataById(MbdId id, DataRequirementPack dataRequirement) {
-        return dataSourceHome.getDataById(id, dataRequirement);
+    public BaseMbdObject getDataById(MbdId id, long recursionDepth) {
+        return dataSourceHome.getMbdDataById(id, recursionDepth);
     }
 
 }

@@ -13,22 +13,22 @@ import java.io.Serializable;
 @lombok.NoArgsConstructor
 @lombok.experimental.FieldNameConstants
 @io.swagger.annotations.ApiModel("专门记录 \"JSON Boolean\" 的表")
-@javax.persistence.Table(name = "boolean_content")
-@javax.persistence.Entity
+@jakarta.persistence.Table(name = "boolean_content")
+@jakarta.persistence.Entity
 public class BooleanContent implements OpenCloneable, Serializable {
     /**
      * 当前表所在数据库实例里的全局ID
      */
-    @javax.persistence.Column(name = "global_id", nullable = false)
-    @javax.persistence.GeneratedValue(generator = "JDBC")
+    @jakarta.persistence.Column(name = "global_id", nullable = false)
+    @jakarta.persistence.GeneratedValue(generator = "JDBC")
     @io.swagger.annotations.ApiModelProperty("当前表所在数据库实例里的全局ID")
-    @javax.persistence.Id
+    @jakarta.persistence.Id
     private Long globalId;
 
     /**
      * 布尔值
      */
-    @javax.persistence.Column(name = "content", nullable = false)
+    @jakarta.persistence.Column(name = "content", nullable = false)
     @io.swagger.annotations.ApiModelProperty("布尔值")
     private Boolean content;
 

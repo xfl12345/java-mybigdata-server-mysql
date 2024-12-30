@@ -7,7 +7,7 @@ import cc.xfl12345.mybigdata.server.common.database.mapper.TableMapper;
 import cc.xfl12345.mybigdata.server.mysql.data.source.base.AbstractBeeDoubleLayerTableDataSource;
 import cc.xfl12345.mybigdata.server.mysql.database.pojo.NumberContent;
 import cc.xfl12345.mybigdata.server.mysql.pojo.MysqlMbdId;
-import org.teasoft.bee.osql.Condition;
+import org.teasoft.bee.osql.api.Condition;
 import org.teasoft.bee.osql.Op;
 import org.teasoft.honey.osql.core.ConditionImpl;
 
